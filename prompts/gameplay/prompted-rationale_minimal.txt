@@ -1,0 +1,4 @@
+Respond with valid JSON only:
+```json
+{"rationale": "<brief notes>", "action": "<up|down|left|right|action|wait>"}
+```

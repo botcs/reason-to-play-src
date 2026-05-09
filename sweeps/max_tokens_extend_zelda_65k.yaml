@@ -1,0 +1,96 @@
+# Zelda 65k extension: adds mt=65536 to the max_tokens axis across
+# all 5 target fractions and both models.
+#
+# Companion to the currently-running zelda sweeps (eejy90d0, loya1qs3,
+# which cover mt [16384, 32768] at fractions [0.1, 0.5, 0.9]) and the
+# complementary 0.3/0.7 sweep (max_tokens_complement_zelda_fill_0p3_0p7).
+# This one supplies the 65k row of the fraction x max_tokens grid so
+# the full plane becomes [0.1, 0.3, 0.5, 0.7, 0.9] x [16384, 32768,
+# 65536] per model.
+#
+# 65536 is the OpenRouter provider hard cap for ``max_completion_tokens``
+# on both deepseek-v3.2 (ctx=131072) and qwen3.5-27b (ctx=262144),
+# confirmed via ``openrouter.ai/api/v1/models``.  Setting higher is
+# silently clamped by the provider -- this is the "practically
+# unbounded" treatment.  The elaborate prompt's Token Budget section
+# will render as "capped at 65536 tokens" verbatim.
+#
+# Known per-cell confound: the truncator formula
+# ``(context_length - max_tokens) * fraction`` shrinks the input
+# budget at mt=65536.  For deepseek (ctx=131072):
+#   f=0.1: input_limit = 6,554   (aggressive trim)
+#   f=0.3: input_limit = 19,661
+#   f=0.5: input_limit = 32,768  (below slice 5's p50=51k)
+#   f=0.7: input_limit = 45,875
+#   f=0.9: input_limit = 58,982  (still above slice 5)
+# If the mt=65536 cells at the low fractions underperform vs
+# mt=32768, input-budget starvation is a suspect.  For cross-cell
+# cleanliness, pair the comparison against the same fraction at
+# mt=32768 (which has larger input_limit at every fraction).
+#
+# As of 2026-04-23 ``llm.max_consecutive_saturated_retries=5`` is
+# active.  At mt=65536 the provider-side reasoning ceiling becomes
+# 5 x 65536 = 327680 per call; if the qwen27b runaway-loop dynamic
+# triggers at that ceiling, it should now abort after 5 consecutive
+# saturated retries instead of burning arbitrarily large budgets
+# on a single step.
+#
+# Axes:
+#   llm.model:                      [deepseek-v3.2, qwen3.5-27b]
+#   harness.context_usage_fraction: [0.1, 0.3, 0.5, 0.7, 0.9]
+#   llm.max_tokens:                 65536  (fixed)
+#
+# Grid: 2 models x 5 fractions x 1 max_tokens x 1 seed = 10 runs.
+#
+# DB logging disabled (wandb-only).
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/max_tokens_extend_zelda_65k.yaml -n 10 --stagger 0
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: max-tokens-extend-zelda-65k
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values: [0.1, 0.3, 0.5, 0.7, 0.9]
+  llm.max_tokens:
+    value: 65536
+  llm.model:
+    values:
+      - deepseek/deepseek-v3.2
+      - qwen/qwen3.5-27b
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: false
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

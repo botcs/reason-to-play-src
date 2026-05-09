@@ -1,0 +1,6 @@
+Respond with valid JSON only:
+```json
+{"action": "<up|down|left|right|action|wait>"}
+```
+
+Your hidden reasoning is captured automatically and shown back to you on future turns.

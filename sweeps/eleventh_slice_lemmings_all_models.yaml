@@ -1,0 +1,76 @@
+# Eleventh slice: lemmings_vgfmri4 across all 6 models, copied-reasoning
+# minimal + elaborate.
+#
+# Extends the slice-10 design (matched minimal/elaborate comparison in a
+# single sweep) to lemmings_vgfmri4 -- a SpawnPoint game.  lemmings
+# cycles spawners without emitting VGDL events for the spawn itself
+# (ordinary SpawnPoint.update, no opcode; see CLAUDE.md and
+# vgfmri_interactions.md), so the agent has to notice "new sprites
+# appeared" from the observation grid alone without an action-log
+# entry.  This is the first slice that tests copied-reasoning at scale
+# on a spawning game; every prior slice ran on bait or zelda (static
+# initial layouts + deterministic transitions).
+#
+# Launched 2026-04-22 preemptively alongside the context-window sweep,
+# under the new defaults that landed earlier the same day:
+# ``harness.context_usage_fraction=0.5`` (preserves slice-1..10
+# effective context fill despite the switch to API-accurate token
+# counts), ``llm.max_tokens=8192``, ``llm.parse_retry_budget=45``.
+# None overridden in the yaml -- they flow from conf/config.yaml so
+# slice 11 doubles as a regression test for the default set.
+#
+# DB tracking enabled so the slots claim and the outcome is recorded
+# in vgdl-grid-gameplay for future reference tables.
+#
+# Grid: 6 models x 1 mode x 1 game x 2 suggestion levels x 1 seed = 12 runs.
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/eleventh_slice_lemmings_all_models.yaml -n 6
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: eleventh-slice-lemmings-all-models-copied-reasoning
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    values: [minimal, elaborate]
+  llm.model:
+    values:
+      - qwen/qwen3.5-9b
+      - qwen/qwen3.5-27b
+      - qwen/qwen3.5-35b-a3b
+      - qwen/qwen3.5-122b-a10b
+      - qwen/qwen3.5-397b-a17b
+      - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: lemmings_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

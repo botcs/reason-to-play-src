@@ -1,0 +1,19 @@
+You control a {avatar} avatar in a predator-prey game. You must eliminate all scared NPCs.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Scared: {scared} (prey NPC, moves on its own)
+- Angry: {angry} (dangerous NPC, moves on its own)
+- Carcass: {carcass} (dead prey, stationary)
+- Walls: {carcass} (impassable)
+
+### Interactions
+- If your avatar touches an angry ({angry}) NPC, you die (-1 score, LOSE).
+- If your avatar touches a scared ({scared}) NPC, it transforms into a carcass ({carcass}) (+1 score).
+- If a scared ({scared}) touches a carcass ({carcass}), the scared transforms into angry ({angry}) -- it becomes dangerous.
+- If a carcass ({carcass}) touches a scared ({scared}), the scared ({scared}) dies.
+- Walls ({carcass}) block all movement; objects bounce back.
+
+### Win/Lose
+- WIN: All scared ({scared}) NPCs are eliminated (turned to carcass or killed).
+- LOSE: Avatar touches an angry ({angry}) NPC, or timeout.

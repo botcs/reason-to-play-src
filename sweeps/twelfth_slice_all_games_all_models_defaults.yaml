@@ -1,0 +1,93 @@
+# Twelfth slice: all 6 models x all 12 games at post-study defaults.
+#
+# Runs at the settings chosen by the max_tokens x context_usage_fraction
+# sensitivity study (writeup: EXPERIMENTS_NOTEBOOK.md "Final results
+# -- all 6 sweeps finished (2026-04-24)"):
+#   harness.context_usage_fraction = 0.3
+#   llm.max_tokens                 = 16384
+#   harness.suggestion_level       = elaborate
+#   harness.rationale_mode         = copied-reasoning
+#   game.advancement.max_consecutive_losses = 7  (2026-04-24 default)
+#
+# Games span both vgfmri3 and vgfmri4 cohorts (see grid_configs/main.yaml
+# _games_all).  Sokoban is intentionally absent from the vgfmri3 cohort
+# (inconsistent coverage across subjects, no vgfmri4 counterpart).
+#
+# Purpose: canonical cross-game x cross-model baseline at the tuned
+# default.  Every model gets a direct comparison point on every game at
+# one consistent configuration.
+#
+# Grid: 6 models x 12 games x 1 mode x 1 suggestion x 1 seed = 72 cells.
+# The grid DB (vgdl-grid-gameplay) de-dupes against `done` slots, so
+# the 6 study-best cells backfilled on 2026-04-24 (ds-v3.2 and q27b
+# on zelda/bait/helper at vgfmri4; see
+# scripts/backfill_tuned_grid_slots.py) will be skipped by the agent.
+# Effective new work: 66 cells.
+#
+# Launch (66 effective cells after grid-DB dedup; one agent per cell,
+# 30s stagger to avoid hammering the wandb agent registration endpoint):
+#   python scripts/launch_sweep.py sweeps/twelfth_slice_all_games_all_models_defaults.yaml -n 66 --stagger 30
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: twelfth-slice-all-games-all-models-defaults
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    value: 0.3
+  llm.model:
+    values:
+      - qwen/qwen3.5-9b
+      - qwen/qwen3.5-27b
+      - qwen/qwen3.5-35b-a3b
+      - qwen/qwen3.5-122b-a10b
+      - qwen/qwen3.5-397b-a17b
+      - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  llm.max_tokens:
+    value: 16384
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    values:
+      - avoidGeorge_vgfmri4
+      - bait_vgfmri3
+      - bait_vgfmri4
+      - chase_vgfmri3
+      - chase_vgfmri4
+      - helper_vgfmri3
+      - helper_vgfmri4
+      - lemmings_vgfmri3
+      - lemmings_vgfmri4
+      - plaqueAttack_vgfmri3
+      - zelda_vgfmri3
+      - zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 7
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

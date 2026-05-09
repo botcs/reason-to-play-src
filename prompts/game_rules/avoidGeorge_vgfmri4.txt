@@ -1,0 +1,19 @@
+You control a {avatar} avatar in a survival game. You win by surviving 60 steps. You lose if your avatar dies or all {quiet} objects are gone.
+
+### Objects and Colors
+- Avatar: {avatar}
+- George: {george} (dangerous NPC, moves on its own)
+- Quiet: {quiet} (friendly NPC)
+- Annoyed: {annoyed} (transformed quiet NPC)
+- Cigarette: {cigarette} (calming item)
+- Walls: block all movement
+
+### Interactions
+- If your avatar ({avatar}) touches George ({george}), you die (-1 score, LOSE).
+- If a quiet ({quiet}) touches George ({george}), {quiet} transforms into {annoyed} (annoyed).
+- If an annoyed ({annoyed}) touches a cigarette ({cigarette}), {annoyed} transforms back into {quiet} (+1 score).
+- Walls block all movement; objects bounce back.
+
+### Win/Lose
+- WIN: Survive 60 steps without dying.
+- LOSE: Avatar touches George, or all quiet ({quiet}) are eliminated.

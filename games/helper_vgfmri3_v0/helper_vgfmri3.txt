@@ -1,0 +1,58 @@
+BasicGame frame_rate=30
+    SpriteSet
+        floor > Immovable img=colors/LIGHTGRAY
+        avatar > MovingAvatar img=colors/DARKBLUE cooldown=0
+        mover > VGDLSprite
+            chaser > Chaser
+                chaser1 > stype=box1 img=colors/ORANGE  cooldown=12
+                chaser2 > stype=box3 img=colors/LIGHTBLUE cooldown=12
+        wall > Immovable img=colors/BLACK
+        forcefield > Passive img=colors/PURPLE
+        box > Passive
+            box1 > img=colors/WHITE
+            box2 > img=colors/GREEN
+            box3 > img=colors/YELLOW
+
+    LevelMapping
+        . > floor
+        A > floor avatar
+        w > floor wall
+        a > floor box1
+        b > floor box2
+        c > floor box3
+        f > floor forcefield
+        x > floor chaser1
+        z > floor chaser2
+        z > floor chaser2
+
+    InteractionSet
+        avatar wall > stepBack
+        box wall > stepBack
+        box3 avatar > bounceForward
+        box1 avatar > bounceForward
+        box1 box2 > stepBack
+        box1 box1 > stepBack
+        box2 avatar > killSprite
+        box1 chaser > killSprite
+        box3 chaser > killSprite
+        chaser forcefield > stepBack
+        chaser wall > stepBack
+        chaser box2 > stepBack
+
+        floor EOS > killSprite
+        avatar EOS > killSprite
+        mover EOS > killSprite
+        chaser EOS > killSprite
+        chaser1 EOS > killSprite
+        chaser2 EOS > killSprite
+        wall EOS > killSprite
+        forcefield EOS > killSprite
+        box EOS > killSprite
+        box1 EOS > killSprite
+        box2 EOS > killSprite
+        box3 EOS > killSprite
+
+    TerminationSet
+        Timeout limit=600 win=False
+        SpriteCounter stype=avatar  limit=0 win=False
+        SpriteCounter stype=box1 limit=0 win=True

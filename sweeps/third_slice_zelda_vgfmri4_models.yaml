@@ -1,0 +1,62 @@
+# Third slice: zelda_vgfmri4 across 27b and deepseek-v3.2.
+#
+# Fixes the game and sweeps the model dimension with just two models:
+# qwen3.5-27b (cheapest dense step up from 9B) and deepseek-v3.2
+# (qualitatively different family).  Budget raised to 4500 frames to
+# give bigger models more room to advance through zelda's 9 levels
+# before the cap -- 9B prompted-rationale hit the 2700 cap at L0 in
+# slice 1, so 2700 is clearly not enough to see the model-scaling
+# payoff on this game.
+#
+# Early stop: max_consecutive_losses=4 aborts a run after 4 deaths with
+# no intervening win, to avoid burning credits on stuck runs (second slice
+# avoidGeorge_vgfmri4 runs zpejq1ga and gs0tqi65 racked up 14 and 36
+# losses respectively without ever clearing the level -- clear sign the
+# run is stuck and just burning tokens).
+#
+# Grid: 2 models x 2 rationale_modes x 1 game x 1 suggestion x 1 seed = 4 runs
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/third_slice_zelda_vgfmri4_models.yaml -n 4
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: third-slice-zelda-vgfmri4-MED-and-XL-models
+parameters:
+  harness.rationale_mode:
+    values: [action-only, prompted-rationale]
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    values:
+      - qwen/qwen3.5-27b
+      - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

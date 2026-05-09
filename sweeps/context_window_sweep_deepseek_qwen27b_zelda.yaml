@@ -1,0 +1,83 @@
+# Context-window-fill sweep on zelda_vgfmri4.
+#
+# Independent study (not part of the main slice progression).
+# Characterises the degradation curve of copied-reasoning gameplay as
+# the conversation-truncation threshold is raised from the slice-1..10
+# implicit regime (~0.5 effective fill, preserved explicitly by
+# ``harness.context_usage_fraction: 0.5``) up to 0.9.
+#
+# Motivation: slices 7/9/10 established that elaborate-suggestion
+# copied-reasoning on Qwen and deepseek-v3.2 can reach L5-L8 on zelda,
+# but until 2026-04-22 the harness was truncating at char-count x 0.9
+# which corresponds to ~22-45% of the true context window -- so all
+# existing results live at low context fill.  This sweep isolates the
+# effect of context fill by varying ``harness.context_usage_fraction``
+# while keeping every other knob constant (same model, same game, same
+# suggestion level, same defaults).
+#
+# Models: deepseek-v3.2 + qwen3.5-27b.  DeepSeek is the "wash on
+# suggestion level, completes zelda both ways" reference; qwen3.5-27b
+# is the most fragile of the elaborate-dominance group (crashed at L8
+# with context-length-exceeded in slice 10) and therefore the most
+# likely to show degradation as context fill rises.  Together they
+# frame the high and low ends of the resilience axis.
+#
+# DB logging is DISABLED for this sweep (``exp_db.enabled: false``).
+# Results land in wandb only and do not occupy slots in
+# vgdl-grid-gameplay -- so the slice-state table remains authoritative
+# for the main grid.
+#
+# Grid: 2 models x 3 context fractions x 1 seed = 6 runs.
+# Fractions chosen: 0.10 (low), 0.50 (slice-1..10 anchor), 0.90 (high
+# stress).  Three points bracket the coherence curve at the cheapest
+# cost; if the 0.10-vs-0.50 and 0.50-vs-0.90 deltas are both small we
+# can skip filling in the interior later.
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/context_window_sweep_deepseek_qwen27b_zelda.yaml -n 4
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: context-window-sweep-deepseek-qwen27b-zelda
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values: [0.1, 0.5, 0.9]
+  llm.model:
+    values:
+      - deepseek/deepseek-v3.2
+      - qwen/qwen3.5-27b
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: false
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

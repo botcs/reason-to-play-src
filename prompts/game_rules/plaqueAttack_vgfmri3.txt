@@ -1,0 +1,26 @@
+You control an avatar in a tower defense game. You must protect molars from food enemies.
+
+### Objects and Colors
+- Avatar: controlled by you (can move and fire)
+- Fluoride projectile: {fluor} (fired by avatar in the direction last step was made using `action`)
+- Hotdog: {hotdog} (enemy, moves toward bottom-row molars)
+- Burger: {burger} (enemy, moves toward top-row molars)
+- Full molar (bottom): {fullMolarInf} (healthy tooth, bottom row)
+- Full molar (top): {fullMolarSup} (healthy tooth, top row)
+- Dead molar (bottom): {deadMolarInf} (damaged tooth, was {fullMolarInf})
+- Dead molar (top): {deadMolarSup} (damaged tooth, was {fullMolarSup})
+- Walls: {wall} (block projectiles)
+- Spawners: periodically create new {hotdog} hotdogs and {burger} burgers
+
+### Interactions
+- If a fluoride ({fluor}) hits a hotdog ({hotdog}), both are destroyed (+1 score).
+- If a fluoride ({fluor}) hits a burger ({burger}), both are destroyed (+1 score).
+- If a fluoride hits a wall ({wall}), the projectile disappears.
+- If a hotdog ({hotdog}) reaches a full molar ({fullMolarInf}), the molar transforms to dead ({deadMolarInf}) (-3 score).
+- If a burger ({burger}) reaches a full molar ({fullMolarSup}), the molar transforms to dead ({deadMolarSup}) (-3 score).
+- If your avatar touches a dead molar ({deadMolarInf}), it transforms back to full ({fullMolarInf}) (+1 score).
+- If your avatar touches a dead molar ({deadMolarSup}), it transforms back to full ({fullMolarSup}) (+1 score).
+
+### Win/Lose
+- WIN: All enemies and spawners are eliminated.
+- LOSE: All molars are dead (all {fullMolarInf} become {deadMolarInf} and all {fullMolarSup} become {deadMolarSup}), or timeout.

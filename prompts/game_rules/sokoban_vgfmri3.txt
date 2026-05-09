@@ -1,0 +1,18 @@
+You control a {avatar} avatar in a box-pushing puzzle.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Box: {box} (pushable)
+- Hole: {hole} (target position for boxes)
+- Walls: {wall} (impassable)
+
+### Interactions
+- Your avatar can push a box ({box}); it moves in the direction you push it (+1 score per push).
+- If a box is pushed into a hole ({hole}), the box disappears (+1 score).
+- A box cannot be pushed into another box (blocked).
+- A box cannot be pushed into a wall (blocked).
+- Walls ({wall}) block all movement.
+
+### Win/Lose
+- WIN: All boxes ({box}) are pushed into holes ({hole}).
+- LOSE: Timeout (or all boxes stuck with no valid pushes remaining).

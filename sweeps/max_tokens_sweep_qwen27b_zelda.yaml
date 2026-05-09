@@ -1,0 +1,105 @@
+# 2D context-fill x max-tokens sweep on qwen/qwen3.5-27b elab zelda_vgfmri4.
+#
+# Sister sweep to ``max_tokens_sweep_deepseek_zelda.yaml`` (sweep
+# ``eejy90d0``, 2026-04-22).  Same axes, same motivation, but runs on
+# qwen3.5-27b instead of deepseek-v3.2.
+#
+# Motivation.  The context-window sweep (``bnny7ji9``, 2026-04-22)
+# tested qwen3.5-27b elab zelda at 3 fill fractions under the
+# 2026-04-22 default ``llm.max_tokens=8192``, reaching only L2-L4
+# (best: f=0.1, L4, $2.58).  Slice 9 bait previously ran 27b-elab at
+# ``max_tokens=16384`` (the pre-2026-04-21 default) without issue, and
+# slice 10 zelda 27b-elab reached L8 at mt=8192 before hitting
+# ``context-length-exceeded`` at step 951.  The interaction between
+# fill fraction and max_tokens on 27b is therefore unexplored.
+#
+# Note on risk.  The 81920 = 5 * 16384 provider reasoning ceiling that
+# crashed slice 7/10 Qwen runs was MINIMAL-specific (three of four
+# crashes were under minimal suggestion level; 27b-elab bait slice 9
+# ran at mt=16384 cleanly).  Elaborate compresses the reasoning tail
+# enough that raising mt on ELAB should not re-trigger the loop.  If
+# this assumption is wrong, the mt=32768 cells will hit ~163840-token
+# reasoning tails and crash similarly to slice 10 minimal -- that is
+# itself a useful datapoint for the ``reasoning.max_tokens`` guardrail
+# bug tracked in slice 10's open items.
+#
+# Axes (matched to the deepseek sister sweep for overlay plots):
+#   harness.context_usage_fraction: [0.1, 0.5, 0.9]    (matches bnny7ji9)
+#   llm.max_tokens:                 [16384, 32768]     (slice 9 cap + 2x)
+# Dropped: mt=65536 (the OpenRouter hard cap).  Keeping the mt axis
+# matched to the deepseek sister sweep so cross-model comparison plots
+# stay clean.
+#
+# The elaborate prompt's Token Budget section
+# (``prompts/gameplay/copied-reasoning_elaborate.txt:47-48``) embeds
+# ``{max_output_tokens}`` via ``harness.py:65-75`` substitution, so
+# each cell's prompt reads verbatim with its own cap figure.
+#
+# Input-budget table.  qwen3.5-27b context length is 262144 tokens
+# (probed from ``openrouter.ai/api/v1/models``).  Truncator formula:
+# ``(262144 - max_tokens) * fraction``.
+#   fraction=0.1 mt=16384:  24,576    (aggressive trim)
+#   fraction=0.1 mt=32768:  22,938
+#   fraction=0.5 mt=16384: 122,880    (large; well above slice 5 deepseek regime)
+#   fraction=0.5 mt=32768: 114,688
+#   fraction=0.9 mt=16384: 221,184    (maximal; likely saturates practical usage)
+#   fraction=0.9 mt=32768: 206,438
+# These are significantly larger than the deepseek sister sweep's
+# corresponding cells because 27b has 2x the nominal context window.
+# This is not a confound for within-sweep comparisons (fraction and
+# max_tokens vary within 27b) but should be noted when overlaying the
+# two sweeps.
+#
+# DB logging is DISABLED (``exp_db.enabled: false``).  Results land in
+# wandb only; no slot claim in ``vgdl-grid-gameplay``.
+#
+# Grid: 1 model x 3 fractions x 2 max_tokens x 1 seed = 6 runs.
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/max_tokens_sweep_qwen27b_zelda.yaml -n 6 --stagger 0
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: max-tokens-sweep-qwen27b-zelda
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values: [0.1, 0.5, 0.9]
+  llm.max_tokens:
+    values: [16384, 32768]
+  llm.model:
+    value: qwen/qwen3.5-27b
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: false
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

@@ -1,0 +1,59 @@
+# Second slice: 9B evaluation grid, remaining games only.
+#
+# Continues the first_slice_rationale_mode sweep (<WANDB-ENTITY>/<WANDB-PROJECT>/<SWEEP-ID>):
+#   - drops copied-reasoning (9B blew its output budget on hidden reasoning,
+#     returned empty responses, and exhausted parse-retry budget on 4/4 runs)
+#   - keeps action-only and prompted-rationale
+#   - runs the 8 vgfmri games NOT in the first slice, with sokoban excluded
+#     (dropped from the behavioral cohort)
+#
+# Grid: 1 model x 2 rationale_modes x 8 games x 1 suggestion x 1 seed = 16 runs
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/second_slice_remaining_games.yaml -n 4
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: second-slice-remaining-games
+parameters:
+  harness.rationale_mode:
+    values: [action-only, prompted-rationale]
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    value: qwen/qwen3.5-9b
+  llm.backend:
+    value: openrouter
+  seed:
+    value: 0
+  game.game:
+    values:
+      - avoidGeorge_vgfmri4
+      - bait_vgfmri3
+      - chase_vgfmri4
+      - helper_vgfmri3
+      - helper_vgfmri4
+      - lemmings_vgfmri3
+      - lemmings_vgfmri4
+      - zelda_vgfmri3
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 2700
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

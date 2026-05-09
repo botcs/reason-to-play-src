@@ -1,0 +1,68 @@
+BasicGame
+    SpriteSet
+        floor > Immovable img=colors/LIGHTGRAY
+        goal  > Immovable img=colors/GREEN
+        key   > Resource img=colors/ORANGE limit=1
+        sword > OrientedFlicker singleton=True img=colors/WHITE
+        avatar  > ShootAvatar   stype=sword frameRate=8 img=colors/DARKBLUE
+        monsterQuick > RandomNPC cooldown=6 cons=6 img=colors/BROWN
+        monsterNormal > RandomNPC cooldown=8 cons=8 img=colors/PINK
+        monsterSlow > RandomNPC cooldown=10 cons=12 img=colors/GOLD
+        wall > Immovable autotiling=true img=colors/DARKGRAY
+
+
+
+    LevelMapping
+        . > floor
+        A > floor avatar
+        g > floor goal
+        + > floor key
+        1 > floor monsterQuick
+        2 > floor monsterNormal
+        3 > floor monsterSlow
+        w > floor wall
+
+    InteractionSet
+        avatar wall > stepBack
+        goal avatar > killIfOtherHasMore resource=key limit=1
+        monsterSlow sword > killSprite scoreChange=2
+        monsterQuick sword > killSprite scoreChange=2
+        monsterNormal sword > killSprite scoreChange=2
+
+        monsterSlow monsterSlow > stepBack
+        monsterSlow monsterQuick > stepBack
+        monsterSlow monsterNormal > stepBack
+        monsterQuick monsterNormal > stepBack
+        monsterNormal monsterNormal > stepBack
+        monsterQuick monsterQuick > stepBack
+
+        avatar monsterSlow > killSprite scoreChange=-1
+        avatar monsterQuick > killSprite scoreChange=-1
+        avatar monsterNormal > killSprite scoreChange=-1
+
+        avatar key > changeResource resource=key value=1 scoreChange=5
+        key avatar > killSprite
+
+        monsterQuick wall > stepBack
+        monsterNormal wall > stepBack
+        monsterSlow wall > stepBack
+
+        sword wall > killSprite
+
+
+
+
+        floor EOS > killSprite
+        goal EOS > killSprite
+        key EOS > killSprite
+        sword EOS > killSprite
+        avatar EOS > killSprite
+        monsterQuick EOS > killSprite
+        monsterNormal EOS > killSprite
+        monsterSlow EOS > killSprite
+        wall EOS > killSprite
+
+    TerminationSet
+        SpriteCounter stype=goal win=True
+        SpriteCounter stype=avatar win=False
+        Timeout limit=600 win=False

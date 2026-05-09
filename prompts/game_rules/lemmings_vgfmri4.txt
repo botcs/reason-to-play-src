@@ -1,0 +1,21 @@
+You control a {avatar} avatar in a lemming-guiding puzzle. You must help lemmings reach the goal.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Lemming: {lemming} (autonomous NPC, moves on its own towards the Goal)
+- Entrance: {entrance} (spawns 4 new lemmings in the beginning of the trial with some delay)
+- Goal: {goal} (lemmings must reach this)
+- Hole: {hole} (deadly pit)
+- Wall: {wall} (destructible by shovel)
+- Shovel: {shovel} (destroys walls on contact)
+
+### Interactions
+- If your avatar touches a hole ({hole}), you die (-5 score, LOSE).
+- If a lemming ({lemming}) touches a hole ({hole}), the lemming dies (-2 score).
+- If a lemming ({lemming}) touches the goal ({goal}), the lemming is saved and disappears (+2 score).
+- If a wall ({wall}) touches a shovel ({shovel}), the wall is destroyed.
+- The entrance ({entrance}) periodically spawns new {lemming} lemmings.
+
+### Win/Lose
+- WIN: All lemmings are saved (no lemmings or entrances remain on the map).
+- LOSE: Avatar falls into a hole, or timeout.

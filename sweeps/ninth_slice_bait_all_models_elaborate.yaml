@@ -1,0 +1,70 @@
+# Ninth slice: bait_vgfmri4 across all 6 models, copied-reasoning ELABORATE.
+#
+# Counterpart to the seventh slice (same game, same models, same mode,
+# same api_budget), but with suggestion_level=elaborate instead of
+# minimal.  Launched in parallel with slice 7 so we get a controlled
+# elaborate-vs-minimal comparison on the same patches (terminal-retry
+# persistence, reasoning echo on retry, api_budget safety net).
+#
+# Hypothesis going in: slice 6's level-curve finding -- minimal solves
+# games faster than elaborate -- should replicate here.  The elaborate
+# prompt contains the "be mindful" token-budget section that tail-
+# compresses reasoning length (slice 5/6 distribution study).  If
+# minimal still wins on bait across scale, that confirms the
+# gameplay-wide recommendation to use minimal for copied-reasoning and
+# reserve elaborate for imputation.
+#
+# Grid: 6 models x 1 mode x 1 game x 1 suggestion x 1 seed = 6 runs
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/ninth_slice_bait_all_models_elaborate.yaml -n 4
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: ninth-slice-bait-all-models-copied-reasoning-elaborate
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    values:
+      - qwen/qwen3.5-9b
+      - qwen/qwen3.5-27b
+      - qwen/qwen3.5-35b-a3b
+      - qwen/qwen3.5-122b-a10b
+      - qwen/qwen3.5-397b-a17b
+      - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  llm.max_tokens:
+    value: 16384
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: bait_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

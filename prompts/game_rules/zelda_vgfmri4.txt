@@ -1,0 +1,22 @@
+You control a {avatar} avatar in a combat and key-goal game.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Monster: {monsterQuick}, {monsterNormal}, or {monsterSlow} (dangerous NPCs, move on their own)
+- Sword: {sword} (projectile fired by avatar)
+- Key: {key} (collectible)
+- Goal: {goal} (exit)
+- Walls: {wall} (impassable)
+
+### Interactions
+- If your avatar touches a monster ({monsterQuick}/{monsterNormal}/{monsterSlow}), you die (-1 score, LOSE).
+- Using the `action` command fires a sword ({sword}) projectile in your facing direction.
+- If a sword ({sword}) hits a monster, the monster dies (+2 score).
+- If your avatar touches a key ({key}), the key is collected (+5 score).
+- If your avatar touches the goal ({goal}) while holding a key, you win (WIN).
+- If your avatar touches the goal without a key, nothing happens.
+- Walls ({wall}) block movement.
+
+### Win/Lose
+- WIN: Reach the goal ({goal}) while holding a collected key.
+- LOSE: Avatar touches a monster, or timeout.

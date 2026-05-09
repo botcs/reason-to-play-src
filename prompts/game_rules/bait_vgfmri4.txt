@@ -1,0 +1,24 @@
+You control a {avatar} avatar in a key-goal puzzle with hazards following Sokoban-like mechanics.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Key: {key} (collectible)
+- Goal: {goal} (exit)
+- Box: {box} (pushable)
+- Hole: {hole} (deadly pit)
+- Mushroom: {mushroom} (bonus collectible)
+- Walls: {wall} (impassable)
+
+### Interactions
+- If your avatar touches a hole ({hole}), you die (LOSE).
+- Your avatar can push a box ({box}); the box moves in the direction you push it.
+- If a box is pushed into a hole, both the box and hole disappear (+5 score).
+- If your avatar touches a key ({key}), the key is collected and disappears (+5 score).
+- If your avatar touches the goal ({goal}) while holding a key, you win (WIN).
+- If your avatar touches the goal without a key, nothing happens.
+- If your avatar touches a mushroom ({mushroom}), it is collected (+10 score).
+- Walls ({wall}) block movement.
+
+### Win/Lose
+- WIN: Reach the goal ({goal}) while holding a collected key.
+- LOSE: Avatar falls into a hole, or timeout.

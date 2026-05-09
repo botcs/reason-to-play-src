@@ -1,0 +1,93 @@
+# Bait + helper full grid sweep: generalisation of the zelda max_tokens
+# sensitivity study to two new games.
+#
+# The zelda sweeps (bnny7ji9, eejy90d0, loya1qs3, complement + 65k
+# extension) establish that on zelda_vgfmri4:
+# - max_tokens dominates context_usage_fraction (mt=32768 > mt=16384
+#   > mt=8192 in every matched pair at elab)
+# - qwen27b + mt=16384 at f >= 0.5 hits the 81920 provider reasoning
+#   ceiling and gets stuck at L0
+# - deepseek at mt=32768 recovers slice 5's L8 completion profile
+#
+# This sweep tests whether that story generalises beyond zelda.
+# Games chosen because we already have prior-slice anchors on them:
+# - bait_vgfmri4: slice 9 gave us 6-model mt=16384 elab anchors,
+#   including qwen3.5-397b-a17b's L8 completion ($44.15).  Deepseek
+#   elab reached L6 ($5.23) before parse-retry crash.
+# - helper_vgfmri4: slice 2 (9b) reached L2 prompted-rationale; slice
+#   4 saw deepseek minimal reach L2.  No prior copied-reasoning elab
+#   data, so this is the first real test of the upper-tier models on
+#   this game.  Skipped sokoban (dropped from cohort per memory) and
+#   lemmings (slice 11 already ruled it intractable under mt=8192 and
+#   the new guard should make it re-runnable -- separate sweep).
+#
+# As of 2026-04-23 the new ``llm.max_consecutive_saturated_retries=5``
+# default (commit af221a8) is active.  On lemmings we saw single steps
+# burn ~10x max_tokens of reasoning through the saturate-retry-saturate
+# loop; that is no longer possible.  Any cell that crashes with
+# ``consecutive_saturated_retries_exceeded`` is an informative
+# datapoint (the loop fires; we just stop early).
+#
+# Axes:
+#   game.game:                      [bait_vgfmri4, helper_vgfmri4]
+#   llm.model:                      [deepseek-v3.2, qwen3.5-27b]
+#   harness.context_usage_fraction: [0.1, 0.3, 0.5, 0.7, 0.9]
+#   llm.max_tokens:                 [16384, 32768, 65536]
+#
+# Grid: 2 games x 2 models x 5 fractions x 3 max_tokens x 1 seed =
+# **60 runs**.
+#
+# DB logging disabled (wandb-only).
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/max_tokens_sweep_bait_helper.yaml -n 60 --stagger 0
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: max-tokens-sweep-bait-helper
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values: [0.1, 0.3, 0.5, 0.7, 0.9]
+  llm.max_tokens:
+    values: [16384, 32768, 65536]
+  llm.model:
+    values:
+      - deepseek/deepseek-v3.2
+      - qwen/qwen3.5-27b
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    values:
+      - bait_vgfmri4
+      - helper_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: false
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

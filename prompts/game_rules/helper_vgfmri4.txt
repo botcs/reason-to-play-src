@@ -1,0 +1,22 @@
+You control a {avatar} avatar in a multi-agent coordination puzzle.
+
+### Objects and Colors
+- Avatar: {avatar}
+- Box1: {box1} (pushable, target for elimination)
+- Box2: {box2} (optional collectible by avatar)
+- Box3: {box3} (pushable, necessary collectible by chasers)
+- Chaser: {chaser1} or {chaser2} (autonomous NPCs that move toward targets)
+- Forcefield: {forcefield} (blocks chasers but not avatar)
+- Walls: {wall} (impassable)
+
+### Interactions
+- Your avatar can push box1 ({box1}) and box3 ({box3}); they move in the push direction.
+- If your avatar touches box2 ({box2}), it disappears (+1 score).
+- If a chaser ({chaser1}/{chaser2}) touches box1 ({box1}), the box disappears.
+- If a chaser touches box3 ({box3}), the box disappears (+1 score).
+- Chasers are blocked by forcefields ({forcefield}).
+- Walls ({wall}) block movement.
+
+### Win/Lose
+- WIN: All box1 ({box1}) objects are eliminated.
+- LOSE: Avatar dies or timeout.

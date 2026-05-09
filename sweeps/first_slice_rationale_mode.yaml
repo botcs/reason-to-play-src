@@ -1,0 +1,56 @@
+# First experimental slice: does rationale_mode differentiate behaviour?
+#
+# Grid: 1 model x 3 rationale_modes x 4 games x 1 suggestion x 1 seed = 12 runs
+#
+# Purpose: cheap first-pass signal before we commit to the full 432-run
+# gameplay grid.  Picks 9b (1.0x cost multiplier) and four games with
+# diverse mechanics:
+#   bait_vgfmri4       -- collection + key
+#   chase_vgfmri3      -- reactive NPCs
+#   zelda_vgfmri4      -- multi-object inventory
+#   plaqueAttack_vgfmri3 -- projectiles (fire action)
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/first_slice_rationale_mode.yaml -n 4
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: first-slice-rationale-mode
+parameters:
+  harness.rationale_mode:
+    values: [action-only, prompted-rationale, copied-reasoning]
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    value: qwen/qwen3.5-9b
+  llm.backend:
+    value: openrouter
+  seed:
+    value: 0
+  game.game:
+    values:
+      - bait_vgfmri4
+      - chase_vgfmri3
+      - zelda_vgfmri4
+      - plaqueAttack_vgfmri3
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 2700
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: true
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}

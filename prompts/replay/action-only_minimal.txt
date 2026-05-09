@@ -1,0 +1,1 @@
+You are encoding a human play. The player's action on each turn is given directly. No rationale is emitted.

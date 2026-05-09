@@ -1,0 +1,59 @@
+# Disable all hydra directory/file creation -- we manage our own output.
+# Without this, hydra creates outputs/ and .hydra/ directories on every run
+# which interferes with wandb file saving and pollutes the repo.
+hydra:
+  job:
+    chdir: false
+  output_subdir: null
+  run:
+    dir: .
+
+seed: 0
+
+harness:
+  rationale_mode: prompted-rationale
+  suggestion_level: elaborate
+  context_usage_fraction: 0.3
+
+llm:
+  backend: openrouter
+  model: ""
+  temperature: 0.5
+  top_p: 0.95
+  max_tokens: 16384
+  api_budget: 45.0
+  parse_retry_budget: 45
+
+game:
+  game: bait_vgfmri4
+  start_level: 0
+  max_levels: 9
+  idle_frames: 4
+  advancement:
+    strategy: blocked_curricula
+    total_frame_budget: 4500
+    consecutive_wins_required: 2
+    max_consecutive_losses: 7
+
+logging:
+  output_dir: out/
+  wandb_project: ""
+  verbose: false
+
+replay:
+  data_dir: ./workdir/prepare_behavioral_data
+  subject: ""
+  game_filter: ""
+  action_frames_only: true
+  stride: 1
+
+exp_db:
+  enabled: false
+  region: <REGION>
+  s3_bucket: <ANONYMIZED-BUCKET>
+  s3_prefix: llm_generative_gameplay/
+  replay_s3_prefix: llm_replay/
+  feature_s3_prefix: extract_model_features_to_py/multi-turn/
+  continue_on_session_error: true
+  force_reclaim: false
+  resume: false

@@ -1,0 +1,31 @@
+BasicGame square_size=20
+    SpriteSet
+        floor > Immovable img=colors/LIGHTGRAY
+        hole   > Immovable img=colors/RED
+        avatar > MovingAvatar img=colors/DARKBLUE
+        box    > Passive img=colors/GREEN
+        wall > Immovable img=colors/DARKGRAY autotiling=True
+
+    LevelMapping
+        . > floor
+        A > floor avatar
+        0 > floor hole
+        1 > floor box
+        w > floor wall
+
+    InteractionSet
+        avatar wall > stepBack
+        box avatar > bounceForward scoreChange=1
+        box wall > stepBack
+        box box > stepBack
+        box hole > killSprite scoreChange=1
+
+        floor EOS > killSprite
+        hole EOS > killSprite
+        avatar EOS > killSprite
+        box EOS > killSprite
+        wall EOS > killSprite
+
+    TerminationSet
+        SpriteCounter stype=box    limit=0 win=True
+        Timeout limit=600 win=False

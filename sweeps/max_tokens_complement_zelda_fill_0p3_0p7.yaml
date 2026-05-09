@@ -1,0 +1,81 @@
+# Complementary zelda fill sweep at fractions 0.3 and 0.7.
+#
+# Add-on to the 2026-04-22/23 pair of max_tokens x fill sweeps
+# (deepseek: eejy90d0; qwen27b: loya1qs3), which covered fractions
+# [0.1, 0.5, 0.9].  Those endpoints bracketed the useful range but
+# leave a coarse grid; this sweep fills in the interior (0.3 and
+# 0.7) so the fraction axis becomes [0.1, 0.3, 0.5, 0.7, 0.9] across
+# both models.  Concatenating the three sweeps post-hoc gives a
+# clean 5-fraction x 2-max_tokens grid per model.
+#
+# The 0.5 cells are NOT repeated here (already running in eejy90d0
+# and loya1qs3); we only launch the two new fractions.  mt=65536
+# at these fractions lives in the sister 65k extension sweep so the
+# yamls stay small and one-axis.
+#
+# As of 2026-04-23 the new ``llm.max_consecutive_saturated_retries=5``
+# default (commit af221a8) is active -- a single step that hits
+# ``output_tokens >= max_tokens`` 5 times in a row aborts the run
+# with ``crash_reason="consecutive_saturated_retries_exceeded"``.
+# This replaces the slice-11 saturate-retry-saturate loop that burned
+# ~10x the intended reasoning budget on a single decision.
+#
+# Axes:
+#   llm.model:                      [deepseek-v3.2, qwen3.5-27b]
+#   harness.context_usage_fraction: [0.3, 0.7]
+#   llm.max_tokens:                 [16384, 32768]
+#
+# Grid: 2 models x 2 fractions x 2 max_tokens x 1 seed = 8 runs.
+#
+# DB logging disabled (wandb-only).
+#
+# Launch:
+#   python scripts/launch_sweep.py sweeps/max_tokens_complement_zelda_fill_0p3_0p7.yaml -n 8 --stagger 0
+
+program: src.llm_eval.generative_gameplay.run
+method: grid
+name: max-tokens-complement-zelda-fill-0p3-0p7
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values: [0.3, 0.7]
+  llm.max_tokens:
+    values: [16384, 32768]
+  llm.model:
+    values:
+      - deepseek/deepseek-v3.2
+      - qwen/qwen3.5-27b
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+  exp_db.enabled:
+    value: false
+
+command:
+  - ${env}
+  - python
+  - -m
+  - src.llm_eval.generative_gameplay.run
+  - ${args_no_hyphens}
