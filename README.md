@@ -2,8 +2,20 @@
 
 Source code for **Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs and Human Game Learners.**
 
+_Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Summerfield, Joshua B. Tenenbaum Rui Ponte Costa, Marcelo G. Mattar, Momchil Tomov_
+
 Live site, interactive replay catalogue, representation viewer, and paper:
 **[botcs.github.io/reason-to-play](https://botcs.github.io/reason-to-play/)**
+
+> **Acknowledgement:** This project is a fork of, and
+> directly inspired by, Cedric Colas's
+> [Language and Experience: A Computational Model of Social Learning in
+> Complex Tasks](https://github.com/ccolas/language_and_experience).
+> The VGDL harness, game suite, and some of the LLM scaffolding originate
+> there; we extend the codebase to study frontier Large Reasoning Models
+> learning these games without rule descriptions, and to align their
+> internal representations against human fMRI data. Huge thanks to Cedric
+> and collaborators for granting us early access to the codebase.
 
 We drop human participants (32, scanned with fMRI) and a suite of frontier Large Reasoning Models into a set of simple grid-world video games written in a compact language called VGDL, with no rules provided, and ask whether the models learn the way humans do, and whether they build similar internal representations.
 
