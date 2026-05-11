@@ -86,15 +86,14 @@ LRM representations predict brain activity significantly above chance across vis
 ## Cite
 
 ```bibtex
-@article{botos2026reason,
-  title   = {Reason to Play: Behavioral and Brain Alignment
-             Between Frontier LRMs and Human Game Learners},
-  author  = {Csaba, Botos and Kumar, Sreejan and
-             Andrews, Austin Tudor David and Hunt, Laurence and
-             Summerfield, Chris and Tenenbaum, Joshua B. and
-             Costa, Rui Ponte and Mattar, Marcelo G. and
-             Tomov, Momchil},
-  year    = {2026}
+@misc{csaba2026reasonplaybehavioralbrain,
+      title={Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs and Human Game Learners},
+      author={Botos Csaba and Sreejan Kumar and Austin Tudor David Andrews and Laurence Hunt and Chris Summerfield and Joshua B. Tenenbaum and Rui Ponte Costa and Marcelo G. Mattar and Momchil Tomov},
+      year={2026},
+      eprint={2605.08019},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2605.08019},
 }
 ```
 
