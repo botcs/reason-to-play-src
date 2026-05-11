@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 
 # Llama 3.1 chat template for models without one configured
 # Reference: https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1
-# Used by feature extraction wrappers (DeepSpeed, Transformers).
+# Used by the Transformers feature-extraction wrapper.
 LLAMA_31_CHAT_TEMPLATE = (
     "{% set loop_messages = messages %}"
     "{% for message in loop_messages %}"

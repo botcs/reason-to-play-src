@@ -19,6 +19,25 @@ Live site, interactive replay catalogue, representation viewer, and paper:
 
 We drop human participants (32, scanned with fMRI) and a suite of frontier Large Reasoning Models into a set of simple grid-world video games written in a compact language called VGDL, with no rules provided, and ask whether the models learn the way humans do, and whether they build similar internal representations.
 
+## Setup
+
+Minimal install (OpenRouter-backed gameplay and action-only human replay; no local GPU inference):
+
+```bash
+pip install -r requirements.txt
+```
+
+Full install (adds local LRM inference, Phase-2 hidden-state feature extraction, plotting, and S3 helpers). Torch is pinned to the CUDA 12.8 build, so pass the matching wheel index:
+
+```bash
+pip install -r requirements-full.txt \
+    --extra-index-url https://download.pytorch.org/whl/cu128
+```
+
+Versions in both files are pinned to the working uv venv on our cluster (Python 3.12, snapshot 2026-05); loosen as needed for your environment.
+
+We developed and optimised the local-inference path for a single **HGX B200 node (8 x B200 GPUs, NVLink)**. The same stack also runs on older NVIDIA architectures (Hopper / H100, Ampere / A100); install the torch / triton build that matches your CUDA stack and drop the Blackwell-tuned kernel extras (`tilelang`, `flash-linear-attention`, `causal-conv1d`, `torch-c-dlpack-ext`) from `requirements-full.txt` on hardware that does not need them.
+
 ## Quickstart
 
 Generative gameplay (LRM plays a game from scratch, no rules):
@@ -46,7 +65,7 @@ src/
   llm_eval/                  LLM evaluation pipeline
     shared/                  config, harness, prompt loading, event logging,
                              observation formatting, response parsing,
-                             LLM wrappers (OpenRouter, Transformers, DeepSpeed)
+                             LLM wrappers (OpenRouter, Transformers, torchrun)
     generative_gameplay/     LLM plays games (agent loop, Hydra entry point)
     human_replay/            replay pipeline (imputation + feature extraction)
   vgdl/                      VGDL game engine (interpreter, sprites, renderer)

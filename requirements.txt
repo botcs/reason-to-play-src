@@ -1,0 +1,23 @@
+# Minimal install: OpenRouter-backed gameplay and action-only human replay.
+# No local GPU inference, no feature extraction.
+# For the full stack (local LRMs, feature extraction, analysis) see
+# requirements-full.txt.
+#
+# Versions pinned to the working uv venv on our HGX B200 cluster
+# (Python 3.12, snapshot 2026-05). Loosen as needed for your environment.
+
+gym==0.26.2
+pygame==2.6.1
+numpy==2.4.4
+
+hydra-core==1.3.2
+
+# OpenRouter is OpenAI-compatible
+openai==2.32.0
+httpx==0.28.1
+
+# Human-replay BSON loader (pymongo ships the `bson` module)
+pymongo==4.17.0
+
+tqdm==4.67.3
+wandb==0.26.1

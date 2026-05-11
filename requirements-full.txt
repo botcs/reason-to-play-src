@@ -1,0 +1,40 @@
+# Full install: everything in requirements.txt plus local LRM inference,
+# Phase-2 hidden-state feature extraction, plotting, and S3 helpers.
+#
+# Versions pinned to the working uv venv on our HGX B200 cluster
+# (Python 3.12, CUDA 12.8, snapshot 2026-05). We developed and optimised
+# the local-inference path for a single HGX B200 node (8 x B200, NVLink).
+# The same stack also runs on older NVIDIA architectures (Hopper / H100,
+# Ampere / A100): install the matching torch + triton CUDA build for your
+# hardware, and drop the Blackwell-tuned kernel extras
+# (tilelang, flash-linear-attention, causal-conv1d, torch-c-dlpack-ext)
+# if your target GPU does not need them.
+#
+# Torch is pinned to the cu128 build used on B200. Install with:
+#   pip install -r requirements-full.txt \
+#       --extra-index-url https://download.pytorch.org/whl/cu128
+
+-r requirements.txt
+
+# Local LRM inference
+torch==2.11.0+cu128
+triton==3.6.0
+transformers==5.6.2
+safetensors==0.7.0
+accelerate==1.13.0
+huggingface-hub==1.12.0
+tokenizers==0.22.2
+sentencepiece==0.2.1
+
+# Attention / dispatch kernels tuned for Blackwell; older-arch fallbacks
+# exist for these. Drop on hardware that does not need them.
+tilelang==0.1.9
+torch-c-dlpack-ext==0.1.5
+flash-linear-attention==0.5.0
+causal-conv1d==1.6.1
+
+# Analysis, plotting, and S3
+matplotlib==3.10.8
+pandas==3.0.2
+scikit-learn==1.8.0
+boto3==1.42.94
