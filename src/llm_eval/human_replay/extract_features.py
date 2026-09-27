@@ -629,6 +629,16 @@ class _WindowHookExtractor:
 # -- Model loading ------------------------------------------------------
 
 
+def _validate_revision_tracking(cfg: ExtractionConfig) -> None:
+    if cfg.model_revision is not None and cfg.exp_db.enabled:
+        raise ValueError(
+            "model_revision requires exp_db.enabled=false: legacy experiment "
+            "slot IDs do not include the model revision and could incorrectly "
+            "reuse or skip another checkpoint. Use a distinct offline output_dir "
+            "for each revision."
+        )
+
+
 def _load_runtime(cfg: ExtractionConfig):
     """Load HF model + tokenizer, register hooks, then compile.
 
@@ -639,6 +649,7 @@ def _load_runtime(cfg: ExtractionConfig):
     after the compile wrapper may not fire inside the compiled graph
     (the same ordering rule documented in ``transformers_wrapper``).
     """
+    _validate_revision_tracking(cfg)
     import torch.distributed as dist
     from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
@@ -650,8 +661,12 @@ def _load_runtime(cfg: ExtractionConfig):
     # Qwen3.5 MoE has num_key_value_heads=2; HF's default tp_plan colwise-shards
     # k_proj/v_proj which crashes in attention.forward at view(-1, head_dim) when
     # WORLD_SIZE > num_kv_heads. Patch tp_plan + attention forward before load.
+    probe_cfg = AutoConfig.from_pretrained(
+        cfg.model, revision=cfg.model_revision, trust_remote_code=True
+    )
+    # Resolve a branch/tag once, then use that exact snapshot for all components.
+    resolved_revision = getattr(probe_cfg, "_commit_hash", None) or cfg.model_revision
     if IS_DISTRIBUTED:
-        probe_cfg = AutoConfig.from_pretrained(cfg.model, trust_remote_code=True)
         if getattr(probe_cfg, "model_type", "") == "qwen3_5_moe":
             from src.llm_eval.shared import qwen3_5_moe_torchrun_wrapper
 
@@ -670,7 +685,9 @@ def _load_runtime(cfg: ExtractionConfig):
 
     _print(f"Loading {cfg.model} (dtype={cfg.torch_dtype}, world_size={WORLD_SIZE})")
 
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(
+        cfg.model, revision=resolved_revision, trust_remote_code=True
+    )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -684,6 +701,8 @@ def _load_runtime(cfg: ExtractionConfig):
         _print("Using sdpa (flash_attn unavailable)")
 
     load_kwargs: dict = dict(
+        config=probe_cfg,
+        revision=resolved_revision,
         torch_dtype=dtype_arg,
         attn_implementation=attn_impl,
         trust_remote_code=True,
@@ -745,6 +764,7 @@ def _derive_slot_and_s3(
     ``populate_feature_extraction``; ablation runs use the ablation table
     with a tag-prefixed slot_id and create-on-claim semantics.
     """
+    _validate_revision_tracking(cfg)
     from src.llm_eval.neurips_exp_db.slot_ids import (
         slot_id_ablation,
         slot_id_feature_extraction,
@@ -1262,6 +1282,8 @@ def extract_for_session(
                 "subject": subject,
                 "game": game_name,
                 "model": cfg.model,
+                "requested_model_revision": cfg.model_revision,
+                "model_revision": getattr(model.config, "_commit_hash", None),
                 "model_id": model_id,
                 "num_layers": num_layers,
                 "hidden_dim": hidden_dim,
@@ -1285,6 +1307,8 @@ def extract_for_session(
             "provenance": {
                 **_get_provenance(),
                 "model": cfg.model,
+                "requested_model_revision": cfg.model_revision,
+                "model_revision": getattr(model.config, "_commit_hash", None),
                 "timestamp": datetime.now().isoformat(),
                 "prompts_file": str(prompts_file),
             },
@@ -1342,6 +1366,22 @@ def extract_for_session(
 # -- Hydra entry point --------------------------------------------------
 
 
+def _finish_extraction_batch(
+    failed_sessions: list[str], completed: int, skipped: int
+) -> None:
+    """Keep partial outputs, but never report a failed selected batch as success."""
+    _print(
+        f"Session results: completed={completed}, skipped={skipped}, "
+        f"failed={len(failed_sessions)}"
+    )
+    if failed_sessions:
+        raise RuntimeError(
+            f"Feature extraction failed for {len(failed_sessions)} session(s); "
+            f"{completed} completed output(s) retained, {skipped} skipped. "
+            f"Failed sessions: {', '.join(failed_sessions)}"
+        )
+
+
 @hydra.main(
     config_path="../../../conf/extract_features",
     config_name="default",
@@ -1362,6 +1402,8 @@ def main(cfg: DictConfig) -> None:
         )
     if not (0.0 <= typed_cfg.overlap < 1.0):
         raise ValueError(f"overlap={typed_cfg.overlap} must be in [0, 1)")
+
+    _validate_revision_tracking(typed_cfg)
 
     # prompts may be a single file path or a glob pattern.  ``glob.glob``
     # on a plain non-glob path returns ``[path]`` if it exists, so one
@@ -1436,6 +1478,7 @@ def main(cfg: DictConfig) -> None:
                 "prompts_pattern": pattern,
                 "n_sessions": len(prompts_files),
                 "model": typed_cfg.model,
+                "model_revision": typed_cfg.model_revision,
                 "window_fraction": typed_cfg.window_fraction,
                 "overlap": typed_cfg.overlap,
                 "action_compression": typed_cfg.action_compression,
@@ -1453,6 +1496,8 @@ def main(cfg: DictConfig) -> None:
     _print(f"Runtime ready in {load_wall_s:.1f}s")
 
     summaries: list[dict] = []
+    failed_sessions: list[str] = []
+    skipped_sessions = 0
     for i, prompts_file in enumerate(prompts_files):
         _print(f"\n### [{i + 1}/{len(prompts_files)}] {prompts_file.name} ###")
         try:
@@ -1467,11 +1512,12 @@ def main(cfg: DictConfig) -> None:
                 exp_db_client=exp_db_client,
                 exp_db_worker=exp_db_worker,
             )
-        except BaseException as e:
+        except Exception as e:
             # extract_for_session has already called fail_slot when
             # exp_db is enabled.  Loop-level policy: continue to the next
             # session (default) or re-raise to abort the batch.
             if typed_cfg.exp_db.continue_on_session_error:
+                failed_sessions.append(str(prompts_file))
                 _print(
                     f"!!! Session {prompts_file.name} failed "
                     f"({type(e).__name__}: {e!r}) -- continuing"
@@ -1479,6 +1525,8 @@ def main(cfg: DictConfig) -> None:
                 continue
             raise
         if result is None:
+            if IS_MAIN:
+                skipped_sessions += 1
             continue
         result = {"prompts_file": str(prompts_file), **result}
         summaries.append(result)
@@ -1590,6 +1638,8 @@ def main(cfg: DictConfig) -> None:
             }
         )
         wandb.finish()
+
+    _finish_extraction_batch(failed_sessions, len(summaries), skipped_sessions)
 
 
 if __name__ == "__main__":

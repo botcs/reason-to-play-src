@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "selection_note": "These immutable revisions recover available implementations. They are not proof of the producing revision for every released checkpoint or result.",
+  "sources": {
+    "rc-rl": {
+      "url": "https://github.com/botcs/RC_RL.git",
+      "revision": "8f5f8a3c6facba2962319ea4892396057061370c",
+      "role": "RC_RL revision pinned by the archived staged DDQN feature extractor",
+      "license": "No repository-wide license located; retain upstream terms and access requirements",
+      "access": "Essential public runtime and game definitions included; full optional historical checkout requires authorized GitHub access",
+      "included_source": "vendor/rc_rl/extraction"
+    },
+    "rc-rl-current": {
+      "url": "https://github.com/botcs/RC_RL.git",
+      "revision": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "role": "Later DDQN sampling and replay fixes; distinct from archived extraction pin",
+      "license": "No repository-wide license located; retain upstream terms and access requirements",
+      "access": "Essential public runtime and game definitions included; full optional historical checkout requires authorized GitHub access",
+      "included_source": "vendor/rc_rl/current"
+    },
+    "rc-rl-ez": {
+      "url": "https://github.com/botcs/RC_RL.git",
+      "revision": "b1e33768b9f1d799d7780a7e6556d328be5174ab",
+      "role": "EZ-development-changes environment with level transforms and warmup levels",
+      "license": "No repository-wide license located; retain upstream terms and access requirements",
+      "access": "Essential public runtime and game definitions included; full optional historical checkout requires authorized GitHub access",
+      "included_source": "vendor/rc_rl/ez"
+    },
+    "efficientzero": {
+      "url": "https://github.com/A-Andrews/EfficientZeroV2.git",
+      "revision": "29157d4892afd9467b1bd0994de1355086145490",
+      "role": "Integrated-development EfficientZero V2 training implementation using RC_RL_PATH",
+      "license": "GPL-3.0 upstream; preserve repository license files",
+      "access": "Inference core included with GPL license; full training repository is public",
+      "included_source": "vendor/efficientzero"
+    },
+    "empa-reference": {
+      "url": "https://github.com/tsividis/vgdl.git",
+      "revision": "f41409ae242412e6722a2c7518547ac7d1eb36d2",
+      "role": "Original human experiment and EMPA reference source, refactor_fMRI_cannon lineage",
+      "license": "Retain repository and component license files; no blanket relicensing",
+      "access": "Public upstream reference"
+    },
+    "vgdl-fmri-comparisons": {
+      "url": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons.git",
+      "revision": "422a4e753749569e83a6d5fdb8a42427730d6d34",
+      "role": "EfficientZero human-trajectory feature extractor and trace-layer selection",
+      "license": "No upstream license located; recovered source included with attribution, original source hashes and explicit license boundary",
+      "access": "Complete essential extraction scripts included; original repository returned404. S3 recovered trace script and layer list differ from recorded Git HEAD; use included file-hash provenance.",
+      "included_source": "recovered/efficientzero"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "fc1": {
+    "model": "ddqn_fc1_rerun",
+    "family": "DDQN",
+    "backbone": "GridDQN",
+    "layer_idx": 0,
+    "n_layers": 1,
+    "layer_depth": 0.0
+  },
+  "hrr": {
+    "model": "hrr_rerun",
+    "family": "HRR",
+    "backbone": "EMPA",
+    "layer_idx": 0,
+    "n_layers": 1,
+    "layer_depth": 0.0
+  }
+}

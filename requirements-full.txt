@@ -14,7 +14,8 @@
 #   pip install -r requirements-full.txt \
 #       --extra-index-url https://download.pytorch.org/whl/cu128
 
--r requirements.txt
+-r requirements-analysis.txt
+-r requirements-release.txt
 
 # Local LRM inference
 torch==2.11.0+cu128
@@ -29,6 +30,8 @@ sentencepiece==0.2.1
 # Attention / dispatch kernels tuned for Blackwell; older-arch fallbacks
 # exist for these. Drop on hardware that does not need them.
 tilelang==0.1.9
+# Required by the bundled DeepSeek runtimes; build against the selected CUDA/Torch stack.
+fast_hadamard_transform
 torch-c-dlpack-ext==0.1.5
 flash-linear-attention==0.5.0
 causal-conv1d==1.6.1
@@ -36,5 +39,4 @@ causal-conv1d==1.6.1
 # Analysis, plotting, and S3
 matplotlib==3.10.8
 pandas==3.0.2
-scikit-learn==1.8.0
 boto3==1.42.94

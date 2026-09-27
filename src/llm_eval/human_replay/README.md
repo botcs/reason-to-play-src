@@ -41,8 +41,8 @@ Reconstruction steps:
 - `sampling.py` -- Step selection strategies
 
 **Extraction (Phase 2):**
-- `extract_features.py` -- Main entry point, extracts hidden states
-- `chunked_feature_saver.py` -- Saves features to .pt files
+- `extract_features.py` -- Main sliding-window entry point; saves session `.pt` tensors and `_prompts.jsonl.gz`
+- `chunked_feature_saver.py` -- Legacy per-level layout, not the current extractor's output
 - `prompt_utils.py` -- Loads saved prompts from Phase 1
 
 All shared infrastructure (config, harness, formatters, wrappers) lives in
@@ -58,3 +58,22 @@ python -m src.llm_eval.human_replay.run_replay replay.subject=sub-01 harness.rat
 python -m src.llm_eval.human_replay.run_replay replay.subject=sub-01 \
     harness.rationale_mode=copied-reasoning llm.model=deepseek/deepseek-v3.2
 ```
+
+## Sliding-window extraction
+
+```bash
+python -m src.llm_eval.human_replay.extract_features \
+    'prompts=out/replays/*.human.replay.json.gz' \
+    model=Qwen/Qwen3.5-9B \
+    output_dir=out/features/action-only/minimal/wf-0.3-overlap-0.5
+```
+
+Use a separate output root per condition. Files below that root are named
+`model-{sanitized_model_id}/{all|compressed}/{subject}/{game}.pt`; the path
+does not encode rationale mode, suggestion level, or window settings. Each
+file stores these settings and the exact model ID in its `session` dictionary.
+Compressed actions produce irregular time intervals: align using target
+metadata timestamps, never by assuming uniform spacing between tensor rows.
+
+See [the release guide](../../../docs/reproducibility.md) for GPU prerequisites
+and the distinction between raw activations and scanner-aligned features.

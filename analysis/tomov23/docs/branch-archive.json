@@ -1,0 +1,56 @@
+{
+  "repository": "botcs/tomov23-analysis",
+  "captured_at": "2026-09-27",
+  "branches": [
+    {
+      "name": "main",
+      "sha": "62c202130d057e585b6bf7978f621fcd0255919c",
+      "archive_tag": null,
+      "ancestor_of_working": false
+    },
+    {
+      "name": "encoding_model",
+      "sha": "3e0f53a750c6544fa9a6261adeb04c6441f08803",
+      "archive_tag": "archive/2026-09-27/encoding_model",
+      "ancestor_of_working": false
+    },
+    {
+      "name": "encoding_model-reproduction_temporal",
+      "sha": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
+      "archive_tag": "archive/2026-09-27/encoding_model-reproduction_temporal",
+      "ancestor_of_working": true
+    },
+    {
+      "name": "llm",
+      "sha": "dafb69b2430d18d51c6ce3c386b5376e73a2e47a",
+      "archive_tag": "archive/2026-09-27/llm",
+      "ancestor_of_working": false
+    }
+  ],
+  "archive_status": "Original non-main tips preserved by verified remote archive tags and the complete-history bundle; selected pipeline integrated on main through the release PR.",
+  "backup_bundle": {
+    "filename": "tomov23-analysis-all-refs-2026-09-27.bundle",
+    "sha256": "fc119e8acff957e6ac321e9d5879d8432bcbe49c384d6b67ff59d1c747ed4e6b",
+    "verified": true
+  },
+  "preserve_tag": "encoding-suppmat-v1.0",
+  "recovery_source": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
+  "restored_files": {
+    "encoding_model_code/align_base.py": "encoding_model_slurm/stages/align.py",
+    "stages/prepare_behavioral_data.py": "stages/prepare_behavioral_data.py",
+    "stages/extract_model_features_to_npz.py": "stages/extract_model_features_to_npz.py",
+    "utils/extract_bold_to_npz.py": "utils/extract_bold_to_npz.py",
+    "MONGODB_README.md": "MONGODB_README.md"
+  },
+  "excluded_from_main": [
+    "Terraform state and backup files",
+    "personal AWS and cluster submit scripts",
+    "superseded encoders and legacy RSA pipeline",
+    "post-paper geometry experiments"
+  ],
+  "restoration_notes": {
+    "encoding_model_code/align_base.py": "Historical alignment retained with public portability and consistent-grid/TR/AR1 validation; see scientific-conventions.md.",
+    "MONGODB_README.md": "Replaced obsolete archival statistics/outcome labels with verified three-valued BSON analysis conventions."
+  },
+  "branch_retention_policy": "Retain archive tags permanently. Remove original active branch refs only after the integration PR merges and only if each head still matches its recorded archive tip."
+}

@@ -1,0 +1,17 @@
+[
+    "representation.downsample_net.resblocks1.0",
+    "representation.downsample_net.resblocks2.0",
+    "representation.downsample_net.resblocks3.0",
+    "representation.resblocks.0",
+    "value_policy.resblocks.0",
+    "value_policy.fc_values.0.0",
+    "value_policy.fc_values.0.1",
+    "value_policy.fc_values.0.3",
+    "value_policy.fc_policy.0",
+    "value_policy.fc_policy.1",
+    "value_policy.fc_policy.3",
+    "dynamics.resblocks.0",
+    "reward.fc.0",
+    "reward.fc.1",
+    "reward.fc.3"
+]

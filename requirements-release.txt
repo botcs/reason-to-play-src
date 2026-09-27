@@ -1,0 +1,6 @@
+# Read-only S3 inventory, manifest preparation and Parquet catalogue.
+# No GPU or model API packages are required.
+boto3>=1.42,<2
+pyarrow>=20,<24
+# Optional per-play catalogue uses the original BSON records.
+pymongo>=4.17,<5

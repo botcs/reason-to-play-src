@@ -128,10 +128,10 @@ class ExpDBConfig:
     feature_s3_prefix: str = "extract_model_features_to_py/multi-turn/"
     # When extract_features sweeps a glob of sessions, controls whether a
     # hard error in one session aborts the whole batch (False, matches
-    # gameplay/replay siblings) or marks that slot failed and continues
-    # (True, default -- preserves the amortised model-load when one input
-    # is bad).
-    continue_on_session_error: bool = True
+    # gameplay/replay siblings; default) or marks that slot failed and continues
+    # (True -- preserves the amortised model-load when one input is bad).
+    # A continued batch still exits nonzero if any selected session failed.
+    continue_on_session_error: bool = False
     # When True, reset existing slots to pending before claiming.  Allows
     # re-running an extraction that previously claimed the same slots.
     force_reclaim: bool = False
@@ -154,6 +154,8 @@ class ExtractionConfig:
     prompts: str = "???"
     # HuggingFace model ID (e.g. ``Qwen/Qwen3.5-9B``).
     model: str = "???"
+    # Prefer an immutable HF commit. None retains historical default behavior.
+    model_revision: str | None = None
     output_dir: str = "out/sliding_window_features"
     torch_dtype: str = "bfloat16"
     # Fraction of the model's native max context to use per window.
