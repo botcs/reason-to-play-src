@@ -1,0 +1,13 @@
+# Python 3.11+ (tomllib is used for recovered fMRIPrep configuration).
+# Historical package versions were not fully recorded; this is not a lockfile.
+numpy
+scipy
+pandas
+nibabel
+nilearn
+scikit-learn
+himalaya
+pymongo
+torch
+tqdm
+wandb

@@ -1,0 +1,36 @@
+{
+  "origin": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons",
+  "recorded_head": "422a4e753749569e83a6d5fdb8a42427730d6d34",
+  "git_blob_verification": "Verified loose Git objects against recorded HEAD: activation helper exact; trace extractor modified; trace_layers untracked. S3 working-tree SHA256 values are authoritative for these recovered files.",
+  "license": "No license file was present in the recovered source tree. Preserve source attribution; these files are not covered by the root MIT grant or automatically by the EfficientZero GPL notice.",
+  "files": [
+    {
+      "file": "get_efficientzero_activations.py",
+      "sha256": "2ce9c2dc02cfa2032cc3a752f45027bdde52a88130e3a4f77539b56a5e84c752",
+      "adaptation": "none; original bytes",
+      "recorded_head_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
+      "source_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
+      "matches_recorded_head": true,
+      "recovered_repository_path": "scripts/python/get_efficientzero_activations.py"
+    },
+    {
+      "file": "get_attention_matrix.py",
+      "sha256": "f32dddddf529814de177f01fca6388c9abfc90953440ce29c9af6de431826ac4",
+      "adaptation": "none; original bytes",
+      "recorded_head_git_blob": "5531d34ee136b494cac017311bfda095d3d1a665",
+      "source_git_blob": "3db5ecd6f6679bcbc671f5bcd7b4a32241d31962",
+      "matches_recorded_head": false,
+      "recovered_repository_path": "scripts/python/get_attention_matrix.py"
+    },
+    {
+      "file": "trace_layers.json",
+      "sha256": "aee9a49aea941476ab475a89c79fc04d53a8692349a56090e7a93b0e02d99bc9",
+      "adaptation": "none; original bytes",
+      "recorded_head_git_blob": null,
+      "source_git_blob": "8b409bbfe9fcc6229c7d9e58fc9e4befebf6d6cc",
+      "matches_recorded_head": false,
+      "recovered_repository_path": "scripts/bash/trace_layers.json"
+    }
+  ],
+  "recovery_location": "Author-provided research backup; transport/object-listing metadata is retained in the separate local release evidence."
+}

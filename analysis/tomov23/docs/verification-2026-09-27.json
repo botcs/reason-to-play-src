@@ -1,0 +1,57 @@
+{
+  "checked_at": "2026-09-27",
+  "python": "3.12.10",
+  "runtime_packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.8.0",
+    "torch": "2.11.0+cpu",
+    "pandas": "3.0.2",
+    "pytest": "9.1.1",
+    "nibabel": "5.4.2",
+    "nilearn": "0.14.1",
+    "himalaya": "0.4.11"
+  },
+  "checks": [
+    {
+      "command": "ruff check analysis/tomov23",
+      "result": "passed"
+    },
+    {
+      "command": "ruff format --check analysis/tomov23",
+      "result": "passed"
+    },
+    {
+      "command": "python -m pytest analysis/tomov23/tests -q",
+      "result": "20 passed",
+      "scope": "38 recovered TOMLs, original launch command/32 selected subject configs, synthetic NIfTI postprocessing, BSON/DDQN base alignment, PT LLM alignment, scan-truncated final plays, main/nuisance ridge fitting and ROI selection, EZ/HRR sidecars, baseline ROI aggregation, AR1 timing, lag isolation, failure reporting"
+    },
+    {
+      "entrypoints": [
+        "scripts/run_fmriprep.py",
+        "stages/prepare_behavioral_data.py",
+        "stages/extract_model_features_to_npz.py",
+        "encoding_model_code/preprocess.py",
+        "encoding_model_code/align_base.py",
+        "encoding_model_code/align.py",
+        "encoding_model_code/encoding_model.py",
+        "encoding_model_code/load_and_parse.py"
+      ],
+      "command": "python <entrypoint> --help",
+      "result": "all 8 passed"
+    },
+    {
+      "evidence": "efficientzero-contract-check.json",
+      "result": "Real 64-state and 12-state recovered traces accepted with expected phase-aware shapes"
+    },
+    {
+      "evidence": "ddqn-vendor-contract-check.json",
+      "result": "Real 64-state BSON play with synthetic untrained checkpoint extracts four finite layer arrays using verified public vendor without private GitHub access"
+    }
+  ],
+  "limits": [
+    "No fMRIPrep container was executed.",
+    "No human MRI processing or paper encoding scores were reproduced.",
+    "Runtime versions describe validation, not the unrecovered original environment lockfile."
+  ]
+}

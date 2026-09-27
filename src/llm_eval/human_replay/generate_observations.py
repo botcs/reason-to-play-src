@@ -3,9 +3,9 @@
 """
 Generate text observations using vLLM from pre-generated prompts.
 
-This is Step 1 of the split pipeline:
-1. generate_observations.py - vLLM text generation (this script)
-2. extract_features.py - HF feature extraction
+Legacy auxiliary utility for archived JSONL prompts. This output is not the
+.replay.json.gz input used by the current feature-extraction pipeline.
+See docs/legacy-observation-generation.md for its separate GPU environment.
 
 Usage:
     # Generate observations for a single prompts file
@@ -507,7 +507,7 @@ def generate_observations(
 
     # Load vLLM once
     print("\n=== Loading vLLM ===")
-    from src.llm_eval.shared.llm_wrapper import VLLMWrapper
+    from src.llm_eval.shared.vllm_wrapper import VLLMWrapper
 
     vllm_client = VLLMWrapper(
         model_path=model,
@@ -790,7 +790,7 @@ def main():
         type=str,
         nargs="+",
         required=True,
-        help="Path(s) to prompts JSONL file(s) (from run_replay.py). Supports multiple files and glob patterns.",
+        help="Path(s) to archived prompts JSONL file(s). Supports multiple files and glob patterns.",
     )
     parser.add_argument(
         "--model", type=str, required=True, help="HuggingFace model path"

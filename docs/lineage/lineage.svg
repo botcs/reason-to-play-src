@@ -1,0 +1,1007 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1728pt" height="1238.4pt" viewBox="0 0 1728 1238.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <title>lineage</title>
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title>lineage</dc:title>
+    <dc:date>2026-09-27T10:57:14.499104</dc:date>
+    <dc:description>Evidence-qualified source lineage, audited 2026-09-27</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.9, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 1238.4 
+L 1728 1238.4 
+L 1728 0 
+L 0 0 
+z
+" style="fill: #f5f7fa"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 58.32 349.92 
+L 406.08 349.92 
+Q 414 349.92 414 342 
+L 414 206.64 
+Q 414 198.72 406.08 198.72 
+L 58.32 198.72 
+Q 50.4 198.72 50.4 206.64 
+L 50.4 342 
+Q 50.4 349.92 58.32 349.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 472.32 349.92 
+L 820.08 349.92 
+Q 828 349.92 828 342 
+L 828 206.64 
+Q 828 198.72 820.08 198.72 
+L 472.32 198.72 
+Q 464.4 198.72 464.4 206.64 
+L 464.4 342 
+Q 464.4 349.92 472.32 349.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 886.32 349.92 
+L 1234.08 349.92 
+Q 1242 349.92 1242 342 
+L 1242 206.64 
+Q 1242 198.72 1234.08 198.72 
+L 886.32 198.72 
+Q 878.4 198.72 878.4 206.64 
+L 878.4 342 
+Q 878.4 349.92 886.32 349.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 1300.32 349.92 
+L 1648.08 349.92 
+Q 1656 349.92 1656 342 
+L 1656 206.64 
+Q 1656 198.72 1648.08 198.72 
+L 1300.32 198.72 
+Q 1292.4 198.72 1292.4 206.64 
+L 1292.4 342 
+Q 1292.4 349.92 1300.32 349.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 414.397925 271.8 
+Q 436.897943 271.8 457.609107 271.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 452.409107 269.2 
+L 457.609107 271.8 
+L 452.409107 274.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #147d79; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 828.397925 271.8 
+Q 850.897943 271.8 871.609107 271.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 866.409107 269.2 
+L 871.609107 271.8 
+L 866.409107 274.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #147d79; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 1242.397925 271.8 
+Q 1264.897943 271.8 1285.609107 271.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 1280.409107 269.2 
+L 1285.609107 271.8 
+L 1280.409107 274.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #147d79; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 58.32 558.72 
+L 406.08 558.72 
+Q 414 558.72 414 550.8 
+L 414 415.44 
+Q 414 407.52 406.08 407.52 
+L 58.32 407.52 
+Q 50.4 407.52 50.4 415.44 
+L 50.4 550.8 
+Q 50.4 558.72 58.32 558.72 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 472.32 558.72 
+L 820.08 558.72 
+Q 828 558.72 828 550.8 
+L 828 415.44 
+Q 828 407.52 820.08 407.52 
+L 472.32 407.52 
+Q 464.4 407.52 464.4 415.44 
+L 464.4 550.8 
+Q 464.4 558.72 472.32 558.72 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 886.32 558.72 
+L 1234.08 558.72 
+Q 1242 558.72 1242 550.8 
+L 1242 415.44 
+Q 1242 407.52 1234.08 407.52 
+L 886.32 407.52 
+Q 878.4 407.52 878.4 415.44 
+L 878.4 550.8 
+Q 878.4 558.72 886.32 558.72 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 1300.32 558.72 
+L 1648.08 558.72 
+Q 1656 558.72 1656 550.8 
+L 1656 415.44 
+Q 1656 407.52 1648.08 407.52 
+L 1300.32 407.52 
+Q 1292.4 407.52 1292.4 415.44 
+L 1292.4 550.8 
+Q 1292.4 558.72 1300.32 558.72 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 414.397925 480.6 
+Q 436.897943 480.6 457.609107 480.6 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 452.409107 478 
+L 457.609107 480.6 
+L 452.409107 483.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #2363a4; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 828.397925 480.6 
+Q 850.897943 480.6 871.609107 480.6 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 866.409107 478 
+L 871.609107 480.6 
+L 866.409107 483.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #2363a4; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 1058.4 402.799438 
+Q 1058.4 376.701147 1058.4 352.391711 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 1055.8 357.591711 
+L 1058.4 352.391711 
+L 1061 357.591711 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #2363a4; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 1472.4 349.600562 
+Q 1472.4 375.698853 1472.4 400.008289 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 1475 394.808289 
+L 1472.4 400.008289 
+L 1469.8 394.808289 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #78539b; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 58.32 760.32 
+L 406.08 760.32 
+Q 414 760.32 414 752.4 
+L 414 624.24 
+Q 414 616.32 406.08 616.32 
+L 58.32 616.32 
+Q 50.4 616.32 50.4 624.24 
+L 50.4 752.4 
+Q 50.4 760.32 58.32 760.32 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 472.32 760.32 
+L 820.08 760.32 
+Q 828 760.32 828 752.4 
+L 828 624.24 
+Q 828 616.32 820.08 616.32 
+L 472.32 616.32 
+Q 464.4 616.32 464.4 624.24 
+L 464.4 752.4 
+Q 464.4 760.32 472.32 760.32 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 886.32 760.32 
+L 1234.08 760.32 
+Q 1242 760.32 1242 752.4 
+L 1242 624.24 
+Q 1242 616.32 1234.08 616.32 
+L 886.32 616.32 
+Q 878.4 616.32 878.4 624.24 
+L 878.4 752.4 
+Q 878.4 760.32 886.32 760.32 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 1300.32 760.32 
+L 1648.08 760.32 
+Q 1656 760.32 1656 752.4 
+L 1656 624.24 
+Q 1656 616.32 1648.08 616.32 
+L 1300.32 616.32 
+Q 1292.4 616.32 1292.4 624.24 
+L 1292.4 752.4 
+Q 1292.4 760.32 1300.32 760.32 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 410.4 685.8 
+L 434.88 685.8 
+L 434.88 586.8 
+L 1265.76 586.8 
+L 1265.76 480.6 
+L 1290.611146 480.6 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 8,4.8; stroke-dashoffset: 0; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 1285.411146 478 
+L 1290.611146 480.6 
+L 1285.411146 483.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #78539b; stroke-dasharray: 8,4.8; stroke-dashoffset: 0; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_22">
+    <path d="M 1058.4 554.4 
+L 1058.4 569.52 
+L 851.04 569.52 
+L 851.04 685.8 
+L 826.188854 685.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 831.388854 688.4 
+L 826.188854 685.8 
+L 831.388854 683.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #2363a4; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #2363a4; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_23">
+    <path d="M 58.32 979.92 
+L 406.08 979.92 
+Q 414 979.92 414 972 
+L 414 836.64 
+Q 414 828.72 406.08 828.72 
+L 58.32 828.72 
+Q 50.4 828.72 50.4 836.64 
+L 50.4 972 
+Q 50.4 979.92 58.32 979.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_24">
+    <path d="M 472.32 979.92 
+L 820.08 979.92 
+Q 828 979.92 828 972 
+L 828 836.64 
+Q 828 828.72 820.08 828.72 
+L 472.32 828.72 
+Q 464.4 828.72 464.4 836.64 
+L 464.4 972 
+Q 464.4 979.92 472.32 979.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_25">
+    <path d="M 886.32 979.92 
+L 1234.08 979.92 
+Q 1242 979.92 1242 972 
+L 1242 836.64 
+Q 1242 828.72 1234.08 828.72 
+L 886.32 828.72 
+Q 878.4 828.72 878.4 836.64 
+L 878.4 972 
+Q 878.4 979.92 886.32 979.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 1300.32 979.92 
+L 1648.08 979.92 
+Q 1656 979.92 1656 972 
+L 1656 836.64 
+Q 1656 828.72 1648.08 828.72 
+L 1300.32 828.72 
+Q 1292.4 828.72 1292.4 836.64 
+L 1292.4 972 
+Q 1292.4 979.92 1300.32 979.92 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_27">
+    <path d="M 414.397925 901.8 
+Q 436.897943 901.8 457.609107 901.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 452.409107 899.2 
+L 457.609107 901.8 
+L 452.409107 904.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #a46a18; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_28">
+    <path d="M 828.397925 901.8 
+Q 850.897943 901.8 871.609107 901.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 866.409107 899.2 
+L 871.609107 901.8 
+L 866.409107 904.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #a46a18; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_29">
+    <path d="M 1242.397925 901.8 
+Q 1264.897943 901.8 1285.609107 901.8 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 1280.409107 899.2 
+L 1285.609107 901.8 
+L 1280.409107 904.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #a46a18; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #a46a18; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 58.32 1102.32 
+L 820.08 1102.32 
+Q 828 1102.32 828 1094.4 
+L 828 1015.2 
+Q 828 1007.28 820.08 1007.28 
+L 58.32 1007.28 
+Q 50.4 1007.28 50.4 1015.2 
+L 50.4 1094.4 
+Q 50.4 1102.32 58.32 1102.32 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #e5eaf1"/>
+   </g>
+   <g id="patch_31">
+    <path d="M 54.40188 1154.16 
+Q 73.299768 1154.16 90.408802 1154.16 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #53657a; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 85.208802 1151.56 
+L 90.408802 1154.16 
+L 85.208802 1156.76 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #53657a; stroke: #53657a; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_32">
+    <path d="M 457.60188 1154.16 
+Q 476.499768 1154.16 493.608802 1154.16 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 488.408802 1151.56 
+L 493.608802 1154.16 
+L 488.408802 1156.76 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #147d79; stroke-dasharray: 1.92,4.32; stroke-dashoffset: 0; stroke: #147d79; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_33">
+    <path d="M 947.20188 1154.16 
+Q 966.099768 1154.16 983.208802 1154.16 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke-dasharray: 8,4.8; stroke-dashoffset: 0; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 978.008802 1151.56 
+L 983.208802 1154.16 
+L 978.008802 1156.76 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #78539b; stroke-dasharray: 8,4.8; stroke-dashoffset: 0; stroke: #78539b; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 27px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="46.8" y="60.115781" transform="rotate(-0 46.8 60.115781)">Reason to Play — code, data and method lineage</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="48.24" y="90.858047" transform="rotate(-0 48.24 90.858047)">A source audit of the paths into the project, with the neural-analysis branch history separated from file reuse.</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 25px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #2363a4" x="1681.2" y="61.476094" transform="rotate(-0 1681.2 61.476094)">01</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 10.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #147d79" x="50.4" y="174.153937" transform="rotate(-0 50.4 174.153937)">HUMAN EXPERIMENT, RAW DATA AND PREPROCESSING</text>
+   </g>
+   <g id="patch_34">
+    <a xlink:href="https://github.com/tsividis/vgdl/tree/refactor_fMRI_cannon">
+     <path d="M 56.52 347.4 
+L 404.28 347.4 
+Q 412.2 347.4 412.2 339.48 
+L 412.2 204.12 
+Q 412.2 196.2 404.28 196.2 
+L 56.52 196.2 
+Q 48.6 196.2 48.6 204.12 
+L 48.6 339.48 
+Q 48.6 347.4 56.52 347.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_35">
+    <a xlink:href="https://openneuro.org/datasets/ds004323/versions/1.0.0">
+     <path d="M 470.52 347.4 
+L 818.28 347.4 
+Q 826.2 347.4 826.2 339.48 
+L 826.2 204.12 
+Q 826.2 196.2 818.28 196.2 
+L 470.52 196.2 
+Q 462.6 196.2 462.6 204.12 
+L 462.6 339.48 
+Q 462.6 347.4 470.52 347.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_36">
+    <a xlink:href="https://github.com/botcs/RC_RL/commit/969141d">
+     <path d="M 884.52 347.4 
+L 1232.28 347.4 
+Q 1240.2 347.4 1240.2 339.48 
+L 1240.2 204.12 
+Q 1240.2 196.2 1232.28 196.2 
+L 884.52 196.2 
+Q 876.6 196.2 876.6 204.12 
+L 876.6 339.48 
+Q 876.6 347.4 884.52 347.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_37">
+    <a xlink:href="https://github.com/botcs/tomov23-analysis/commit/5c53c931fce464c5f708e3f416db4330be434fa8">
+     <path d="M 1298.52 347.4 
+L 1646.28 347.4 
+Q 1654.2 347.4 1654.2 339.48 
+L 1654.2 204.12 
+Q 1654.2 196.2 1646.28 196.2 
+L 1298.52 196.2 
+Q 1290.6 196.2 1290.6 204.12 
+L 1290.6 339.48 
+Q 1290.6 347.4 1298.52 347.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 10.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #2363a4" x="50.4" y="382.953938" transform="rotate(-0 50.4 382.953938)">REINFORCEMENT-LEARNING CODE ANCESTRY</text>
+   </g>
+   <g id="patch_38">
+    <a xlink:href="https://github.com/ACampero/RC_RL">
+     <path d="M 56.52 556.2 
+L 404.28 556.2 
+Q 412.2 556.2 412.2 548.28 
+L 412.2 412.92 
+Q 412.2 405 404.28 405 
+L 56.52 405 
+Q 48.6 405 48.6 412.92 
+L 48.6 548.28 
+Q 48.6 556.2 56.52 556.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_39">
+    <a xlink:href="https://github.com/tomov/RC_RL/commit/8df431a">
+     <path d="M 470.52 556.2 
+L 818.28 556.2 
+Q 826.2 556.2 826.2 548.28 
+L 826.2 412.92 
+Q 826.2 405 818.28 405 
+L 470.52 405 
+Q 462.6 405 462.6 412.92 
+L 462.6 548.28 
+Q 462.6 556.2 470.52 556.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_40">
+    <a xlink:href="https://github.com/botcs/RC_RL/commit/99566fd07cb5d31da16802b2b2422109af289441">
+     <path d="M 884.52 556.2 
+L 1232.28 556.2 
+Q 1240.2 556.2 1240.2 548.28 
+L 1240.2 412.92 
+Q 1240.2 405 1232.28 405 
+L 884.52 405 
+Q 876.6 405 876.6 412.92 
+L 876.6 548.28 
+Q 876.6 556.2 884.52 556.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_41">
+    <a xlink:href="https://github.com/botcs/tomov23-analysis/commit/3199db9946ada6328fab419d2c5f9fb1bb9c5ca3">
+     <path d="M 1298.52 556.2 
+L 1646.28 556.2 
+Q 1654.2 556.2 1654.2 548.28 
+L 1654.2 412.92 
+Q 1654.2 405 1646.28 405 
+L 1298.52 405 
+Q 1290.6 405 1290.6 412.92 
+L 1290.6 548.28 
+Q 1290.6 556.2 1298.52 556.2 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 10.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #78539b" x="50.4" y="591.753938" transform="rotate(-0 50.4 591.753938)">METHODS AND BASELINE TOOLING</text>
+   </g>
+   <g id="patch_42">
+    <a xlink:href="https://www.nature.com/articles/s41467-024-49173-5">
+     <path d="M 56.52 757.8 
+L 404.28 757.8 
+Q 412.2 757.8 412.2 749.88 
+L 412.2 621.72 
+Q 412.2 613.8 404.28 613.8 
+L 56.52 613.8 
+Q 48.6 613.8 48.6 621.72 
+L 48.6 749.88 
+Q 48.6 757.8 56.52 757.8 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_43">
+    <a xlink:href="https://github.com/A-Andrews/EfficientZeroV2/tree/29157d4892afd9467b1bd0994de1355086145490">
+     <path d="M 470.52 757.8 
+L 818.28 757.8 
+Q 826.2 757.8 826.2 749.88 
+L 826.2 621.72 
+Q 826.2 613.8 818.28 613.8 
+L 470.52 613.8 
+Q 462.6 613.8 462.6 621.72 
+L 462.6 749.88 
+Q 462.6 757.8 470.52 757.8 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_44">
+    <a xlink:href="https://github.com/tsumers/bert-brains">
+     <path d="M 884.52 757.8 
+L 1232.28 757.8 
+Q 1240.2 757.8 1240.2 749.88 
+L 1240.2 621.72 
+Q 1240.2 613.8 1232.28 613.8 
+L 884.52 613.8 
+Q 876.6 613.8 876.6 621.72 
+L 876.6 749.88 
+Q 876.6 757.8 884.52 757.8 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_45">
+    <a xlink:href="https://github.com/botcs/tomov23-analysis/commit/62c202130d057e585b6bf7978f621fcd0255919c">
+     <path d="M 1298.52 757.8 
+L 1646.28 757.8 
+Q 1654.2 757.8 1654.2 749.88 
+L 1654.2 621.72 
+Q 1654.2 613.8 1646.28 613.8 
+L 1298.52 613.8 
+Q 1290.6 613.8 1290.6 621.72 
+L 1290.6 749.88 
+Q 1290.6 757.8 1298.52 757.8 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 10.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="50.4" y="801.993937" transform="rotate(-0 50.4 801.993937)">LANGUAGE-MODEL HARNESS AND PUBLIC ARTIFACTS</text>
+   </g>
+   <g id="patch_46">
+    <path d="M 56.52 977.4 
+L 404.28 977.4 
+Q 412.2 977.4 412.2 969.48 
+L 412.2 834.12 
+Q 412.2 826.2 404.28 826.2 
+L 56.52 826.2 
+Q 48.6 826.2 48.6 834.12 
+L 48.6 969.48 
+Q 48.6 977.4 56.52 977.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_47">
+    <a xlink:href="https://github.com/botcs/llm-vgdl/commit/68fc1024">
+     <path d="M 470.52 977.4 
+L 818.28 977.4 
+Q 826.2 977.4 826.2 969.48 
+L 826.2 834.12 
+Q 826.2 826.2 818.28 826.2 
+L 470.52 826.2 
+Q 462.6 826.2 462.6 834.12 
+L 462.6 969.48 
+Q 462.6 977.4 470.52 977.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_48">
+    <a xlink:href="https://github.com/botcs/reason-to-play-src/commit/9e5b2c8">
+     <path d="M 884.52 977.4 
+L 1232.28 977.4 
+Q 1240.2 977.4 1240.2 969.48 
+L 1240.2 834.12 
+Q 1240.2 826.2 1232.28 826.2 
+L 884.52 826.2 
+Q 876.6 826.2 876.6 834.12 
+L 876.6 969.48 
+Q 876.6 977.4 884.52 977.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_49">
+    <a xlink:href="https://github.com/botcs/reason-to-play/commit/e20c204">
+     <path d="M 1298.52 977.4 
+L 1646.28 977.4 
+Q 1654.2 977.4 1654.2 969.48 
+L 1654.2 834.12 
+Q 1654.2 826.2 1646.28 826.2 
+L 1298.52 826.2 
+Q 1290.6 826.2 1290.6 834.12 
+L 1290.6 969.48 
+Q 1290.6 977.4 1298.52 977.4 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="patch_50">
+    <a xlink:href="https://github.com/ccolas/language_and_experience/commit/edb30bc9815efad268605d337d63601d4f6f39a8">
+     <path d="M 56.52 1099.8 
+L 818.28 1099.8 
+Q 826.2 1099.8 826.2 1091.88 
+L 826.2 1012.68 
+Q 826.2 1004.76 818.28 1004.76 
+L 56.52 1004.76 
+Q 48.6 1004.76 48.6 1012.68 
+L 48.6 1091.88 
+Q 48.6 1099.8 56.52 1099.8 
+z
+" clip-path="url(#pdc6e562724)" style="fill: #ffffff; stroke: #dce4ed; stroke-width: 0.8; stroke-linejoin: miter"/>
+    </a>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="882" y="1035.498047" transform="rotate(-0 882 1035.498047)">Reading this figure</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 11.7px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(882 1062.250172)">These streams have separate histories. A repository snapshot date does not</text>
+    <text style="font-size: 11.7px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(882 1078.018664)">establish when work began, when a model was run, or which results used it.</text>
+    <text style="font-size: 11.7px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(882 1093.787156)">The analysis imports are expanded in the companion branch diagram.</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="111.6" y="1157.02975" transform="rotate(-0 111.6 1157.02975)">Verified Git ancestry</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="514.8" y="1157.02975" transform="rotate(-0 514.8 1157.02975)">Verified data / content / dependency</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="1004.4" y="1157.02975" transform="rotate(-0 1004.4 1157.02975)">Reported methodological adaptation</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 10.1px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="50.4" y="1186.56" transform="rotate(-0 50.4 1186.56)">Audit: 27 Sep 2026  ·  Unpublished history review  ·  Dates are milestones, not a time scale  ·  Solid lines may abbreviate intermediate commits</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 9.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="50.4" y="1207.44" transform="rotate(-0 50.4 1207.44)">Primary links and evidence notes: lineage-sources.md  ·  SVG/PDF cards link to the cited repositories, datasets or commits</text>
+   </g>
+   <g id="line2d_1">
+    <path d="M 51.84 334.08 
+L 51.84 209.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #147d79; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 465.84 334.08 
+L 465.84 209.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #147d79; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 879.84 334.08 
+L 879.84 209.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #147d79; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 1293.84 334.08 
+L 1293.84 209.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #147d79; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 51.84 542.88 
+L 51.84 418.32 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 465.84 542.88 
+L 465.84 418.32 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 879.84 542.88 
+L 879.84 418.32 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_8">
+    <path d="M 1293.84 542.88 
+L 1293.84 418.32 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #78539b; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_9">
+    <path d="M 51.84 744.48 
+L 51.84 627.12 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #78539b; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 465.84 744.48 
+L 465.84 627.12 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #2363a4; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_11">
+    <path d="M 879.84 744.48 
+L 879.84 627.12 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #78539b; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_12">
+    <path d="M 1293.84 744.48 
+L 1293.84 627.12 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #78539b; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_13">
+    <path d="M 51.84 964.08 
+L 51.84 839.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_14">
+    <path d="M 465.84 964.08 
+L 465.84 839.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_15">
+    <path d="M 879.84 964.08 
+L 879.84 839.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_16">
+    <path d="M 1293.84 964.08 
+L 1293.84 839.52 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_17">
+    <path d="M 51.84 1086.48 
+L 51.84 1018.08 
+" clip-path="url(#pdc6e562724)" style="fill: none; stroke: #a46a18; stroke-width: 3; stroke-linecap: round"/>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="67.68" y="225.197813" transform="rotate(-0 67.68 225.197813)">Human experiment code</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 254.790094)">tsividis/vgdl</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 271.047051)">refactor_fMRI_cannon</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 287.643321)">Tomov study infrastructure</text>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #147d79" x="67.68" y="326.877125" transform="rotate(-0 67.68 326.877125)">PRE-2025</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="481.68" y="225.197813" transform="rotate(-0 481.68 225.197813)">OpenNeuro ds004323</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 254.790094)">Original human dataset</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 271.047051)">Version 1.0.0</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 287.304009)">Raw BIDS fMRI</text>
+   </g>
+   <g id="text_20">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #147d79" x="481.68" y="326.877125" transform="rotate(-0 481.68 326.877125)">PRE-2025  ·  OPENNEURO</text>
+   </g>
+   <g id="text_21">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="895.68" y="225.197813" transform="rotate(-0 895.68 225.197813)">Raw fMRIPrep launcher</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 254.790094)">botcs/RC_RL</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 271.386364)">Actual raw-data launch script</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 287.643321)">DDQN / EfficientZero work alongside</text>
+   </g>
+   <g id="text_23">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #147d79" x="895.68" y="326.877125" transform="rotate(-0 895.68 326.877125)">16 OCT 2025  ·  969141d</text>
+   </g>
+   <g id="text_24">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="1309.68" y="225.197813" transform="rotate(-0 1309.68 225.197813)">AWS staged RSA</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 254.790094)">botcs/tomov23-analysis</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 271.047051)">BOLD / model extraction, HRF, RDMs</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 287.304009)">AWS orchestration developed next</text>
+   </g>
+   <g id="text_26">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #147d79" x="1309.68" y="326.877125" transform="rotate(-0 1309.68 326.877125)">28 OCT 2025  ·  5c53c93</text>
+   </g>
+   <g id="text_27">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="67.68" y="433.750625" transform="rotate(-0 67.68 433.750625)">ACampero/RC_RL</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 463.590094)">Earlier reinforcement-learning</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 479.847051)">implementation and game tooling</text>
+   </g>
+   <g id="text_29">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #2363a4" x="67.68" y="535.677125" transform="rotate(-0 67.68 535.677125)">UPSTREAM LINEAGE</text>
+   </g>
+   <g id="text_30">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="481.68" y="433.750625" transform="rotate(-0 481.68 433.750625)">tomov/RC_RL</text>
+   </g>
+   <g id="text_31">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 463.590094)">Inherited study / model code</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 479.847051)">Verified upstream base for botcs fork</text>
+   </g>
+   <g id="text_32">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #2363a4" x="481.68" y="535.677125" transform="rotate(-0 481.68 535.677125)">UPSTREAM BASE  ·  8df431a</text>
+   </g>
+   <g id="text_33">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="895.68" y="433.997813" transform="rotate(-0 895.68 433.997813)">botcs/RC_RL</text>
+   </g>
+   <g id="text_34">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 463.590094)">First botcs work in the fork</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 479.847051)">MRI, DDQN and EfficientZero interfaces</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 496.104009)">Feeds the staged analysis project</text>
+   </g>
+   <g id="text_35">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #2363a4" x="895.68" y="535.677125" transform="rotate(-0 895.68 535.677125)">15 SEP 2025  ·  99566fd</text>
+   </g>
+   <g id="text_36">
+    <text style="font-weight: 700; font-size: 13.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="1309.68" y="433.541906" transform="rotate(-0 1309.68 433.541906)">Sreejan's encoding pipeline</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 463.590094)">Parcelwise: 17 Dec 2025 · 3199db9</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 479.847051)">Voxelwise: 28 Jan 2026 · 3e0f53a</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 496.104009)">Post-fMRIPrep processing and fits</text>
+   </g>
+   <g id="text_38">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #78539b" x="1309.68" y="535.677125" transform="rotate(-0 1309.68 535.677125)">TOMOV23-ANALYSIS  ·  SEE FIGURE 2</text>
+   </g>
+   <g id="text_39">
+    <text style="font-weight: 700; font-size: 13.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="67.68" y="642.341906" transform="rotate(-0 67.68 642.341906)">Nature Communications (2024)</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 672.390094)">tsumers/bert-brains · Kumar, Sumers et al.</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 688.647051)">Banded ridge and delayed features</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 704.904009)">Narratives ds002345 (different data)</text>
+   </g>
+   <g id="text_41">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #78539b" x="67.68" y="737.277125" transform="rotate(-0 67.68 737.277125)">CODE: APR 2022  /  PAPER: 29 JUN 2024</text>
+   </g>
+   <g id="text_42">
+    <text style="font-weight: 700; font-size: 13.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="481.68" y="642.493875" transform="rotate(-0 481.68 642.493875)">A-Andrews/EfficientZeroV2</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 672.390094)">Austin's fork of EfficientZeroV2</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 688.647051)">VGDL / curriculum work: Oct–Nov 2025</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 704.904009)">Imports RC_RL.VGDLEnv</text>
+   </g>
+   <g id="text_44">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #2363a4" x="481.68" y="737.277125" transform="rotate(-0 481.68 737.277125)">RETAINED BRANCH: 17 JAN 2026  ·  29157d4</text>
+   </g>
+   <g id="text_45">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="895.68" y="642.797812" transform="rotate(-0 895.68 642.797812)">Evidence boundary</text>
+   </g>
+   <g id="text_46">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 672.390094)">Shared author and methods verified.</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 688.647051)">Direct source-file copying from</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 704.904009)">bert-brains has not been established.</text>
+   </g>
+   <g id="text_47">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #78539b" x="895.68" y="737.277125" transform="rotate(-0 895.68 737.277125)">ADAPTATION REPORTED BY PROJECT OWNER</text>
+   </g>
+   <g id="text_48">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="1309.68" y="642.797812" transform="rotate(-0 1309.68 642.797812)">Later analysis snapshots</text>
+   </g>
+   <g id="text_49">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 672.390094)">23 Mar 2026 · clean import 26fa74c</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 688.647051)">31 Jul 2026 · submission 62c2021</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 704.904009)">Sibling Git children; some files reused</text>
+   </g>
+   <g id="text_50">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #78539b" x="1309.68" y="737.277125" transform="rotate(-0 1309.68 737.277125)">EXACT TOPOLOGY IN FIGURE 2</text>
+   </g>
+   <g id="text_51">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="67.68" y="855.197813" transform="rotate(-0 67.68 855.197813)">Colas: private infer-vgdl</text>
+   </g>
+   <g id="text_52">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 884.790094)">Original source of the January fork</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 901.047051)">Upstream base: 64dc4f6d</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(67.68 917.304009)">Base commit dated 21 Aug 2025</text>
+   </g>
+   <g id="text_53">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="67.68" y="956.877125" transform="rotate(-0 67.68 956.877125)">PRIVATE UPSTREAM</text>
+   </g>
+   <g id="text_54">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="481.68" y="855.197813" transform="rotate(-0 481.68 855.197813)">botcs/llm-vgdl</text>
+   </g>
+   <g id="text_55">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 884.790094)">Gameplay, replay and activations</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 901.047051)">First botcs commit: 49a2bca2</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(481.68 917.304009)">First harness: 68fc1024</text>
+   </g>
+   <g id="text_56">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="481.68" y="956.877125" transform="rotate(-0 481.68 956.877125)">11 JAN 2026</text>
+   </g>
+   <g id="text_57">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="895.68" y="855.197813" transform="rotate(-0 895.68 855.197813)">reason-to-play-src</text>
+   </g>
+   <g id="text_58">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 884.790094)">Public source repository</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 901.047051)">Derived from the LLM harness</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(895.68 917.304009)">May source snapshot: 309e9a7</text>
+   </g>
+   <g id="text_59">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="895.68" y="956.877125" transform="rotate(-0 895.68 956.877125)">9 MAY 2026  ·  9e5b2c8</text>
+   </g>
+   <g id="text_60">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="1309.68" y="855.197813" transform="rotate(-0 1309.68 855.197813)">reason-to-play website</text>
+   </g>
+   <g id="text_61">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 884.790094)">Public project and replay website</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 901.047051)">Created 7 May 2026 · c4583a2</text>
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; fill: #53657a" transform="translate(1309.68 917.304009)">Links separate source repo on 9 May</text>
+   </g>
+   <g id="text_62">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="1309.68" y="956.877125" transform="rotate(-0 1309.68 956.877125)">9 MAY 2026  ·  SOURCE LINK e20c204</text>
+   </g>
+   <g id="text_63">
+    <text style="font-weight: 700; font-size: 13.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #182b43" x="67.68" y="1033.301906" transform="rotate(-0 67.68 1033.301906)">Later public Colas source: language_and_experience</text>
+   </g>
+   <g id="text_64">
+    <text style="font-size: 12.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #53657a" x="67.68" y="1063.350094" transform="rotate(-0 67.68 1063.350094)">First source snapshot: 12 Feb 2026 · edb30bc</text>
+   </g>
+   <g id="text_65">
+    <text style="font-weight: 700; font-size: 10.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a46a18" x="67.68" y="1079.277125" transform="rotate(-0 67.68 1079.277125)">LATER PARALLEL PUBLIC SNAPSHOT — NOT THE JANUARY FORK POINT</text>
+   </g>
+   <g id="text_66">
+    <g id="patch_51">
+     <path d="M 1402.331766 382.386328 
+L 1542.468234 382.386328 
+L 1542.468234 369.293672 
+L 1402.331766 369.293672 
+z
+" style="fill: #f5f7fa"/>
+    </g>
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #78539b" x="1472.4" y="378.406219" transform="rotate(-0 1472.4 378.406219)">Git branch; details in figure 2</text>
+   </g>
+   <g id="text_67">
+    <g id="patch_52">
+     <path d="M 958.83975 592.3815 
+L 1136.36025 592.3815 
+L 1136.36025 579.0585 
+L 958.83975 579.0585 
+z
+" style="fill: #f5f7fa"/>
+    </g>
+    <text style="font-size: 9.6px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #78539b" x="1047.6" y="588.369" transform="rotate(-0 1047.6 588.369)">reported methodological adaptation</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pdc6e562724">
+   <rect x="0" y="0" width="1728" height="1238.4"/>
+  </clipPath>
+ </defs>
+</svg>

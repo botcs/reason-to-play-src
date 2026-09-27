@@ -9,6 +9,10 @@
 gym==0.26.2
 pygame==2.6.1
 numpy==2.4.4
+# Imported by the existing VGDL utilities, including API-only gameplay.
+scikit-learn==1.8.0
+# VGDL/Pygame import pkg_resources at startup.
+setuptools==81.0.0
 
 hydra-core==1.3.2
 

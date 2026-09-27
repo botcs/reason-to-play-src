@@ -18,8 +18,8 @@ Usage::
         -m src.llm_eval.human_replay.extract_features_v32 \\
         prompts="path/to/*.replay.json.gz" \\
         model=deepseek-ai/DeepSeek-V3.2 \\
-        ckpt_path=/path/to/converted/shards \\
-        ds_config=deepseek_inference/vgdl_DS32.json \\
+        +ckpt_path=/path/to/converted/shards \\
+        +ds_config=deepseek_inference/vgdl_DS32.json \\
         output_dir=out/features_v32
 
 Prerequisites:
@@ -65,6 +65,7 @@ from src.llm_eval.human_replay.extract_features import (  # noqa: E402
     LOCAL_RANK,
     WORLD_SIZE,
     _WindowHookExtractor,
+    _finish_extraction_batch,
     _print,
     extract_for_session,
 )
@@ -353,6 +354,8 @@ def main(cfg: DictConfig) -> None:
     _print(f"Runtime ready in {load_wall_s:.1f}s")
 
     summaries: list[dict] = []
+    failed_sessions: list[str] = []
+    skipped_sessions = 0
     for i, prompts_file in enumerate(prompts_files):
         _print(f"\n### [{i + 1}/{len(prompts_files)}] {prompts_file.name} ###")
         try:
@@ -367,8 +370,9 @@ def main(cfg: DictConfig) -> None:
                 exp_db_client=exp_db_client,
                 exp_db_worker=exp_db_worker,
             )
-        except BaseException as e:
+        except Exception as e:
             if typed_cfg.exp_db.continue_on_session_error:
+                failed_sessions.append(str(prompts_file))
                 _print(
                     f"!!! Session {prompts_file.name} failed "
                     f"({type(e).__name__}: {e!r}) -- continuing"
@@ -376,6 +380,8 @@ def main(cfg: DictConfig) -> None:
                 continue
             raise
         if result is None:
+            if IS_MAIN:
+                skipped_sessions += 1
             continue
         result = {"prompts_file": str(prompts_file), **result}
         summaries.append(result)
@@ -444,6 +450,8 @@ def main(cfg: DictConfig) -> None:
 
     if wandb_run is not None:
         wandb_run.finish()
+
+    _finish_extraction_batch(failed_sessions, len(summaries), skipped_sessions)
 
 
 if __name__ == "__main__":

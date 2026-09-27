@@ -2,13 +2,30 @@
 
 Source code for **Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs and Human Game Learners.**
 
-_Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Summerfield, Joshua B. Tenenbaum Rui Ponte Costa, Marcelo G. Mattar, Momchil Tomov_
+_Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Summerfield, Joshua B. Tenenbaum, Rui Ponte Costa, Marcelo G. Mattar, Momchil Tomov_
 
-Live site, interactive replay catalogue, representation viewer, and paper:
-**[botcs.github.io/reason-to-play](https://botcs.github.io/reason-to-play/)**
+**[Paper](https://arxiv.org/abs/2605.08019)** ·
+**[Interactive results](https://botcs.github.io/reason-to-play/)** ·
+**[Reproduction guide](docs/reproducibility.md)** ·
+**[Dataset release workflow](docs/release/manifest-guide.md)** ·
+**[Code lineage](docs/lineage/README.md)** ·
+**[Hugging Face release plan](docs/release/huggingface-plan.md)**
 
-> **Acknowledgement:** This project is a fork of, and
-> directly inspired by, Cedric Colas's
+The paper has been accepted. This source release brings together preprocessing,
+behavioural generation, activation extraction, and analysis. The
+[reproduction guide](docs/reproducibility.md) identifies tested entry points
+and remaining dependencies; the dataset publication plan tracks the Hugging
+Face release requested in [issue #1](https://github.com/botcs/reason-to-play-src/issues/1).
+
+This Git release contains code, documentation and source provenance. Dataset
+manifests, participant catalogues, historical result tables and scientific
+payloads are prepared separately and are not included here. The proposed
+Hugging Face dataset has not been published; follow the release plan for its
+staging and verification steps.
+
+> **Acknowledgement:** Development began on 11 January 2026 from an early,
+> private version of Cedric Colas's `infer-vgdl` code. The related source was
+> subsequently published as
 > [Language and Experience: A Computational Model of Social Learning in
 > Complex Tasks](https://github.com/ccolas/language_and_experience).
 > The VGDL harness, game suite, and some of the LLM scaffolding originate
@@ -49,12 +66,12 @@ python -m src.llm_eval.generative_gameplay.run \
     harness.rationale_mode=copied-reasoning
 ```
 
-Human replay imputation (run an LRM through a participant's recorded
-keypresses to reconstruct the per-step "think aloud"):
+Human action-only replay (recorded keypresses, no model API call):
 
 ```bash
 python -m src.llm_eval.human_replay.run_replay \
     replay.subject=sub-01 \
+    replay.data_dir=/absolute/path/to/behavior/human \
     harness.rationale_mode=action-only
 ```
 
@@ -77,6 +94,14 @@ games/                       VGDL game description + level layout files
 sweeps/                      W&B sweep configs for the experiment grid
 conf/
   config.yaml                Hydra default configuration
+scripts/analysis/            offline episode export and behavioural/neural figures
+scripts/release/             S3 inventory, selection, source pinning and staging
+baselines/                   pinned RL sources and recovered feature extraction
+analysis/tomov23/            curated fMRI preprocessing, alignment, and encoding code
+deepseek_inference/          DeepSeek V3.2 checkpoint conversion + inference runtime
+deepseek_v4_inference/       DeepSeek V4 conversion + inference runtime
+docs/                        reproduction guide, provenance, and release plan
+tests/                       replay, extraction, outcome, and advancement contracts
 figures/                     headline behavioural + neural figures
 ```
 
@@ -84,7 +109,7 @@ figures/                     headline behavioural + neural figures
 
 ### Do LRMs learn the way humans do?
 
-We compare how quickly each agent discovers the rules of a game, and how far through a curriculum of nine difficulty levels it can progress. Human participants, deep-RL baselines (DDQN, EfficientZero, EMPA), and eight frontier LRMs all play the same games under the same conditions.
+We compare how quickly each agent discovers the rules of a game, and how far through a curriculum of nine difficulty levels it can progress. Human participants, deep-RL baselines (DDQN, EfficientZero, EMPA), and eight frontier LRMs play related VGDL game variants. Humans advanced on a fixed scanner schedule, while LRMs used blocked advancement; the analysis applies an explicit comparison rule. Some converted game variants also differ in their timeout rules. See the reproduction guide before comparing raw level counts or elapsed time.
 
 The best LRMs cluster tightly around the human learning distribution. On the discovery metric, the top LRM is nearly indistinguishable from the human median; on the curriculum metric, it tracks human-level progression through all nine difficulty levels. The deep-RL baselines, by contrast, are far slower and plateau much earlier.
 
@@ -94,7 +119,7 @@ The best LRMs cluster tightly around the human learning distribution. On the dis
 
 ### Do they build similar brain representations?
 
-We extract hidden-state activations from each LRM during gameplay and use them as regressors in a voxelwise encoding model that predicts the human fMRI BOLD signal, with separate regularisation for the model features and the nuisance regressors (game / level identity, button presses, time). Best-layer Pearson correlations are then averaged within functional region groups.
+We extract hidden-state activations from models encoding human gameplay traces and use them to predict the human fMRI BOLD signal. The encoding code supports separate regularisation for model features and optional nuisance bands; the selected condition determines which bands are fitted. Best-layer Pearson correlations are then averaged within functional region groups. See the [scientific conventions](analysis/tomov23/docs/scientific-conventions.md) and [release provenance](docs/release/scientific-provenance.md) for the retained analysis settings and known artifact gaps.
 
 LRM representations predict brain activity significantly above chance across visual, frontoparietal and default-mode regions, and outperform DDQN and EfficientZero baselines by a wide margin across every cortical region group. Targeted ablations (prompt-only, shuffled-features, random-init controls) confirm that the signal comes from the model's in-context representation of the game state, not from surface-level prompt statistics or chance correlations.
 
@@ -118,4 +143,7 @@ LRM representations predict brain activity significantly above chance across vis
 
 ## License
 
-MIT. See `LICENSE`.
+Original project code and newly created research artifacts are released jointly
+under [MIT](LICENSE). Upstream material retains its existing terms:
+[THIRD_PARTY.md](THIRD_PARTY.md) records component licenses and attribution,
+including CC0 for the original OpenNeuro data and separate model-weight terms.

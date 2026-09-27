@@ -1,114 +1,35 @@
-# LLM Evaluation Pipeline
+# LLM evaluation pipeline
 
-Two parallel pipelines that produce feature-comparable traces:
+All runs are multi-turn: conversation history persists across decisions.
+`harness.rationale_mode` selects one of three mechanisms:
 
-1. **Generative gameplay** -- LLM plays VGDL games, choosing actions itself
-2. **Human replay** -- LLM processes human behavioral data (Tomov et al. 2023)
+| Mode | Assistant context | Human replay |
+| --- | --- | --- |
+| `action-only` | `{"action": "right"}` | Inject the recorded human action; no LLM call |
+| `prompted-rationale` | Explicit rationale plus action | Not supported |
+| `copied-reasoning` | Native reasoning copied into a rationale field plus action | Impute reasoning conditioned on the recorded action |
 
-Both pipelines produce traces with identical message structure and the same
-gameplay system prompt, enabling direct comparison of hidden-state features.
+Generative gameplay uses `prompts/gameplay/{mode}_{suggestion}.txt`.
+Copied-reasoning imputation uses `prompts/replay/copied-reasoning_{suggestion}.txt`:
+the action is disclosed to the imputation model. Before feature extraction the
+trace uses the gameplay prompt, removes the action hint from user turns, and
+places the copied rationale and recorded action in assistant turns. The
+imputation model and extraction model are independently selected.
 
-## Pipeline Overview
+`harness.suggestion_level` is `minimal`, `elaborate`, or `oracle` for gameplay.
+Oracle provides the game rules and must be reported as an ablation. Do not
+mix it with the rule-discovery conditions.
 
-```
-                        prompts/gameplay/                prompts/replay/
-                    (gameplay system prompts)         (imputation prompts)
-                              |                              |
-           +------------------+------------------+           |
-           |                                     |           |
-    Generative Gameplay                   Replay Phase 2     |
-    (LLM plays games)                  (feature extraction)  |
-           |                                     |           |
-           |    +--------------------------------+           |
-           |    |  SAME system prompt                        |
-           |    |  SAME message structure                    |
-           |    |  (user=state, assistant=action+reasoning)  |
-           |    |                                            |
-           v    v                                            |
-     Feature Extraction                              Replay Phase 1
-     (hidden states)                                (imputation, persistent only)
-                                                     LLM generates reasoning
-                                                     for human actions
-```
+## Entry points
 
-### Generative Gameplay
+- [`generative_gameplay/run.py`](generative_gameplay/run.py): LLM decisions and
+  replay generation, controlled by [`../../conf/config.yaml`](../../conf/config.yaml).
+- [`human_replay/run_replay.py`](human_replay/run_replay.py): BSON human plays to
+  action-only or imputed sessions.
+- [`human_replay/extract_features.py`](human_replay/extract_features.py):
+  overlapping conversation windows to per-layer hidden, attention, and MLP
+  activations; configured by
+  [`../../conf/extract_features/default.yaml`](../../conf/extract_features/default.yaml).
 
-```
-System prompt: prompts/gameplay/{mode}_{suggestion}.txt
-
-+-- For each step: ----------------------------------------+
-|                                                           |
-|   User: game state + action log                           |
-|     |                                                     |
-|     v                                                     |
-|   LLM: {"rationale": "...", "action": "right"}            |
-|     |                                                     |
-|     v                                                     |
-|   Game engine executes action, returns next state         |
-|                                                           |
-+-----------------------------------------------------------+
-     |
-     v
-  .replay.json.gz  -->  feature extraction
-```
-
-### Human Replay -- Phase 1 (Imputation)
-
-Persistent modes only. Ephemeral modes skip this phase.
-
-The imputation LLM generates reasoning for the human's action:
-- System: imputation prompt (`prompts/replay/persistent_*.txt`)
-- User: participant's observation + participant's action
-- Assistant: `{"rationale": "<imputed reasoning>", "action": "down"}`
-- User: participant's observation + participant's action
-- Assistant: `{"rationale": "<imputed reasoning>", "action": "right"}`
-- ...
-
-The human's actual action is revealed in each user message.
-The LLM must produce reasoning that concludes with that action.
-
-### Human Replay -- Phase 2 (Feature Extraction)
-
-The extraction LLM encodes the trace into hidden-state features:
-- System: gameplay prompt (`prompts/gameplay/persistent_*.txt`)
-- User: participant's observation
-- Assistant: `{"rationale": "<copy from phase 1>", "action": "down"}`
-- User: participant's observation
-- Assistant: `{"rationale": "<copy from phase 1>", "action": "right"}`
-- ...
-
-Key differences: the system prompt is swapped to gameplay, participant's actions
-are stripped from user messages, and hidden reasoning (CoT) is never included.
-
-## Prompt Architecture
-
-```
-prompts/
-  gameplay/           <-- used by generative gameplay AND replay Phase 2
-    ephemeral_elaborate.txt
-    persistent_elaborate.txt
-    ephemeral_minimal.txt
-    persistent_minimal.txt
-  replay/             <-- used by replay Phase 1 (imputation) only
-    persistent_elaborate.txt  (imputation: participant's action is revealed)
-    persistent_minimal.txt
-```
-
-Ephemeral replay modes skip Phase 1 entirely and use gameplay prompts
-directly in Phase 2. No ephemeral imputation prompts exist.
-
-## Suggestion Levels
-
-The `suggestion_level` controls how much the system prompt scaffolds the
-agent's reasoning:
-
-| Level | System prompt |
-|-------|----------------|
-| `elaborate` | Detailed game-agent instructions, strategy hints, structured rationale format |
-| `minimal` | Bare-bones JSON response schema, no scaffolding |
-
-## Subpackages
-
-- `generative_gameplay/` -- LLM plays games (see its README)
-- `human_replay/` -- Two-phase replay pipeline (see its README)
-- `shared/` -- Config, harness, formatters, LLM wrappers
+See [the reproducibility guide](../../docs/reproducibility.md) for commands,
+input/output paths, fMRI alignment, analysis, and known release gaps.

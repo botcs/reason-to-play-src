@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "selection_semantics": "SYNTHETIC EXAMPLE ONLY. Prefix classification proposes candidates; it does not select paper inputs or authorize publication.",
+  "schema_notes": {
+    "prefixes": "Each key matches the first slash-separated component of a source key. Unknown prefixes receive review disposition.",
+    "disposition": "candidate, review or exclude. Unsafe, credential and cache paths are excluded regardless of prefix rules.",
+    "release_root": "Relative destination root; remaining source-key segments are reversibly percent-encoded.",
+    "component": "User-defined component label for discovery and summary tables."
+  },
+  "prefixes": {
+    "example-replays": {
+      "release_root": "replays/human",
+      "component": "example_replays",
+      "disposition": "candidate",
+      "reason": "Invented replay prefix; actual scientific scope requires a separate selection policy"
+    },
+    "example-features": {
+      "release_root": "features/example",
+      "component": "example_features",
+      "disposition": "candidate",
+      "reason": "Invented feature prefix"
+    },
+    "example-archive": {
+      "release_root": "archive/example",
+      "component": "example_archive",
+      "disposition": "review",
+      "reason": "Invented historical prefix requiring review"
+    },
+    "example-excluded": {
+      "release_root": "excluded/example",
+      "component": "example_excluded",
+      "disposition": "exclude",
+      "reason": "Invented prefix outside the proposed scope; no source objects are deleted"
+    }
+  }
+}

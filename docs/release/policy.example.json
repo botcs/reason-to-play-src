@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "release_id": "example-release-v1",
+  "target_repository": "YOUR_NAMESPACE/YOUR_DATASET",
+  "derivative_license": "NOASSERTION",
+  "selection_status": "SYNTHETIC EXAMPLE ONLY. These invented prefixes are not a project release selection. Replace the rules and license with your reviewed configuration.",
+  "schema_notes": {
+    "rules": "Ordered, first matching rule wins. Unmatched source keys are deferred. Credential, cache and unsafe paths are excluded before policy matching.",
+    "source_prefix": "Literal source-key prefix; match is a regular expression applied to the entire remaining suffix.",
+    "decision": "include and optional enter the prepared manifest; defer and exclude are counted but not selected.",
+    "release_root": "Relative destination root. Remaining source-key segments are reversibly percent-encoded; source objects are never renamed or modified.",
+    "tier_and_component": "User-defined labels for selective staging and catalogue discovery.",
+    "license": "Use a per-rule license to override derivative_license when source terms differ. This example asserts no payload license."
+  },
+  "rules": [
+    {
+      "id": "example-core-replays",
+      "source_prefix": "example-replays/",
+      "match": ".*\\.json\\.gz",
+      "decision": "include",
+      "tier": "core",
+      "component": "example_replays",
+      "release_root": "replays/human",
+      "reason": "Invented example of explicitly selected replay files"
+    },
+    {
+      "id": "example-optional-features",
+      "source_prefix": "example-features/",
+      "match": ".*\\.(?:npz|json)",
+      "decision": "optional",
+      "tier": "optional_features",
+      "component": "example_features",
+      "release_root": "features/example",
+      "reason": "Invented optional tensor and metadata tier"
+    },
+    {
+      "id": "example-deferred-archive",
+      "source_prefix": "example-archive/",
+      "match": ".*",
+      "decision": "defer",
+      "tier": "deferred",
+      "component": "example_archive",
+      "release_root": "deferred",
+      "reason": "Invented archive awaiting scientific selection"
+    },
+    {
+      "id": "example-excluded-material",
+      "source_prefix": "example-excluded/",
+      "match": ".*",
+      "decision": "exclude",
+      "tier": "excluded",
+      "component": "example_excluded",
+      "release_root": "excluded",
+      "reason": "Invented prefix excluded from the prepared release, without deleting source objects"
+    }
+  ]
+}

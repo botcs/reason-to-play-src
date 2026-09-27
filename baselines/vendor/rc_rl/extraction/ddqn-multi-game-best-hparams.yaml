@@ -1,0 +1,57 @@
+command:
+- ${env}
+- python
+- ${program}
+- ${args}
+method: grid
+metric:
+  goal: maximize
+  name: mean_level_avg_reward
+name: ddqn-multi-game-best-hparams
+parameters:
+  batch_size:
+    values:
+    - 32
+  cuda:
+    value: 1
+  doubleq:
+    value: 1
+  eps_decay:
+    value: 300000
+  eps_end:
+    values:
+    - 0.01
+  frame_stack_size:
+    values:
+    - 8
+  gamma:
+    values:
+    - 0.995
+  level_switch:
+    value: sequential
+  lr:
+    value: 5e-05
+  max_mem:
+    values:
+    - 50000
+  pretrain:
+    value: 0
+  random_seed:
+    values:
+    - 42
+  target_update:
+    value: 30000
+  test_mode:
+    value: 0
+  game_name:
+    values:
+    - vgfmri4_avoidgeorge
+    - vgfmri4_bait
+    - vgfmri4_chase
+    - vgfmri4_helper
+    - vgfmri4_lemmings
+    - vgfmri3_plaqueAttack
+    # - vgfmri3_sokoban
+    # - vgfmri4_zelda
+program: runDDQN.py
+project: ddqn-vgdl

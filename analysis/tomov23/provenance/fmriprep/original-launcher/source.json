@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/botcs/RC_RL",
+  "commit": "969141d09369ecd783965fadbbe2a1920065cf24",
+  "committed_at": "2025-10-16T04:06:00+01:00",
+  "files": [
+    {
+      "path": "original-launcher/run_fmriprep.sh",
+      "source_path": "fmriprep_pipeline/run_fmriprep.sh",
+      "sha256": "418e8e651b1e0bb204cc6c391a77ea3e3ed2396e5f6aaa2a2ffa8c1c080b3cd5"
+    },
+    {
+      "path": "original-launcher/README.md",
+      "source_path": "fmriprep_pipeline/README.md",
+      "sha256": "b75e8085d97852bf89013b83fc7fab842bb7e62f19d8f4513b51f469c5e580a5"
+    }
+  ],
+  "role": "Historical evidence, not the portable entry point. Run scripts/run_fmriprep.py instead.",
+  "execution_provenance": "Original launcher invokes Docker; recovered TOMLs identify Singularity. Their scientific settings agree, but exact producing invocation/container digest is unresolved."
+}

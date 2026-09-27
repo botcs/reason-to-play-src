@@ -1,0 +1,15 @@
+# Ruff configuration for infer-vgdl
+# VGDL engine (src/vgdl/, src/utils.py) is forked upstream code -- excluded.
+extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/recovered/"]
+
+[lint.per-file-ignores]
+# These files use sys.path.insert() before imports (intentional E402)
+"src/llm_eval/generative_gameplay/run.py" = ["E402"]
+"src/llm_eval/human_replay/extract_features.py" = ["E402"]
+"src/llm_eval/human_replay/generate_observations.py" = ["E402"]
+"src/llm_eval/human_replay/run_replay.py" = ["E402"]
+"src/llm_eval/shared/deepseek_torchrun_wrapper.py" = ["E402"]
+"tests/test_interaction_ground_truth.py" = ["E402"]
+
+# Historical figure scripts configure a headless backend before pyplot.
+"scripts/analysis/plot_behavioural.py" = ["E402"]
