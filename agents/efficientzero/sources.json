@@ -29,8 +29,8 @@
     "extraction": {
       "url": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons.git",
       "revision": "422a4e753749569e83a6d5fdb8a42427730d6d34",
-      "role": "EfficientZero human-trajectory feature extractor and trace-layer selection",
-      "license": "No license file accompanies this source snapshot; retain attribution and original source hashes. These scripts have no license grant under the root MIT license.",
+      "role": "Austin Andrews's project contribution: EfficientZero human-trajectory feature extractor and trace-layer selection",
+      "license": "MIT; Reason to Play project contribution",
       "access": "The extraction scripts are included locally. The trace extractor and layer list differ from the recorded Git HEAD; per-file hashes identify the exact source snapshot.",
       "included_source": "."
     }

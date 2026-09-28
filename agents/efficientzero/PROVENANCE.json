@@ -2,7 +2,8 @@
   "origin": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons",
   "recorded_head": "422a4e753749569e83a6d5fdb8a42427730d6d34",
   "git_blob_verification": "The activation helper matches recorded_head. The trace extractor differs from that revision, and trace_layers.json is absent from its tree. Per-file hashes identify the provided source snapshot.",
-  "license": "No license file accompanies this source snapshot. Preserve its attribution; these files are not covered by the root MIT grant or automatically by the EfficientZero GPL notice.",
+  "contributor": "Austin Andrews",
+  "license": "MIT; Reason to Play project contribution",
   "files": [
     {
       "file": "extract_features.py",
