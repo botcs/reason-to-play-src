@@ -98,11 +98,96 @@ def external_binding(path):
         raise ValueError(f"Alignment association is not verified: {document_path}")
     if document.get("feature_sha256") != file_sha256(path):
         raise ValueError(f"Alignment association names different feature bytes: {path}")
-    return {
+    binding = {
         "alignment_binding_version": 1,
         "alignment_base_sha256": document["base_sha256"],
         "alignment_samples_sha256": document["sample_order_sha256"],
     }
+    if "feature_coverage" in document:
+        binding["feature_coverage"] = document["feature_coverage"]
+    return binding
+
+
+def validate_feature_coverage(coverage, base):
+    """Check declared missing plays in the original, unfiltered base sample order."""
+    if not isinstance(coverage, dict):
+        raise ValueError("Feature coverage must be an object")
+    required = {
+        "complete",
+        "retained_sample_count",
+        "missing_feature_sample_count",
+        "missing_feature_play_ids",
+        "missing_feature_sample_intervals",
+    }
+    if not required.issubset(coverage):
+        raise ValueError("Feature coverage lacks required counts or intervals")
+    for key in ("retained_sample_count", "missing_feature_sample_count"):
+        if type(coverage[key]) is not int or coverage[key] < 0:
+            raise ValueError(f"Feature coverage {key} must be a nonnegative integer")
+    if type(coverage["complete"]) is not bool:
+        raise ValueError("Feature coverage complete must be a boolean")
+    if coverage["retained_sample_count"] != len(base["tr_play_idx"]):
+        raise ValueError("Feature coverage sample count differs from the base archive")
+    ids = coverage["missing_feature_play_ids"]
+    intervals = coverage["missing_feature_sample_intervals"]
+    absent_games = coverage.get("absent_game_files", [])
+    if (
+        not isinstance(absent_games, list)
+        or any(not isinstance(game, str) or not game for game in absent_games)
+        or len(absent_games) != len(set(absent_games))
+    ):
+        raise ValueError(
+            "Feature coverage absent_game_files must list unique game names"
+        )
+    if (
+        not isinstance(ids, list)
+        or any(not isinstance(pid, str) for pid in ids)
+        or len(ids) != len(set(ids))
+        or not isinstance(intervals, list)
+    ):
+        raise ValueError(
+            "Feature coverage requires unique play IDs and an interval list"
+        )
+    play_indices = {str(pid): index for index, pid in enumerate(base["play_ids"])}
+    seen = set()
+    missing_count = 0
+    for interval in intervals:
+        if not isinstance(interval, dict):
+            raise ValueError("Feature coverage interval must be an object")
+        pid = interval.get("play_id")
+        if not isinstance(pid, str) or pid not in play_indices or pid in seen:
+            raise ValueError(
+                "Feature coverage interval has an unknown or duplicate play"
+            )
+        index = play_indices[pid]
+        start, stop = interval.get("sample_start"), interval.get("sample_stop")
+        if (
+            type(start) is not int
+            or type(stop) is not int
+            or start != int(base["play_boundaries"][index])
+            or stop != int(base["play_boundaries"][index + 1])
+        ):
+            raise ValueError(
+                "Feature coverage interval disagrees with base play boundaries"
+            )
+        if "game" in interval and interval["game"] != str(
+            base["game_names"][int(base["play_game_idx"][index])]
+        ):
+            raise ValueError("Feature coverage interval names a different game")
+        if "level" in interval and (
+            type(interval["level"]) is not int
+            or interval["level"] != int(base["play_levels"][index])
+        ):
+            raise ValueError("Feature coverage interval names a different level")
+        seen.add(pid)
+        missing_count += stop - start
+    if (
+        seen != set(ids)
+        or coverage["missing_feature_sample_count"] != missing_count
+        or coverage["complete"] != (not ids and not absent_games)
+    ):
+        raise ValueError("Feature coverage completeness, play IDs and counts disagree")
+    return coverage
 
 
 def released_llm_path(layer, subject):

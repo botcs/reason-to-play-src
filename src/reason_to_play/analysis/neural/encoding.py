@@ -69,6 +69,7 @@ from reason_to_play.analysis.neural.alignment import (
     file_sha256,
     released_llm_path,
     validate_binding,
+    validate_feature_coverage,
 )
 
 # Himalaya imports
@@ -276,8 +277,13 @@ def load_aligned_data(paths, subject, layer, *, require_binding=True):
             sidecar = dict(source)
         verified = validate_binding(sidecar, base, paths[0], base_sha256=base_digest)
         association = external_binding(path)
+        coverage = None
         if association is not None:
             validate_binding(association, base, paths[0], base_sha256=base_digest)
+            if "feature_coverage" in association:
+                coverage = validate_feature_coverage(
+                    association["feature_coverage"], base
+                )
             verified = True
         if not verified:
             if require_binding:
@@ -289,7 +295,12 @@ def load_aligned_data(paths, subject, layer, *, require_binding=True):
                 path,
             )
         binding_status.append(
-            {"path": str(path), "status": "verified" if verified else "unverified"}
+            {
+                "path": str(path),
+                "status": "verified" if verified else "unverified",
+                "feature_coverage": coverage,
+                "coverage_sample_order": "original-base-archive",
+            }
         )
         data = merge_feature_sidecar(data, sidecar, path)
     data["alignment_verification_json"] = json.dumps(binding_status, sort_keys=True)
@@ -1226,6 +1237,7 @@ def run_encoding_model(
         "target_type": dm["target_type"],
         "n_volumes": dm["n_volumes"],
         "n_valid_volumes": int(valid_mask.sum()),
+        "valid_sample_policy": "feature-row-sum-nonzero-after-level-selection-and-shuffle",
         "game_names": dm["game_names"],
         "band_names": np.array(band_names),
         "include_nuisance_bands": include_nuisance_bands,

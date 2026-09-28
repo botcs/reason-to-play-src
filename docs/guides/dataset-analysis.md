@@ -137,6 +137,14 @@ the same identities. An archived input without this evidence requires the
 explicit `--allow-unverified-alignment` option and is recorded as unverified.
 Verified alignment does not imply that features exist for every play: missing
 source inputs and their zero-filled rows remain reported separately.
+The result's `alignment_verification_json` retains each association's
+`feature_coverage`, including missing play IDs and sample intervals; null means
+coverage was not supplied. Intervals use the original base archive's sample
+order, before level selection or shuffling. The established fit excludes rows
+whose feature-vector sum is zero after those operations; it does not use the
+coverage declaration to change that mask. `valid_sample_policy` and
+`n_valid_volumes` record this numerical rule and its resulting sample count.
+An all-zero row is not evidence by itself that its source observation is missing.
 
 The example's seed defines a fresh repeatable fit. The historical fitting seed
 was not recorded, so it does not claim to recover the original random search.

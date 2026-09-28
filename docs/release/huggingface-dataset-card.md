@@ -202,6 +202,10 @@ association record. Download it with the archive: the encoding reader checks
 both the feature hash and its binding to the base BOLD/sample order before
 fitting. Input coverage is recorded separately from alignment verification;
 zero-filled rows for unavailable source plays are not model observations.
+Encoding results preserve declared coverage in `alignment_verification_json`.
+Coverage intervals refer to the original base sample order. The documented
+fitting mask remains a separate numerical rule; see the dataset analysis guide
+for its policy and the recorded sample counts.
 
 Use the code and dataset revisions recorded for the release when reproducing
 paper results. New experiments should state their own cohorts, models,

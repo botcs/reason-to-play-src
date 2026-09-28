@@ -4,13 +4,13 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 453,
+      "passed": 463,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/, tools/ and the manifest assembler (105 scoped files).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/, tools/ and the manifest assembler (106 scoped files).",
     "documentation": {
       "links_and_anchors_checked": 152,
       "failures": 0,
@@ -169,8 +169,20 @@
       "hrr_decomposed_participants": 21,
       "hrr_arrays_per_participant": 3,
       "maximum_absolute_error": 0.0,
-      "scope": "Recorded arrays independently realigned from frozen features/theory JSON and human clocks; coverage gaps remain explicit.",
-      "recorded_play_identity": "Exact participant/run/original-document IDs take precedence over timestamp proximity, with original-frame timestamp validation and conflicting-identity rejection."
+      "scope": "All 411 selected LRM archives and all 21 HRR archives were independently realigned from frozen model/theory inputs and human clocks. Every compared value agrees exactly; coverage gaps remain explicit.",
+      "recorded_play_identity": "Exact participant/run/original-document IDs take precedence over timestamp proximity, with original-frame timestamp validation and conflicting-identity rejection.",
+      "coverage_evidence": "Declared missing play IDs and sample intervals are checked against bound base metadata and preserved in encoding results; the existing feature-row-sum mask is recorded separately. Tests cover a real fit, level filtering, zero-sum nonzero rows, absent source games with no retained samples, resume and changed-association rejection.",
+      "lrm_archives_numerically_compared": 411,
+      "lrm_arrays_numerically_compared": 20081,
+      "lrm_values_numerically_compared": 132639191040,
+      "all_lrm_arrays_exactly_equal": true,
+      "participants_with_verified_base_sample_identities": 32,
+      "archives_with_declared_missing_feature_intervals": 411,
+      "missing_feature_play_instances": 2105,
+      "missing_feature_sample_instances": 5727,
+      "retained_sample_instances_across_feature_archives": 603513,
+      "coverage_count_scope": "Play and sample instances are counted per feature archive, so the same participant/play can occur under several models or conditions. Declared absent features retain the original zero-filled intervals; exact array equality is separate from feature coverage.",
+      "source_generation_selection": "Raw tensor and prompt records are selected by immutable source generation; every included raw-to-aligned comparison uses the corresponding verified generation."
     }
   },
   "not_executed": [

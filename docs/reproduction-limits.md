@@ -98,6 +98,15 @@ checks, and synthetic NIfTI-to-ROI integration. The tiny model validates the
 extraction interface and timestamps; its features are not the activations used in the paper. Figure commands also run against the corresponding result tables;
 the code repository does not embed participant-derived tables.
 
+All 411 selected LRM feature archives were realigned from their corresponding
+source generations and the human clocks: all 20,081 arrays agree exactly with
+the saved scanner-sampled features. The 21 HRR archives also agree exactly.
+The manifest pins the input generations. Each LRM association records missing
+play intervals separately; these total 5,727 of 603,513 sample instances across
+the archives, counting a participant's samples again for each model or condition.
+The original zero-filled intervals remain explicit. Exact alignment does not
+mean every retained sample has an observed model feature.
+
 Further checks reproduce 6,426 archived ROI rows with the released atlas and
 32-participant common mask, and repeat a fresh seeded fit over all 1,470 samples
 of one participant with a bounded 16-voxel target set. The two fresh fits are
