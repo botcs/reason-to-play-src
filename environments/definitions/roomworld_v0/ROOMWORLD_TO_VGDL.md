@@ -3,7 +3,7 @@
 This optional game suite supports Roomworld experiments. It is separate from
 the VGDL-fMRI games used in the NeurIPS 2026 study. This note documents manual
 layout conversion for [`roomworld.txt`](roomworld.txt); it is not a dataset
-preprocessing step. The [gameplay guide](../../docs/reproducibility.md#replay-and-model-gameplay)
+preprocessing step. The [gameplay guide](../../../docs/reproducibility.md#replay-and-model-gameplay)
 describes running game definitions through the harness.
 
 ## Source Format
