@@ -14,32 +14,32 @@
     "vgfmri4_avoidgeorge": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_avoidgeorge/EZ-V2-seed%3D0-2026-01-13%2022%3A13%3A01/models/model_120000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_avoidgeorge/EZ-V2-seed%3D0-2026-01-13%2022%3A13%3A01/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     },
     "vgfmri4_bait": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_bait/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/models/model_180000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_bait/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     },
     "vgfmri4_chase": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_chase/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/models/model_190000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_chase/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     },
     "vgfmri4_helper": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_helper/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/models/model_180000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_helper/EZ-V2-seed%3D0-2026-01-13%2022%3A17%3A18/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     },
     "vgfmri4_lemmings": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_lemmings/EZ-V2-seed%3D0-2026-01-14%2000%3A54%3A23/models/model_180000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_lemmings/EZ-V2-seed%3D0-2026-01-14%2000%3A54%3A23/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     },
     "vgfmri4_zelda": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_zelda/EZ-V2-seed%3D0-2026-01-14%2002%3A52%3A09/models/model_180000.p",
       "train_log": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_zelda/EZ-V2-seed%3D0-2026-01-14%2002%3A52%3A09/logs/Train.log",
-      "scientific_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
+      "checkpoint_status": "January candidate with actual training config; final-paper checkpoint and layer attribution unresolved"
     }
   },
   "release_path_note": "Use these exact escaped local paths beneath the staged dataset root, including literal %20, %3A and %3D. Do not percent-decode filenames. All entries are provisional checkpoint candidates with unresolved final-paper attribution."

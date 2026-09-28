@@ -41,7 +41,7 @@
       "tier": "deferred",
       "component": "example_archive",
       "release_root": "deferred",
-      "reason": "Invented archive awaiting scientific selection"
+      "reason": "Example archive awaiting dataset selection"
     },
     {
       "id": "example-excluded-material",

@@ -51,7 +51,7 @@ DEFAULT_RC_RL_DIR = (
     if PUBLIC_ROOT is not None
     else None
 )
-RECOVERED_RC_RL_REVISION = "8f5f8a3c6facba2962319ea4892396057061370c"
+RC_RL_EXTRACTION_REVISION = "8f5f8a3c6facba2962319ea4892396057061370c"
 
 
 def _torch():
@@ -143,11 +143,11 @@ def load_baseline(rc_rl_dir):
                 "Use the complete public checkout or pass --rc-rl-dir."
             )
     provenance = baseline_source_provenance(rc_rl_dir)
-    if provenance["revision"] != RECOVERED_RC_RL_REVISION:
+    if provenance["revision"] != RC_RL_EXTRACTION_REVISION:
         logging.warning(
-            "RC_RL revision %s differs from recovered extraction pin %s",
+            "RC_RL revision %s differs from the extraction source pin %s",
             provenance["revision"],
-            RECOVERED_RC_RL_REVISION,
+            RC_RL_EXTRACTION_REVISION,
         )
     sys.path.insert(0, str(rc_rl_dir))
     from VGDLEnv import VGDLEnv

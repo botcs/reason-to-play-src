@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "selection_note": "These immutable revisions recover available implementations. They are not proof of the producing revision for every released checkpoint or result.",
+  "selection_note": "These revisions identify the included implementations. They do not establish which revision produced every checkpoint or result.",
   "sources": {
     "rc-rl": {
       "url": "https://github.com/botcs/RC_RL.git",
@@ -45,9 +45,9 @@
       "url": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons.git",
       "revision": "422a4e753749569e83a6d5fdb8a42427730d6d34",
       "role": "EfficientZero human-trajectory feature extractor and trace-layer selection",
-      "license": "No upstream license located; recovered source included with attribution, original source hashes and explicit license boundary",
-      "access": "Complete essential extraction scripts included; original repository returned404. S3 recovered trace script and layer list differ from recorded Git HEAD; use included file-hash provenance.",
-      "included_source": "recovered/efficientzero"
+      "license": "No license file accompanies this source snapshot; retain attribution and original source hashes. These scripts have no license grant under the root MIT license.",
+      "access": "The extraction scripts are included locally. The trace extractor and layer list differ from the recorded Git HEAD; per-file hashes identify the exact source snapshot.",
+      "included_source": "extraction/efficientzero"
     }
   }
 }

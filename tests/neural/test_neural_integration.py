@@ -633,7 +633,7 @@ def test_vendored_baseline_provenance_rejects_changed_or_added_source(tmp_path):
     original = b"# minimal source fixture\n"
     source.write_bytes(original)
     record = {
-        "commit": extractor.RECOVERED_RC_RL_REVISION,
+        "commit": extractor.RC_RL_EXTRACTION_REVISION,
         "files": [
             {"path": source.name, "sha256": hashlib.sha256(original).hexdigest()}
         ],

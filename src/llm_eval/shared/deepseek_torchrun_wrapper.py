@@ -285,7 +285,7 @@ class DeepSeekTorchrunWrapper:
         return None
 
     def cleanup(self):
-        """Remove hooks and cleanup distributed."""
+        """Remove hooks and close the distributed runtime."""
         self.hook_extractor.remove_hooks()
         if self.world_size > 1 and dist.is_initialized():
             dist.destroy_process_group()

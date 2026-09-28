@@ -780,8 +780,8 @@ def _derive_slot_and_s3(
         raise ValueError(f"{prompts_file}: missing subject in session")
     if not suggestion_level:
         raise ValueError(
-            f"{prompts_file}: missing meta.suggestion_level; older replay "
-            "files predate the field. Re-run run_replay.py to regenerate, "
+            f"{prompts_file}: missing meta.suggestion_level, required for experiment "
+            "database tracking; provide a replay with the prompt condition "
             "or pass exp_db.enabled=false."
         )
     prompt_config = f"suggestion-{suggestion_level}"

@@ -13,7 +13,7 @@ Usage:
         --subject sub-13 \\
         --aligned-data ./dataset/analysis-inputs/sub-13/bold-ddqn-theory.npz \\
         --behavior-dir ./dataset/behavior/human \\
-        --llm-source "name=dsv3_legacy,dir=/path/to/llm_dsv3" \\
+        --llm-source "name=dsv3,dir=/path/to/llm_dsv3" \\
         --output-dir /path/to/out
 """
 
@@ -92,9 +92,9 @@ GAME_ORDER = [
 # =============================================================================
 # Game name normalization for multi-turn format
 # =============================================================================
-# Old format dirs: vgfmri4_avoidgeorge/ etc. (lowercase, prefix=vgfmri4)
-# New format files: avoidGeorge_vgfmri4.pt  (camelCase, suffix=vgfmri4)
-# This maps between them so the rest of the pipeline can stay in "old" convention.
+# Per-level feature directories: vgfmri4_avoidgeorge/ etc. (lowercase, prefix=vgfmri4)
+# Per-game feature files: avoidGeorge_vgfmri4.pt  (camelCase, suffix=vgfmri4)
+# This maps between them so analysis joins use the vgfmri-prefixed names.
 
 _CANONICAL_TO_MULTITURN = {
     "vgfmri4_avoidgeorge": "avoidGeorge_vgfmri4",
@@ -140,7 +140,7 @@ class LLMSourceConfig:
         stream: Which activation stream to extract from multi-turn .pt files.
                 One of {'main', 'attn', 'mlp'}. Maps to the .pt keys
                 'features', 'features_attn', 'features_mlp' respectively.
-                Ignored for legacy-format sources.
+                Ignored for per-level feature sources.
     """
 
     name: str
@@ -229,9 +229,9 @@ def load_llm_features_for_level(
 ) -> dict:
     """Load LLM features for a specific game/level.
 
-    Dispatches between multi-turn and legacy loaders based on directory layout.
+    Dispatches between per-game and per-level feature loaders by directory layout.
     `stream` selects which activation tensor to extract from multi-turn .pt files
-    ('main' | 'attn' | 'mlp'); ignored for legacy-format sources.
+    ('main' | 'attn' | 'mlp'); ignored for per-level feature sources.
 
     Returns dict keyed by local play idx.
     """
@@ -241,7 +241,7 @@ def load_llm_features_for_level(
         )
     if stream != "main":
         logging.warning(
-            f"    Legacy LLM source at {llm_dir} does not support stream={stream!r}; "
+            f"    Per-level LLM source at {llm_dir} does not support stream={stream!r}; "
             f"loading default features."
         )
     return _load_llm_features_for_level_legacy(
@@ -355,7 +355,7 @@ def _load_llm_features_for_level_legacy(
 # =============================================================================
 # Multi-turn format loader
 # =============================================================================
-# New format stores one .pt per game with:
+# Per-game features store one .pt per game with:
 #   features       : (n_states, n_layers, hidden_dim)  bfloat16
 #   features_attn  : same shape
 #   features_mlp   : same shape
@@ -434,7 +434,7 @@ def load_multiturn_features_for_level(
     """Multi-turn equivalent of load_llm_features_for_level.
 
     Returns dict keyed by local play index (0, 1, 2, ...) within the level,
-    matching the old format's contract.
+    using the shared feature-loader return structure.
 
     `stream` selects which activation tensor to extract from the .pt:
         'main' -> 'features'        (residual stream output, default)
@@ -659,12 +659,12 @@ def match_multiturn_plays(features_by_index, source_plays, *, slop_seconds=2.0):
             ]
             if len(candidates) > 1:
                 raise ValueError(
-                    f"Ambiguous legacy feature timestamps match multiple original plays: {candidates}; "
+                    f"Ambiguous timestamp-only feature references match multiple original plays: {candidates}; "
                     "supply features with explicit source references"
                 )
             if not candidates:
                 logging.warning(
-                    "Legacy feature play %s has no source timestamp match",
+                    "Timestamp-only feature play %s has no source timestamp match",
                     feature["metadata"].get("play_id"),
                 )
                 continue
@@ -713,7 +713,7 @@ def is_multiturn_source(llm_dir: Path, subject: str) -> bool:
         return False
     # Multi-turn format: <game>_vgfmri*.pt directly in subject dir
     has_mt = any(subj_dir.glob("*_vgfmri*.pt"))
-    # Old format: <game>/level_*.pt or <game>/level_*.npz
+    # Per-level files: <game>/level_*.pt or <game>/level_*.npz
     has_legacy = any(
         d.is_dir() and (any(d.glob("level_*.pt")) or any(d.glob("level_*.npz")))
         for d in subj_dir.iterdir()
@@ -721,7 +721,7 @@ def is_multiturn_source(llm_dir: Path, subject: str) -> bool:
     if has_mt and has_legacy:
         # Prefer multi-turn format if both exist (unusual)
         logging.warning(
-            f"    Both multi-turn and legacy formats detected for {subject}; using multi-turn."
+            f"    Both per-game and per-level features detected for {subject}; using per-game files."
         )
     return has_mt
 
@@ -729,7 +729,7 @@ def is_multiturn_source(llm_dir: Path, subject: str) -> bool:
 def find_llm_games_and_levels(llm_dir: Path, subject: str) -> dict:
     """Find all games and levels available for a subject in LLM features.
 
-    Dispatches to multi-turn or legacy based on layout detection.
+    Dispatches to per-game or per-level features based on directory layout.
     """
     if is_multiturn_source(llm_dir, subject):
         return find_multiturn_games_and_levels(llm_dir, subject)
@@ -777,7 +777,7 @@ class LLMFeatureManager:
         self.subject = subject
         self.source_metadata = {}
         # Tracks per-play timestamp consistency with original human frames.
-        # Only populated for multi-turn sources (legacy uses index-based lookup).
+        # Populated for per-game features; per-level features use frame-index lookup.
         self.timestamp_audit = {"pass": 0, "fail": 0, "examples": []}
         for src in sources:
             self._initialize_source(src)
@@ -1201,7 +1201,7 @@ def process_subject(
         run_doc = runs_by_key.get((subj_num, run_id))
         if run_doc is None:
             raise RuntimeError(f"Scanner run missing ({subj_num}, {run_id})")
-        # Recover the start offset without extending scan-truncated plays.
+        # Calculate the start offset without extending scan-truncated plays.
         tmp_timing = get_play_timing(
             play_doc, run_doc, tr, n_volumes_whitened=10**9, ar1_corrected=ar1_corrected
         )
@@ -1348,7 +1348,7 @@ def process_subject(
                     is_multiturn_source_flag = meta.get("is_multiturn", False)
 
                     # Multiturn rows are matched once per level using exact source
-                    # identities, or an unambiguous legacy timestamp match.
+                    # identities, or an unambiguous timestamp-only match.
                     if is_multiturn_source_flag:
                         llm_play = multiturn_by_source[src_name].get(play_id)
                     else:
@@ -1369,9 +1369,9 @@ def process_subject(
                             )
 
                         # Detect which format this LLM source uses.
-                        # - Legacy format: `timestamps` are integer INDICES into the
+                        # - Per-level format: `timestamps` are integer frame indices into the
                         #   play's DDQN state array. We look them up to get real ts.
-                        # - Multi-turn format: `timestamps` are already absolute
+                        # - Per-game format: `timestamps` are absolute
                         #   wall-clock timestamps (unix seconds, ~1.6e9). Pass straight
                         #   through to align_llm_features_by_timestamp.
                         is_multiturn_ts = (
@@ -1381,13 +1381,13 @@ def process_subject(
                         )
 
                         if is_multiturn_ts:
-                            # Multi-turn: use the timestamps as-is.
+                            # Per-game features: use the timestamps as-is.
                             valid_llm_mask = np.ones(len(llm_frame_indices), dtype=bool)
                             real_timestamps = llm_frame_indices.astype(np.float64)
 
-                            # Retain the historical range audit. Exact linked
+                            # Check the timestamp range. Exact referenced
                             # frame clocks were verified before subsampling; the
-                            # 2-second tolerance applies only to legacy matching.
+                            # 2-second tolerance applies only to timestamp-only matching.
                             SLOP_SEC = 2.0
                             frame_min = float(ddqn_timestamps.min())
                             frame_max = float(ddqn_timestamps.max())
@@ -1417,7 +1417,7 @@ def process_subject(
                             else:
                                 llm_manager.timestamp_audit["pass"] += 1
                         else:
-                            # Legacy: ts are indices into ddqn_timestamps
+                            # Per-level features: timestamps are indices into ddqn_timestamps
                             llm_to_ddqn_indices = llm_frame_indices.astype(int)
                             valid_llm_mask = (llm_to_ddqn_indices >= 0) & (
                                 llm_to_ddqn_indices < n_ddqn_states

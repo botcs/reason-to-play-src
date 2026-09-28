@@ -34,7 +34,7 @@ LLM-only aligner requires it. The December alpha grid also differs. These facts
 do not establish which historical result files used which implementation.
 
 The original RC_RL Docker launcher is included verbatim.
-The corresponding S3 TOMLs report Singularity. Their scientific parameters
+The corresponding S3 TOMLs report Singularity. Their processing parameters
 agree for the 32 selected configurations; this does not prove the exact runtime
 or container image digest that generated each derivative. The earliest sub-02
 TOML used DOF 6; its later retained TOMLs use DOF 9. The old shell's `all` subject
@@ -79,7 +79,7 @@ scopes and is recorded with input/source hashes and dependency versions. This
 defines a repeatable new fit, not the unknown historical random realization.
 Identical historical scores cannot be promised. The submitted validity test is `feature_row.sum() != 0`, which can
 also exclude nonzero vectors whose entries cancel. Changing that validity rule
-or the fitting method defines a different scientific analysis.
+or the fitting method defines a different analysis.
 
 The exact DDQN checkpoint family for the indexed `model-ddqn-curriculum` features
 is not established by the earlier `trial1-sequential` W&B mapping. New extraction
@@ -115,4 +115,4 @@ Preprocessing for hyperparameter selection is not fully nested: scaling/PCA are
 fitted on the outer training set and reused across its inner alpha-selection
 folds. The outer held-out partition is excluded from those fits. This retained
 method should be distinguished from independent preprocessing in every inner
-fold; changing it defines a new scientific analysis.
+fold; changing it defines a new analysis.

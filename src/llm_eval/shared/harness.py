@@ -48,7 +48,7 @@ class Harness:
             max_output_tokens: Per-turn output token cap enforced by the LLM
                 backend.  Substituted into the ``{max_output_tokens}``
                 placeholder in the loaded prompt text and also used by the
-                repair-prompt builder to detect budget-exhaustion parse
+                retry-prompt builder to detect budget-exhaustion parse
                 failures.  Required when the loaded prompt contains the
                 placeholder; otherwise optional.
             game_name: Game identifier (e.g. ``bait_vgfmri4``).  Required when
@@ -102,7 +102,7 @@ class Harness:
         # inlines the reasoning trace into the committed content, so both
         # components contribute to the next turn's prompt_tokens).
         # Falls back to ``len(content)`` as a 1-char:1-token proxy for the
-        # system prompt, observation turns, and repair turns where no API
+        # system prompt, observation turns, and retry turns where no API
         # count is available.
         self._msg_tokens: list[int] = [len(self._system_prompt)]
 
@@ -242,15 +242,15 @@ class Harness:
         return list(self._conversation)
 
     # -------------------------------------------------------------------------
-    # parse_strict / commit_assistant / repair helpers
+    # parse_strict / commit_assistant / retry helpers
     # -------------------------------------------------------------------------
 
     def parse_strict(self, raw_response: str, context_info: dict | None = None) -> dict:
         """Parse LLM response, raising on any parse or schema error.
 
         Does NOT modify the conversation state.  The caller is responsible
-        for calling ``commit_assistant`` on success or ``append_repair_turn``
-        on failure before regenerating.
+        for calling ``commit_assistant`` on success or ``append_retry_turn``
+        on failure before retrying the response.
 
         Args:
             raw_response: Raw string response from the LLM.
@@ -349,13 +349,13 @@ class Harness:
             parsed["rationale"] = parsed.pop("_resolved_rationale")
         self._last_valid_response = parsed
 
-    def append_repair_turn(
+    def append_retry_turn(
         self,
         raw_response: str,
         error: Exception,
         context_info: dict | None = None,
     ) -> None:
-        """Append a malformed assistant + mode-specific repair-prompt user msg.
+        """Append a malformed assistant + mode-specific retry-prompt user msg.
 
         Used when ``parse_strict`` raised: the agent wants to feed the error
         back to the model for a retry.  The appended pair is meant to be
@@ -365,7 +365,7 @@ class Harness:
             raw_response: The malformed raw LLM output (shown back verbatim).
             error: The exception produced by ``parse_strict``.
             context_info: Optional dict from the LLM API call.  When it
-                reports ``output_tokens >= max_tokens`` the repair prompt
+                reports ``output_tokens >= max_tokens`` the retry prompt
                 additionally tells the model it hit the output cap and must
                 shorten its response.
         """
@@ -383,9 +383,9 @@ class Harness:
             failed_tokens = len(raw_response)
         self._msg_tokens.append(failed_tokens)
 
-        repair_prompt = self._build_repair_prompt(error, context_info)
-        self._conversation.append({"role": "user", "content": repair_prompt})
-        self._msg_tokens.append(len(repair_prompt))
+        retry_prompt = self._build_retry_prompt(error, context_info)
+        self._conversation.append({"role": "user", "content": retry_prompt})
+        self._msg_tokens.append(len(retry_prompt))
 
     def clip_from(self, start_idx: int) -> None:
         """Truncate the conversation so messages ``[start_idx:]`` are removed."""
@@ -401,10 +401,10 @@ class Harness:
         del self._conversation[start_idx:]
         del self._msg_tokens[start_idx:]
 
-    def _build_repair_prompt(
+    def _build_retry_prompt(
         self, error: Exception, context_info: dict | None = None
     ) -> str:
-        """Build the user-facing repair prompt for a parse failure.
+        """Build the user-facing retry prompt for a parse failure.
 
         The schema reminder is mode-specific so the model gets the exact
         shape it was asked to produce.  When ``context_info`` reports the
@@ -414,7 +414,7 @@ class Harness:
 
         For copied-reasoning, the failed attempt's hidden reasoning trace
         is echoed back verbatim so the model has continuity with what it
-        was just thinking.  The echo is part of the ephemeral repair turn
+        was just thinking.  The echo is part of the ephemeral retry turn
         and gets stripped via ``clip_from`` on a successful parse, so the
         prompt explicitly instructs the model not to reference the echoed
         text in its new rationale (the reference would dangle after clip).
@@ -605,7 +605,7 @@ class Harness:
         messages carry the API-reported ``output_tokens + reasoning_tokens``
         from the call that produced them (copied-reasoning inlines the
         reasoning trace, so both components contribute); the system
-        prompt, observation turns, and ephemeral repair turns fall back
+        prompt, observation turns, and ephemeral retry turns fall back
         to a 1-char:1-token proxy.
 
         Reserves ``max_tokens`` for generation, then enforces that the
@@ -859,8 +859,7 @@ class Harness:
     def get_replay_extraction_messages(self) -> list[dict]:
         """Return the current conversation for feature extraction.
 
-        For both supported replay modes the conversation has already been
-        restructured (action-only: inject_known_action; copied-reasoning:
-        synthesized rationale + action with user hint stripped).
+        Action-only conversations contain the recorded action; copied-reasoning
+        conversations contain a rationale and action with the user hint removed.
         """
         return list(self._conversation)

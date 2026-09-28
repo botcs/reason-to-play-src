@@ -37,7 +37,7 @@ file embeds its trajectory, exact prompts, original play identities and scanner
 clocks. The three prompt conditions are `elaborate`, `minimal` and `oracle`;
 readers select `elaborate` by default to count each measured trajectory once.
 One file is sufficient for that participant/game: no external human records or
-definitions are required. The scientific reader exposes the measurements as
+definitions are required. The reader returns the recorded fields as
 ordinary Python dictionaries:
 
 ```python
@@ -58,13 +58,13 @@ no states are synthesized during gaps between plays.
 Original IDs, nullable outcomes, per-frame timestamps, engine ticks, structured
 keys/events and plays with no selected actions remain available. Recorded
 rendering rectangles retain fractional grid positions; original logical pixel
-positions are also preserved for scientific inputs. Do not infer participant
+positions are also preserved for baseline model inputs. Do not infer participant
 outcomes from the terminal flags of a display replay.
 
-The missing original scanner record for participant 11/run 05 is represented
-by an explicitly marked recovered clock inside its plays. All nine source plays
-agree on its start time; the entry records that evidence. No additional scanner
-file is needed by the public reader. Missing or conflicting clocks are errors.
+Participant 11/run 05 has no separate source scanner record. Its start time
+is derived from the nine play records, which all agree on that time. The
+embedded scanner entry identifies how the time was derived. No additional
+scanner file is needed by the reader. Missing or conflicting clocks are errors.
 See the [data format guide](../data-format.md) for field meanings and the
 [higher-detail source reference](../sources/tomov23-behavior-notes.md)
 for the historical archive. That reference is not the public replay schema.
@@ -113,7 +113,7 @@ The example's seed defines a fresh repeatable fit. The historical fitting seed
 was not recorded, so it does not claim to recover the original random search.
 The result records input content hashes, source hash, dependency versions and
 fitting settings. `--resume` checks those identities. Use a separate output
-root for a different scientific condition.
+root for a different experimental condition.
 
 The model/variant, layer and participant selection for the headline comparison
 is [experiments/neurips2026/encoding.json](../../experiments/neurips2026/encoding.json).

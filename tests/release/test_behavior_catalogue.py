@@ -1,4 +1,4 @@
-"""Catalogue scientific meaning and provenance using standalone JSON inputs."""
+"""Catalogue play metadata and provenance using standalone JSON inputs."""
 
 from copy import deepcopy
 import gzip
@@ -164,7 +164,7 @@ def test_selects_one_condition_and_keeps_original_run_order(tmp_path, monkeypatc
 @pytest.mark.parametrize(
     "damage", ["bounds", "clock", "timestamp", "id", "outcome", "game"]
 )
-def test_rejects_corrupted_identity_or_scientific_values(tmp_path, damage):
+def test_rejects_corrupted_identity_or_measured_values(tmp_path, damage):
     record = recording()
     if damage == "bounds":
         record["plays"][0]["state_start"] = 1

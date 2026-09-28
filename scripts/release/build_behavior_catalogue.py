@@ -4,7 +4,7 @@
 Select one prompt condition so repeated observations are counted once. Keep every
 play present in those files and expose practice, cohort and level flags rather
 than silently filtering them. Frame clocks and nullable outcomes follow the
-shared scientific reader. Paths and hashes identify the exact compressed replay.
+shared behavior reader. Paths and hashes identify the exact compressed replay.
 """
 
 from __future__ import annotations
@@ -77,7 +77,7 @@ SCHEMA = pa.schema(
         b"prompt_condition": b"One selected prompt condition; trajectories are not counted again for other conditions",
     },
 )
-SCIENTIFIC_FIELDS = SCHEMA.names[: SCHEMA.names.index("source_artifact_id")]
+MEASUREMENT_FIELDS = SCHEMA.names[: SCHEMA.names.index("source_artifact_id")]
 
 
 def sha256_file(path: Path) -> str:

@@ -1,4 +1,4 @@
-"""The recovered EZ adapters consume canonical records without BSON at runtime."""
+"""EfficientZero adapters consume human JSON records."""
 
 import importlib.util
 import json
@@ -21,7 +21,7 @@ def environment():
             for path in (
                 "baselines/vendor/rc_rl/ez",
                 "baselines/vendor/efficientzero",
-                "baselines/recovered/efficientzero",
+                "baselines/extraction/efficientzero",
                 "src",
                 ".",
             )

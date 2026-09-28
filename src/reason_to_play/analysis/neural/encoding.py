@@ -1156,7 +1156,7 @@ def run_encoding_model(
         "n_targets_batch": n_targets_batch,
         "n_alphas_batch": n_alphas_batch,
         "randomness_policy": (
-            "explicit seed controls ridge search and shuffle; fresh rerun, not a recovered historical realization"
+            "explicit seed controls ridge search and shuffle for this execution"
             if seed is not None
             else "submitted: unseeded ridge search and game/play shuffle; within-level shuffle uses shuffle_seed"
         ),

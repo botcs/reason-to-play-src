@@ -1,4 +1,4 @@
-"""Scientific metadata values remain unambiguous in ordinary JSON."""
+"""Recorded metadata values remain unambiguous in ordinary JSON."""
 
 from datetime import datetime, timezone
 import gzip
@@ -54,7 +54,7 @@ def test_empa_dataset_root_and_explicit_file_read_identical_typed_records(tmp_pa
 
 
 @pytest.mark.parametrize("defect", [None, "flag", "method", "date"])
-def test_inline_recovered_clock_requires_its_evidence(tmp_path, defect):
+def test_inline_derived_clock_requires_its_evidence(tmp_path, defect):
     record = recording()
     clock = record["plays"][0]["scanner"]
     clock.update(
@@ -70,7 +70,7 @@ def test_inline_recovered_clock_requires_its_evidence(tmp_path, defect):
         clock["scan_start_dt"] = "untyped date"
     path = write_record(tmp_path, record)
     if defect is not None:
-        with pytest.raises(ValueError, match="Invalid recovered scanner clock"):
+        with pytest.raises(ValueError, match="Invalid derived scanner clock"):
             load_runs(path)
     else:
         assert load_runs(path)[13, 1] == decode_value(clock)

@@ -456,7 +456,7 @@
       ]
     }
   ],
-  "notes": "Render the archived master_encoding_data.csv only. Its fit condition was not recorded and remains unknown. Baseline variant/stream columns are also unlabeled; numeric layers retain the archived identities, not a recovered extractor-hook map. The two absent model/subject/layer cells are explicitly acknowledged; all other declared cells must be present. This reproduces summaries from the archived table, not the upstream fitting process.",
+  "notes": "Render the archived master_encoding_data.csv only. Its fit condition was not recorded and remains unknown. Baseline variant/stream columns are also unlabeled; numeric layers retain the archived identities, not a verified mapping to extractor hooks. The two absent model/subject/layer cells are explicitly acknowledged; all other declared cells must be present. This reproduces summaries from the archived table, not the upstream fitting process.",
   "input_sha256": "d05df357a1f4fdf24deac0f3e8cca9f6d568f3f15a090d4be6446064def9ea70",
   "allow_missing_cells": [
     {

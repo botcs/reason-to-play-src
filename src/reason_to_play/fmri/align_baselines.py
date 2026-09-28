@@ -104,8 +104,8 @@ DDQN_CONV_CHANNELS = {
 HRR_DIM = 348
 HRR_SEED = 42
 
-# LLM layers: LEGACY fallback for backward compatibility.
-# New code auto-discovers layers from data files (see discover_llm_layers()).
+# LLM layers used when feature files do not provide layer configuration.
+# The loader discovers layers from data files (see discover_llm_layers()).
 # Only used if LLMSourceConfig.layers is None AND auto-discovery fails.
 LLM_LAYERS = list(range(1, 65))
 LLM_LAYER_NAMES = [f"layer_{i}" for i in LLM_LAYERS]
@@ -709,15 +709,15 @@ def find_available_ez_plays(ez_dir: Path, subject: str) -> Tuple[Dict, bool]:
     Find all available EfficientZero trace files for a subject.
 
     Supports two directory structures:
-    - Old: play0/, play1/, ... (requires state-count matching)
-    - New: play0_key{mongodb_id}/, ... (direct matching by play_id)
+    - Ordinal paths: play0/, play1/, ... (requires state-count matching)
+    - Play-ID paths: play0_key{original_id}/, ... (direct matching by play_id)
 
     Returns:
         Tuple of:
         - Dict mapping:
-          - New format: play_id (str) -> (trace_path, game_name, run_id)
-          - Old format: (game, run, play_idx) tuple -> (trace_path,)
-        - Boolean indicating if new format was detected
+          - Play-ID paths: play_id (str) -> (trace_path, game_name, run_id)
+          - Ordinal paths: (game, run, play_idx) tuple -> (trace_path,)
+        - Boolean indicating whether paths contain play IDs
 
     Note: This function does NOT load the trace files - it only discovers paths.
     Traces are loaded lazily when needed during alignment.
@@ -730,7 +730,7 @@ def find_available_ez_plays(ez_dir: Path, subject: str) -> Tuple[Dict, bool]:
     )
     subj_str = f"subj{subj_num}"
     available = {}
-    has_new_format = False
+    has_play_ids = False
 
     for game_dir in ez_dir.iterdir():
         if not game_dir.is_dir() or not game_dir.name.startswith("vgfmri"):
@@ -750,26 +750,26 @@ def find_available_ez_plays(ez_dir: Path, subject: str) -> Tuple[Dict, bool]:
                 if not trace_path.exists():
                     continue
 
-                # Check for new format: play{idx}_key{mongodb_id}
+                # Check for a play ID in play{idx}_key{original_id}
                 play_dir_name = play_dir.name
                 if "_key" in play_dir_name:
-                    # New format: extract play_id directly (no need to load file)
-                    has_new_format = True
+                    # Extract play_id directly without loading the trace file
+                    has_play_ids = True
                     play_id = play_dir_name.split("_key")[1]
                     available[play_id] = (trace_path, game_name, run_id)
                 else:
-                    # Old format: play{idx} - store path only, load later for matching
+                    # Ordinal path: play{idx}; load later to match by frame count
                     ez_play_idx = int(play_dir_name.replace("play", ""))
                     available[(game_name, run_id, ez_play_idx)] = (trace_path,)
 
-    if has_new_format:
+    if has_play_ids:
         logging.info(
-            f"    Using new EZ format with embedded play keys ({len(available)} plays)"
+            f"    Using EZ paths with embedded play IDs ({len(available)} plays)"
         )
     else:
-        logging.info(f"    Using old EZ format ({len(available)} plays)")
+        logging.info(f"    Using ordinal EZ paths ({len(available)} plays)")
 
-    return available, has_new_format
+    return available, has_play_ids
 
 
 def build_ez_to_behavioral_mapping(
@@ -778,10 +778,10 @@ def build_ez_to_behavioral_mapping(
     subject: str,
 ) -> Dict[Tuple[str, int, int], str]:
     """
-    Build mapping from EZ (game, run, ez_play_idx) -> behavioral MongoDB ObjectId.
+    Build mapping from EZ (game, run, ez_play_idx) -> original behavioral play ID.
 
-    NOTE: This function is only used for the OLD directory format.
-    For the new format with embedded play keys, no mapping is needed.
+    Ordinal paths require this frame-count mapping.
+    Paths with embedded play IDs support direct lookup.
 
     This function loads each trace file to get state counts for matching.
     """
@@ -2094,11 +2094,11 @@ def process_subject(
 
             # Get feature dimensions from first available file
             if ez_new_format:
-                # New format: keys are play_ids (strings)
+                # Play-ID paths: keys are play_ids (strings)
                 first_play_id = list(ez_available.keys())[0]
                 first_ez_path, _, _ = ez_available[first_play_id]
             else:
-                # Old format: keys are (game, run, play_idx) tuples
+                # Ordinal paths: keys are (game, run, play_idx) tuples
                 first_key = list(ez_available.keys())[0]
                 (first_ez_path,) = ez_available[first_key]
 
@@ -2112,9 +2112,11 @@ def process_subject(
                         f"    EZ layer '{layer_name}': {ez_n_features_by_layer[layer_name]} features"
                     )
 
-            # Build mapping only for old format
+            # Build a frame-count mapping for ordinal paths
             if not ez_new_format:
-                logging.info("  Building EZ -> Behavioral mapping (old format)...")
+                logging.info(
+                    "  Building EZ -> Behavioral mapping from ordinal paths..."
+                )
                 ez_to_beh_mapping = build_ez_to_behavioral_mapping(
                     ez_available, all_plays_list, subject
                 )
@@ -2122,8 +2124,8 @@ def process_subject(
                     v: k for k, v in ez_to_beh_mapping.items() if v is not None
                 }
             else:
-                # For new format, play_ids ARE the keys, so mapping is direct
-                logging.info("  Using direct play_id mapping (new format)")
+                # Paths contain play_ids, so mapping is direct
+                logging.info("  Using direct play_id mapping from EZ paths")
 
     if require_ez and not has_ez:
         raise ValueError(
@@ -2255,11 +2257,11 @@ def process_subject(
 
                 # Check EZ availability based on format
                 if ez_new_format:
-                    # New format: direct lookup by play_id
+                    # Play-ID paths: direct lookup by play_id
                     has_ez_for_play = play_id in ez_available
                     ez_path = ez_available[play_id][0] if has_ez_for_play else None
                 else:
-                    # Old format: lookup via mapping
+                    # Ordinal paths: lookup via frame-count mapping
                     ez_key = beh_to_ez_mapping.get(play_id)
                     has_ez_for_play = ez_key is not None
                     ez_path = ez_available[ez_key][0] if has_ez_for_play else None
@@ -3122,7 +3124,7 @@ if __name__ == "__main__":
     # Build LLM sources list from arguments
     llm_sources = []
 
-    # New format: --llm-source (repeatable)
+    # Named LLM sources: --llm-source (repeatable)
     if args.llm_sources_raw:
         for src_str in args.llm_sources_raw:
             try:
@@ -3132,7 +3134,7 @@ if __name__ == "__main__":
                 raise
         logging.info(f"Configured {len(llm_sources)} LLM source(s)")
 
-    # Backward compatibility: --llm-features-dir (deprecated)
+    # Single unnamed source: --llm-features-dir (deprecated)
     elif args.llm_features_dir:
         logging.warning(
             "--llm-features-dir is deprecated and will be removed in a future version. "

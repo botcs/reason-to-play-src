@@ -1,4 +1,4 @@
-"""Recover the legacy batch interface without requiring vLLM or a GPU."""
+"""Verify observation generation batches without requiring vLLM or a GPU."""
 
 import json
 import subprocess
@@ -33,7 +33,7 @@ def test_wrapper_import_and_cli_help_do_not_import_gpu_packages():
     assert "--prompts" in result.stdout
 
 
-def test_legacy_generation_preserves_prompt_identity_across_file_batches(
+def test_generation_preserves_prompt_identity_across_file_batches(
     monkeypatch, tmp_path
 ):
     batches = []

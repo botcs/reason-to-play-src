@@ -103,7 +103,7 @@ def _make_replay(states: list[dict]) -> dict:
 
 
 class TestRoundTrip:
-    """Encoding then expanding must recover the original states exactly."""
+    """Encoding then expanding must reproduce the input states exactly."""
 
     def test_static_game(self):
         """All frames identical (avatar doesn't move) -- sprites omitted after frame 0."""
@@ -312,7 +312,7 @@ class TestEdgeCases:
         expand_delta_states(data)
         assert data["states"] == original["states"]
 
-    def test_expand_noop_on_old_format(self):
+    def test_expand_noop_on_full_states(self):
         """expand_delta_states is a no-op if delta_encoded flag is absent."""
         states = [_make_state({"wall": [WALL_A]}) for _ in range(3)]
         data = _make_replay(states)
@@ -358,7 +358,7 @@ class TestEdgeCases:
 
 class TestFileIO:
     def test_save_and_load_round_trip(self, tmp_path):
-        """save_replay then load_replay recovers original data."""
+        """save_replay then load_replay returns the input data."""
         sprites = {"wall": [WALL_A, WALL_B], "avatar": [AVATAR_POS1]}
         states = [
             _make_state(sprites),
@@ -392,7 +392,7 @@ class TestFileIO:
         assert parsed["delta_encoded"] is True
         assert "states" in parsed
 
-    def test_load_old_format_without_delta(self, tmp_path):
+    def test_load_full_states_without_delta(self, tmp_path):
         """load_replay handles old files that lack delta_encoded flag."""
         data = _make_replay(
             [
@@ -402,7 +402,7 @@ class TestFileIO:
         )
         original_states = copy.deepcopy(data["states"])
 
-        # Write without delta encoding (old format)
+        # Write without delta encoding
         path = tmp_path / "old.replay.json.gz"
         with gzip.open(path, "wt") as f:
             json.dump(data, f)

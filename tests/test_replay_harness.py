@@ -953,7 +953,7 @@ class TestPersistentGenerationMockLLM:
             agent.run_replay(states, level=0)
 
     def test_extraction_messages_persistent(self, prompt_loader):
-        """MT persistent extraction messages: properly restructured conversation."""
+        """Extraction messages contain the rationale and action without user hints."""
         mock = MockLLM('{"rationale": "analyzing", "action": "right"}')
         cfg = HarnessConfig(
             rationale_mode="copied-reasoning", suggestion_level="elaborate"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the recovered per-subject fMRIPrep 24.1.0 configuration with a local SIF."""
+"""Run the per-subject fMRIPrep 24.1.0 configuration with a local SIF."""
 
 import argparse
 import hashlib
@@ -17,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def replay_config_text(config):
-    """Drop prior invocation bookkeeping while retaining scientific settings."""
+    """Drop prior invocation bookkeeping while retaining preprocessing settings."""
     stale = {
         "bids_database_dir",
         "run_uuid",
@@ -36,7 +36,7 @@ def replay_config_text(config):
     return "\n".join(lines) + "\n"
 
 
-def scientific_arguments(cfg):
+def preprocessing_arguments(cfg):
     """Override 24.1.0 argparse defaults, which otherwise overwrite the TOML."""
     workflow = cfg["workflow"]
     arguments = []
@@ -88,10 +88,10 @@ def command(args):
         if record["path"] == manifest["selected_configs"][args.subject]
     )
     if hashlib.sha256(config.read_bytes()).hexdigest() != expected:
-        raise ValueError(f"Recovered config checksum does not match manifest: {config}")
+        raise ValueError(f"Configuration checksum does not match manifest: {config}")
     cfg = tomllib.loads(config.read_text())
     if cfg["environment"]["version"] != "24.1.0":
-        raise ValueError("Only recovered fMRIPrep 24.1.0 configurations are supported")
+        raise ValueError("Only fMRIPrep 24.1.0 configurations are supported")
     mounts = [
         (args.bids_dir, "/data", "ro"),
         (args.output_dir, "/out", "rw"),
@@ -124,7 +124,7 @@ def command(args):
             "/work",
         ]
     )
-    result.extend(scientific_arguments(cfg))
+    result.extend(preprocessing_arguments(cfg))
     return result, config
 
 
@@ -149,7 +149,7 @@ def main():
     if not re.fullmatch(r"sub-(0[1-9]|[12][0-9]|3[0-2])", args.subject):
         parser.error("--subject must be sub-01 through sub-32")
     argv, config = command(args)
-    LOGGER.info("Recovered config: %s", config)
+    LOGGER.info("Configuration: %s", config)
     LOGGER.info("Command: %s", shlex.join(argv))
     if args.dry_run:
         return

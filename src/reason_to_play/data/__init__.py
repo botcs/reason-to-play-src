@@ -1,1 +1,1 @@
-"""Scientific readers for human behaviour and model data."""
+"""Behavior readers for human behaviour and model data."""

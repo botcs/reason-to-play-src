@@ -1,4 +1,4 @@
-"""Released replays alone supply scientific observations and original identities."""
+"""Released replays alone supply recorded frames and original identities."""
 
 from copy import deepcopy
 from datetime import datetime
@@ -132,7 +132,7 @@ def test_conditions_are_selected_once_and_original_run_order_is_preserved(tmp_pa
 
 
 @pytest.mark.parametrize("damage", ["bounds", "id", "clock", "definition"])
-def test_reject_inconsistent_scientific_records(tmp_path, damage):
+def test_reject_inconsistent_recorded_values(tmp_path, damage):
     record = recording()
     if damage == "bounds":
         record["plays"][0]["state_start"] = 1
@@ -189,8 +189,8 @@ def test_replay_loader_keeps_all_idle_plays_and_rejects_non_json_inputs(tmp_path
     original, frames = loader.load_play("sub-13", 1, 4)
     assert original["_id"] == record["plays"][0]["_id"]
     assert len(frames) == 2 and all(frame["keyPressType"] is None for frame in frames)
-    legacy = tmp_path / "non-json" / "plays" / "sub-13"
-    legacy.mkdir(parents=True)
-    (legacy / "run-01.bson").write_bytes(b"not a JSON recording")
+    non_json = tmp_path / "non-json" / "plays" / "sub-13"
+    non_json.mkdir(parents=True)
+    (non_json / "run-01.bson").write_bytes(b"not a JSON recording")
     with pytest.raises(FileNotFoundError, match="No human JSON recordings"):
-        HumanPlayLoader(str(legacy.parent.parent))
+        HumanPlayLoader(str(non_json.parent.parent))

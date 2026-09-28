@@ -1,7 +1,7 @@
 # Inventory, manifest and staging workflow
 
 This guide covers dataset catalogues and tools for maintaining a source
-inventory. Scientific payloads and generated catalogues belong in the dataset,
+inventory. Dataset files and generated catalogues belong in the dataset,
 not the code repository. The [dataset card](huggingface-dataset-card.md) records
 publication status for `csbotos/reason-to-play`.
 
@@ -110,7 +110,7 @@ one row per participant/game/prompt condition. Its schema is
 | `artifact_id` | `sha256:` followed by the compressed payload checksum |
 | `payload` | Human JSON schema/version, compressed byte count and SHA-256 |
 | `metadata` | Participant, game, prompt condition and play/frame/step counts |
-| `provenance.scientific_sha256` | Identity of measured behavior; agrees across prompt conditions for one participant/game |
+| `provenance.measurement_sha256` | Hash of the recorded behavior; agrees across prompt conditions for one participant/game |
 | `provenance.recorded_behavior` | Original human study and associated OpenNeuro dataset/version |
 | `provenance.upstream_replay` | Source attribution: frozen source artifact ID, source checksum and exact S3 bucket/key/version |
 
@@ -123,7 +123,7 @@ not a required consumer input.
 ## Path and publication contract
 
 Dataset destinations are relative to one release root. Original source keys
-remain in provenance metadata. Model IDs and scientific condition fields remain
+remain in provenance metadata. Model IDs and experimental condition fields remain
 explicit rather than being reconstructed from filenames. The manifest supplies
 the exact path for every feature, BOLD input, atlas, result and website asset;
 follow the [dataset analysis guide](../guides/dataset-analysis.md) to select the
@@ -132,7 +132,6 @@ inputs for a workflow. Human files use
 
 The planned Hugging Face configurations are `planned_files`, `files` and
 `human_plays`, each with
-split name **`data`**. This is an organizational split, not a scientific
-train/test partition; `all` is reserved by the datasets loader. Before publishing,
+split name **`data`**. This is an organizational split, not a train/test partition; `all` is reserved by the datasets loader. Before publishing,
 test the actual local package by configuration name, then test the uploaded
 repository at its immutable dataset commit. See the [dataset card](huggingface-dataset-card.md) for catalogue contents.

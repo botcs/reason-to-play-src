@@ -352,7 +352,7 @@
   },
   "caveats": [
     "One early sub-02 invocation used bold2anat_dof=6; all other 37 and every selected latest invocation used 9.",
-    "SIF/container digest and full template cache were not recorded in the recovered configs.",
+    "SIF/container digest and full template cache were not recorded in the recorded configs.",
     "sub-09 reports five runs; other subjects report six.",
     "Configuration availability does not establish successful completion or map each output to an invocation."
   ]

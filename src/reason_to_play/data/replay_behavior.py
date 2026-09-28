@@ -1,4 +1,4 @@
-"""Scientific readers for self-contained participant/game human replay files."""
+"""Behavior readers for self-contained participant/game human replay files."""
 
 from __future__ import annotations
 
@@ -296,7 +296,7 @@ def replay_runs(root, *, condition="elaborate"):
                     or not isinstance(scanner.get("scan_start_dt"), datetime)
                 ):
                     raise ValueError(
-                        f"Invalid recovered scanner clock or missing provenance in {context}"
+                        f"Invalid derived scanner clock or missing provenance in {context}"
                     )
             if key in runs and runs[key] != scanner:
                 raise ValueError(f"Conflicting embedded scanner records: {key}")

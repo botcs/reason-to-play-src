@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope": "Origins of scientific implementations; source pins alone do not identify the producing run for paper outputs",
+  "scope": "Origins of analysis implementations; source pins alone do not identify the producing run for paper outputs",
   "files": {
     "src/reason_to_play/fmri/preprocess.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
@@ -38,7 +38,7 @@
       "path": "utils/extract_bold_to_npz.py"
     },
     "src/reason_to_play/fmri/fmriprep.py": {
-      "origin": "Scientific settings from the original RC_RL launcher and retained execution configurations",
+      "origin": "Preprocessing settings from the original RC_RL launcher and retained execution configurations",
       "original_launcher": "../../src/reason_to_play/resources/fmriprep/original-launcher/source.json",
       "config_manifest": "../../src/reason_to_play/resources/fmriprep/manifest.json"
     }

@@ -3,7 +3,7 @@
 ZstateAdapter: Convert Tomov 2023 zstate dicts to game engine format.
 
 Connects measured human JSON frames to the unified Harness pipeline.
-The adapter converts the scientific reader's frame dictionaries into the
+The adapter converts the behavior reader's frame dictionaries into the
 same 2D grid + event tuples that the game engine produces via env.step().
 
 This allows ObservationFormatter and EventLogger to operate identically on both

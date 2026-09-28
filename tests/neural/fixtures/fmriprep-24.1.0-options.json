@@ -2,8 +2,8 @@
   "source_url": "https://raw.githubusercontent.com/nipreps/fmriprep/24.1.0/fmriprep/cli/parser.py",
   "source_sha256": "1073c7cc7836280a61157b72a39aba44a8298a73f8742ba701fd971373640868",
   "source_version": "24.1.0",
-  "extraction": "AST-derived add_argument definitions overlapping recovered execution/workflow/nipype/seeds keys, plus _random_seed. Implicit argparse boolean defaults are materialized. Runtime type/action expressions are names, not executable fixture code. The one Path default expression for work_dir depends on the caller cwd.",
-  "config_overlay_semantics": "parser loads TOML then config.from_dict(vars(opts)); _Config.load ignores None but overwrites every other value. Defaults therefore override recovered TOML values unless explicit flags restore them.",
+  "extraction": "AST-derived add_argument definitions overlapping recorded execution/workflow/nipype/seeds keys, plus _random_seed. Implicit argparse boolean defaults are materialized. Runtime type/action expressions are names, not executable fixture code. The one Path default expression for work_dir depends on the caller cwd.",
+  "config_overlay_semantics": "parser loads TOML then config.from_dict(vars(opts)); _Config.load ignores None but overwrites every other value. Defaults therefore override recorded TOML values unless explicit flags specify them.",
   "options": [
     {
       "flags": [

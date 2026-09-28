@@ -27,11 +27,11 @@ credentials. Keep their engine revisions separate:
 | `vendor/rc_rl/current/` | DDQN training and behavioural generation |
 | `vendor/rc_rl/ez/` | EfficientZero's environment, level transformations and warmup levels |
 | `vendor/efficientzero/` | EfficientZero model inference |
-| `recovered/efficientzero/` | Activation and trace extraction scripts |
+| `extraction/efficientzero/` | Activation and trace extraction scripts |
 
 The source records include commits and per-file hashes. Upstream license and
 publication-permission limits are listed in [THIRD_PARTY.md](../../THIRD_PARTY.md)
-and [EfficientZero provenance](../../baselines/recovered/efficientzero/PROVENANCE.json).
+and [EfficientZero provenance](../../baselines/extraction/efficientzero/PROVENANCE.json).
 The repository's MIT license does not replace those terms.
 
 ## Offline behavioural inputs
@@ -87,7 +87,7 @@ python runDDQN.py --game_name vgfmri4_bait --random_seed 7 --no_wandb
 ```
 
 This is an entry-point example, not the paper's full training configuration.
-Use the recorded sweep/run settings for a scientific comparison. A small CPU
+Use the recorded sweep/run settings when comparing reported results. A small CPU
 training check under Python 3.12 validates execution, not historical performance.
 
 ## EfficientZero hidden features
@@ -100,7 +100,7 @@ draw order. This does not simulate a new human trajectory.
 
 Each checkpoint must retain its `models/` directory and sibling
 `logs/Train.log`: the extractor reads the recorded architecture from that log.
-[checkpoint_paths.json](../../baselines/recovered/efficientzero/checkpoint_paths.json) records
+[checkpoint_paths.json](../../baselines/extraction/efficientzero/checkpoint_paths.json) records
 the six-game source selection. Choose the checkpoint/log pair from the dataset
 manifest or your own run, preserving their relative layout. Its `release_models`
 entries identify the indexed source snapshot and do not establish an association
@@ -115,7 +115,7 @@ python baselines/run_efficientzero.py traces -- \
   --subj-id 12 --run-id 6 --play-id 0 --game-name vgfmri4_bait \
   --play-key 606debc9b4f366ca0cba5fda \
   --heads all --device cpu \
-  --trace-layers-json /absolute/reason-to-play-src/baselines/recovered/efficientzero/trace_layers.json \
+  --trace-layers-json /absolute/reason-to-play-src/baselines/extraction/efficientzero/trace_layers.json \
   --trace-output /absolute/data/ez-features/vgfmri4_bait/subj12/run6/play0_key606debc9b4f366ca0cba5fda/traces.pt
 ```
 

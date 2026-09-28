@@ -294,14 +294,14 @@ def _locate_run_directory(checkpoint_path: Path) -> Path:
 
 
 def _load_config(run_dir: Path, override: Optional[Union[Mapping[str, Any], OmegaConf]]) -> OmegaConf:
-    """Recover the Hydra config stored in logs/Train.log, or apply a manual override."""
+    """Read the Hydra config stored in logs/Train.log, or apply a manual override."""
     if override is not None:
         return OmegaConf.create(override)
 
     log_path = run_dir / "logs" / "Train.log"
     if not log_path.exists():
         raise FileNotFoundError(
-            f"Cannot recover the training config. Expected a log file at {log_path}."
+            f"Cannot read the training config. Expected a log file at {log_path}."
         )
 
     config_line = None
@@ -454,7 +454,7 @@ def _prepare_observations(
 
 
 def _infer_frame_channels(config: OmegaConf) -> int:
-    """Heuristically recover the per-frame channel count from the training config."""
+    """Infer the per-frame channel count from the training config."""
     obs_channels = int(config.env.obs_shape[0])
     n_stack = max(1, int(config.env.n_stack))
     if obs_channels >= n_stack and obs_channels % n_stack == 0:

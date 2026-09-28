@@ -15,5 +15,5 @@
     }
   ],
   "role": "Historical evidence. Use python -m reason_to_play.fmri.fmriprep for the documented public interface.",
-  "execution_provenance": "Original launcher invokes Docker; recovered TOMLs identify Singularity. Their scientific settings agree, but exact producing invocation/container digest is unresolved."
+  "execution_provenance": "Original launcher invokes Docker; recorded TOMLs identify Singularity. Their preprocessing settings agree, but exact producing invocation/container digest is unresolved."
 }

@@ -45,9 +45,9 @@ explicit experiment configuration. Read this guide before changing code.
 Read the relevant module and its tests before editing. Update this map when
 moving an implementation; do not leave a second implementation at the old path.
 
-## Preserve scientific meaning
+## Preserve data and analysis conventions
 
-- Keep structural changes separate from changes to scientific methods or study
+- Keep structural changes separate from changes to analysis methods or study
   settings. Tests passing does not establish reproduction of the paper results.
 - Ordinary analysis reads the derivative dataset alone. Keep raw-MRI
   reconstruction optional. The public pipeline reads JSON behaviour; do not
@@ -56,7 +56,7 @@ moving an implementation; do not leave a second implementation at the old path.
   trajectory and exact prompts together. Preserve original play/run identities,
   frame timestamps and the input/event fields needed by analyses. Do not require
   external prompt-to-trajectory joins or dynamic reconstruction merely to avoid
-  repetition. Scientific readers select one prompt condition by default to
+  repetition. Human-data readers select one prompt condition by default to
   avoid counting repeated behaviour three times.
 - The study ROI mask is the intersection across all 32 source participants,
   including when fitting/plotting a smaller cohort. Pass the released mask
@@ -69,7 +69,7 @@ moving an implementation; do not leave a second implementation at the old path.
   timestamps, play/run identifiers, lag boundaries and alignment metadata.
 - Preserve fractional replay positions from the original rendering rectangles.
   Human replay visuals use the recorded frame's rectangle coordinates; prompt
-  alignment and model input quantization are separate scientific operations.
+  alignment and model input quantization are separate operations.
   Do not replace recorded visuals with rounded observation grids or simulated
   positions. Validate these changes independently of prompt/feature contents.
 - Each replay has one authoritative `game_description`: the translated VGDL
@@ -103,8 +103,9 @@ moving an implementation; do not leave a second implementation at the old path.
   source files does not change source-object identities or historical hashes.
 - Maintain commands in the workflow guides. README, website and dataset-card
   references should lead to those guides; use `CITATION.cff` for citation data.
-- Public documentation describes the supported interface. Keep development
-  notes in the development repository.
+- Use concrete names: recorded frames, play IDs, scanner times, model inputs
+  and analysis results. Public documentation describes the data and supported
+  workflows. Keep release-preparation notes in the development repository.
 
 ## Verification
 

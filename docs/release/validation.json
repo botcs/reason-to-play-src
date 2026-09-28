@@ -38,7 +38,7 @@
       "cloud_api_required": false
     },
     "generic_feature_extraction": {
-      "purpose": "Actual CPU entrypoint/interface validation, not scientific feature reproduction",
+      "purpose": "CPU entrypoint/interface validation using synthetic weights; does not reproduce paper activations",
       "model": "Locally initialized tiny Llama with a fast ChatML tokenizer",
       "parameters": 21536,
       "recorded_turns": 6,
@@ -58,7 +58,7 @@
       "deliberately_invalid_session_exit_code": 1
     },
     "extraction_failure_status": "Generic, V3.2 and V4 batch tests distinguish completed, skipped and failed sessions; continuation retains successful outputs while still failing the command when any selected session fails.",
-    "efficientzero": "Bundled runtime and recovered extractor ran a small recorded trajectory on CPU and produced all requested layer traces; no private checkout was required. Final-paper checkpoint identity remains unresolved.",
+    "efficientzero": "Bundled runtime and extractor ran a small recorded trajectory on CPU and produced all requested layer traces; no private checkout was required. Final-paper checkpoint identity remains unresolved.",
     "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
     "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
     "figures": "Historical behavioral and neural figure commands ran against separately held tables; partial-table neural plotting also passed a headless synthetic smoke. Those tables are not included in this code release.",
@@ -82,7 +82,7 @@
       "unique_plays": 6994,
       "unique_frames": 1661744,
       "unique_selected_steps": 342492,
-      "compressed_bytes": 411043253,
+      "compressed_bytes": 411040889,
       "catalogue_rows": 6994,
       "catalogue_measurement_columns_compared": 18,
       "catalogue_differences": 0,
@@ -124,7 +124,6 @@
     "Complete multimodal dataset staging, payload hashing or Hugging Face upload."
   ],
   "data_boundary": "Participant payloads and catalogue tables belong to the separate dataset package. This Git repository contains implementations, specifications and aggregate validation evidence.",
-  "scientific_limitations": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions.",
   "dataset_package_validation": "Separate local HF package loaded through its README configurations with datasets 4.8.5 using split=data. Both catalogue configurations loaded successfully; no remote upload was performed.",
   "package": {
     "build": "setuptools wheel",
@@ -137,5 +136,6 @@
       "frames": 12775,
       "scanner_runs": 3
     }
-  }
+  },
+  "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
 }

@@ -38,7 +38,7 @@ def feature(play, frames=(0, 2, 4), *, linked=True):
         "timestamps": np.asarray([play["states"][i]["ts"] for i in frames]),
         "activations": {"layer_1": np.arange(len(frames)).reshape(-1, 1)},
         "metadata": {
-            "play_id": "legacy composite display identity",
+            "play_id": "composite display identity",
             "source_references": references if linked else None,
         },
     }
@@ -116,7 +116,7 @@ def test_linked_reference_errors_fail_before_alignment(change, match):
         align.match_multiturn_plays({0: candidate}, plays)
 
 
-def test_legacy_matching_is_unique_in_both_directions():
+def test_timestamp_only_matching_is_unique_in_both_directions():
     a, b = original("a", 0), original("b", 1, start=1_600_000_030.0)
     candidate = feature(a, linked=False)
     matched = align.match_multiturn_plays({99: candidate}, {"b": b, "a": a})

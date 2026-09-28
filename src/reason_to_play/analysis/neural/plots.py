@@ -936,7 +936,7 @@ def select_encoding_rows(
     variant: str | None = None,
     fit_condition: str | None = None,
 ) -> tuple[pd.DataFrame, list[str] | None]:
-    """Select declared scientific cells before any averaging or layer selection."""
+    """Select declared analysis conditions before any averaging or layer selection."""
     required = {
         "model",
         "variant",
@@ -1044,7 +1044,7 @@ def select_encoding_rows(
                     "historical_fit_condition must match the explicitly selected condition"
                 )
             warnings.warn(
-                "Legacy CSV has no fit_condition column; using the explicitly declared historical_fit_condition, not recovered row metadata",
+                "CSV has no fit_condition column; using the explicitly declared historical_fit_condition",
                 stacklevel=2,
             )
             df["fit_condition"] = declared

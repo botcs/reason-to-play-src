@@ -78,19 +78,18 @@ Neural outputs distinguish feature variant/stream, performance band and fit
 condition. Main-only and nuisance-adjusted fits must not be silently combined.
 Best-layer selection and stochastic fitting follow the documented analysis
 conventions. Executable code alone does not independently validate the paper’s
-scientific conclusions.
+conclusions.
 
 ## Validation scope
 
 The [validation summary](release/validation.json) records test commands and
 execution limits. The human-file checks cover all 6,994 task attempts and
-1,661,744 recorded states. Measured trajectories and scientific identities agree
+1,661,744 recorded states. Measured trajectories and play and frame IDs agree
 across all three prompt conditions; the catalogue counts each observation once.
 Representative checks cover recorded human replay,
 three-stream extraction through a tiny synthetic CPU model, baseline runtime
 checks, and synthetic NIfTI-to-ROI integration. The tiny model validates the
-extraction interface and timestamps; its features are not scientific paper
-features. Figure commands also run against the corresponding result tables;
+extraction interface and timestamps; its features are not the activations used in the paper. Figure commands also run against the corresponding result tables;
 the code repository does not embed participant-derived tables.
 
 Further checks reproduce 6,426 archived ROI rows with the released atlas and

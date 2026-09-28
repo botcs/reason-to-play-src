@@ -1,4 +1,4 @@
-"""Dependency-free checks for recovered provenance and the container boundary."""
+"""Dependency-free checks for preprocessing configurations and the container boundary."""
 
 import argparse
 import hashlib
@@ -19,7 +19,7 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
-def historical_scientific_parser():
+def fmriprep_option_parser():
     """Reconstruct option semantics from the actual pinned upstream parser AST."""
     fixture = json.loads(
         (ROOT / "tests/neural/fixtures/fmriprep-24.1.0-options.json").read_text()
@@ -55,7 +55,7 @@ def historical_scientific_parser():
     return parser
 
 
-class RecoveredPipelineTests(unittest.TestCase):
+class FmriprepPipelineTests(unittest.TestCase):
     def test_original_launcher_is_preserved_and_agrees_with_selected_configs(self):
         directory = runner.PROVENANCE / "original-launcher"
         record = json.loads((directory / "source.json").read_text())
@@ -70,7 +70,7 @@ class RecoveredPipelineTests(unittest.TestCase):
             "--verbose", 1
         )[0]
         raw_options = raw_options.replace("\\\n", " ")
-        original, _ = historical_scientific_parser().parse_known_args(
+        original, _ = fmriprep_option_parser().parse_known_args(
             shlex.split(raw_options)
         )
         selected = json.loads((runner.PROVENANCE / "manifest.json").read_text())[
@@ -79,8 +79,8 @@ class RecoveredPipelineTests(unittest.TestCase):
         for relative in selected.values():
             config = tomllib.loads((runner.PROVENANCE / relative).read_text())
             effective = vars(
-                historical_scientific_parser().parse_args(
-                    runner.scientific_arguments(config)
+                fmriprep_option_parser().parse_args(
+                    runner.preprocessing_arguments(config)
                 )
             )
             for key in (
@@ -107,16 +107,16 @@ class RecoveredPipelineTests(unittest.TestCase):
                     getattr(original, key), effective[key], (relative, key)
                 )
 
-    def test_effective_scientific_options_match_every_selected_configuration(self):
-        parser = historical_scientific_parser()
-        # This is the original failure: --config-file alone is overwritten by
-        # the pinned upstream parser's non-None defaults.
+    def test_effective_preprocessing_options_match_every_selected_configuration(self):
+        parser = fmriprep_option_parser()
+        # --config-file alone is overwritten by the pinned upstream parser's
+        # non-None defaults.
         self.assertEqual(parser.parse_args([]).bold2anat_dof, 6)
         self.assertTrue(parser.parse_args([]).run_reconall)
         manifest = json.loads((runner.PROVENANCE / "manifest.json").read_text())
         for relative in manifest["selected_configs"].values():
             cfg = tomllib.loads((runner.PROVENANCE / relative).read_text())
-            options = vars(parser.parse_args(runner.scientific_arguments(cfg)))
+            options = vars(parser.parse_args(runner.preprocessing_arguments(cfg)))
             for key, expected in cfg["workflow"].items():
                 effective = options.get(key)
                 if effective is None:

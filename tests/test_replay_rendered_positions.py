@@ -48,7 +48,7 @@ def test_human_visual_uses_rendered_rectangle_without_flooring(position):
 
 
 @pytest.mark.parametrize("rectangle", [None, {}, {"size": [35, 35]}])
-def test_legacy_object_without_rectangle_position_has_explicit_xy_fallback(rectangle):
+def test_object_without_rectangle_position_has_explicit_xy_fallback(rectangle):
     source = frame(x=-8.75, y=87.5)
     source["objects"]["avatar"]["source-position"]["rect"] = rectangle
     visual = convert_zstate_to_viewer(source, 35)["sprites"]["avatar"][0]

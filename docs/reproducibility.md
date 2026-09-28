@@ -39,7 +39,7 @@ when studying preprocessing choices or reconstructing upstream derivatives.
 For fitting the supplied analysis inputs or aligning a new model to the supplied
 BOLD, use the [dataset guide](guides/dataset-analysis.md).
 
-The original launcher, recorded configurations and scientific conventions carry
+The original launcher, recorded configurations and analysis methods carry
 source attribution. Available source code does not prove
 the producing invocation, checkpoint or random seed of every archived result;
 the [reproduction limits](reproduction-limits.md) distinguishes these.

@@ -142,7 +142,7 @@ def _behavioral_to_vgdl_game_name(name: str) -> str:
     VGDL registry uses '{game}_{version}' (e.g. 'bait_vgfmri3').  Casing
     in behavioral data is inconsistent (`avoidgeorge` vs the canonical
     `avoidGeorge`), so the swapped lowercase is looked up against the
-    games/ directory to recover the canonical casing.
+    games/ directory to find the canonical casing.
     """
     parts = name.split("_", 1)
     if len(parts) != 2:

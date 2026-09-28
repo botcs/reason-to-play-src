@@ -36,9 +36,9 @@ The original `_id` identifies a play across prompt conditions.
 `scanner` inside each play retains the original run identity and timing needed
 for neural alignment, including `scan_start_ts`. Repeating this small record
 makes the file independently usable. It does not embed source game rules or
-level layouts. The missing source scanner record for participant 11/run 05 is
-represented by an explicitly marked recovered clock: all nine original plays
-agree on its start time. That entry carries its evidence and `clock_only` flag.
+level layouts. Participant 11/run 05 has no separate source scanner record.
+Its start time is derived from the nine play records, which all agree on that time. The
+embedded scanner entry records this derivation and has `clock_only: true`.
 The other selected runs use their original scanner clocks.
 
 Human play outcomes are **true, false, or null**. `outcome` distinguishes `win`,
@@ -79,7 +79,7 @@ copies recorded values; it does not run or simulate the game.
 A sprite's `col` and `row` are its original drawing-rectangle coordinates divided
 by the play's `block_size`. They retain fractional values. The web viewer renders
 these positions directly, without shifting them to the next frame. Original
-logical pixel coordinates `x` and `y` are also retained because some scientific
+logical pixel coordinates `x` and `y` are also retained because the baseline model
 inputs use them and they can differ from the drawing rectangle. Sprite IDs,
 source keys, RGB colours, optional colour names and recorded resources remain
 available. Empty sprite groups are retained.
@@ -113,7 +113,7 @@ pipeline preserves observation identities with the resulting activations.
 
 ## Reading a file
 
-The scientific reader restores measured fields to dictionaries using the Python
+The reader decodes recorded fields into dictionaries using the Python
 standard library; it does not import BSON or an engine. Source datetimes and
 binary values in metadata/events use explicit `$rtp` encodings in JSON.
 

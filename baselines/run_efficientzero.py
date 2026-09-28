@@ -21,8 +21,8 @@ from datetime import datetime, timezone
 ROOT = Path(__file__).resolve().parent
 ENTRYPOINTS = {
     "train": ("efficientzero", "ez/train.py"),
-    "features": ("recovered", "get_efficientzero_activations.py"),
-    "traces": ("recovered", "get_attention_matrix.py"),
+    "features": ("extraction", "get_efficientzero_activations.py"),
+    "traces": ("extraction", "get_attention_matrix.py"),
 }
 
 
@@ -63,8 +63,8 @@ def command(
         if subprocess.call(["git", "-C", str(engine), "diff", "--quiet", "HEAD", "--"]):
             raise ValueError("External RC_RL checkout has tracked changes")
     source_dir = (
-        ROOT / "recovered" / "efficientzero"
-        if source_name == "recovered"
+        ROOT / "extraction" / "efficientzero"
+        if source_name == "extraction"
         else checkouts / source_name
     )
     script = source_dir / entry
@@ -90,7 +90,7 @@ def command(
     env.setdefault("SDL_VIDEODRIVER", "dummy")
     env.setdefault("SDL_AUDIODRIVER", "dummy")
     env.setdefault("MPLBACKEND", "Agg")
-    # The child uses the recovered source directory as cwd. Resolve dataset roots
+    # The child uses the extraction directory as cwd. Resolve dataset roots
     # against the caller's cwd before crossing that boundary.
     args = list(args)
     for index, value in enumerate(args):
@@ -174,7 +174,7 @@ def record_trace_provenance(
             (ROOT / "vendor/efficientzero/PROVENANCE.json").read_text()
         ),
         "extractor_source": json.loads(
-            (ROOT / "recovered/efficientzero/PROVENANCE.json").read_text()
+            (ROOT / "extraction/efficientzero/PROVENANCE.json").read_text()
         ),
         "requested_play_key": selected.play_key,
     }

@@ -431,5 +431,5 @@
     "max_level": 8,
     "historical_seed": null
   },
-  "notes": "Selection for the reported headline encoding cohort. Historical seed and producing weight revisions are not established; explicit seeds identify fresh reruns, not recovered historical random states."
+  "notes": "Selection for the reported headline encoding cohort. Historical seed and producing weight revisions are not established; explicit seeds identify fresh reruns, not the unknown random states of the original fits."
 }

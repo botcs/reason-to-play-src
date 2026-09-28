@@ -5,7 +5,7 @@ Generate text observations using vLLM from pre-generated prompts.
 
 Legacy auxiliary utility for archived JSONL prompts. This output is not the
 .replay.json.gz input used by the current feature-extraction pipeline.
-See docs/legacy-observation-generation.md for its separate GPU environment.
+See docs/guides/text-observations.md for its separate GPU environment.
 
 Usage:
     # Generate observations for a single prompts file

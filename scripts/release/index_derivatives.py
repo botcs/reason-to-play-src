@@ -2,7 +2,7 @@
 """Read-only S3 inventory and reversible release-path manifest builder.
 
 No object bodies are downloaded; no remote objects are modified. A candidate
-is a proposed release asset, not a scientifically validated paper input.
+is a proposed release asset, not a verified input to the paper analyses.
 """
 
 from __future__ import annotations

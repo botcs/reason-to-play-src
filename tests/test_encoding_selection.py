@@ -87,14 +87,14 @@ def test_known_missing_cell_must_be_explicitly_acknowledged():
     assert len(selected) == 15
 
 
-def test_legacy_fit_condition_is_never_inferred():
-    legacy = table().drop(columns="fit_condition")
+def test_missing_fit_condition_is_never_inferred():
+    missing_condition = table().drop(columns="fit_condition")
     with pytest.raises(ValueError, match="requires fit_condition metadata"):
-        select_encoding_rows(legacy, selection=experiment())
+        select_encoding_rows(missing_condition, selection=experiment())
     config = experiment()
     config["historical_fit_condition"] = "with-nuisance"
     with pytest.warns(UserWarning, match="explicitly declared historical"):
-        selected, _ = select_encoding_rows(legacy, selection=config)
+        selected, _ = select_encoding_rows(missing_condition, selection=config)
     assert set(selected["fit_condition"]) == {"with-nuisance"}
 
 

@@ -94,7 +94,7 @@ The official paper's source archive is
 [the camera-ready source](https://github.com/tsumers/bert-brains/tree/26d4da6c1419fc8e635351ddb692897e2d0a1cc5).
 Its source repository retains GPL-3.0, while the archive metadata states
 CC-BY-4.0; retain source-file notices when examining reuse. Current VGDL
-scientific choices are documented in [analysis methods](../analysis-methods.md).
+analysis choices are documented in [analysis methods](../analysis-methods.md).
 
 ## fMRI preprocessing sources
 

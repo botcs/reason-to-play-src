@@ -105,7 +105,7 @@ tests. Keep the paper's study settings explicit when adapting an experiment.
 
 The original human data are available in
 [OpenNeuro ds004323 v1.0.0](https://openneuro.org/datasets/ds004323/versions/1.0.0).
-Scientific data and model weights are separate from this code checkout.
+Datasets and model weights are separate from this code checkout.
 
 The Hugging Face release is being prepared for `csbotos/reason-to-play`:
 canonical human recordings, model prompts and gameplay, activations, processed

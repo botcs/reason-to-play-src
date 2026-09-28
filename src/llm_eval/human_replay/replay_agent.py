@@ -56,7 +56,7 @@ class ReplayAgent:
                 rationale. If None with 'copied-reasoning', rationale will
                 be empty.
             max_output_tokens: Per-turn output token cap; forwarded to the
-                Harness so the imputation prompt and repair prompts can
+                Harness so the imputation prompt and retry prompts can
                 reference it.  Required when the loaded prompt contains the
                 ``{max_output_tokens}`` placeholder.
             game_name: Game identifier (e.g. ``bait_vgfmri4``); forwarded to

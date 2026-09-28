@@ -1,4 +1,4 @@
-"""Scientific data contracts for the offline public episode exporter."""
+"""Analysis data contracts for the offline public episode exporter."""
 
 import gzip
 import json

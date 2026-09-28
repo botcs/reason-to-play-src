@@ -39,7 +39,7 @@ default; `--runtime singularity` selects Singularity. The runner checks the
 container version, records its hash and replays selected subject settings
 explicitly. Retain HTML reports, logs, confounds and masks for quality review.
 
-Recovered settings are fMRIPrep 24.1.0, MNI152NLin2009cAsym at 2 mm plus
+The recorded settings are fMRIPrep 24.1.0, MNI152NLin2009cAsym at 2 mm plus
 anatomical space, BOLD-to-anatomical DOF 9, forced BBR, no discarded dummy scans,
 no FreeSurfer reconstruction, all confound components, slice reference 0.5,
 fixed skull-stripping seed and master seed 23. An earlier sub-02 configuration
@@ -115,6 +115,6 @@ and the encoding/ROI examples in the same guide. The imputation model and
 extraction model are distinct. Preserve timestamps, original play identity,
 feature stream and prompt metadata throughout.
 
-Scientific conventions, producing-run uncertainties and bounded validation
+Analysis methods, producing-run uncertainties and bounded validation
 are documented in [reproduction limits](../reproduction-limits.md).
 Validation does not include full fMRIPrep execution or full-scale GPU extraction.

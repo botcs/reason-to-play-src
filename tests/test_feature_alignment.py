@@ -1,4 +1,4 @@
-"""Contract between released session tensors and the recovered fMRI loader."""
+"""Contract between released session tensors and the fMRI feature reader."""
 
 import importlib.util
 import sys

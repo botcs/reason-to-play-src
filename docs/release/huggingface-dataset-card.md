@@ -15,7 +15,7 @@ tags:
 # VGDL-fMRI: Reason to Play
 
 **Draft dataset card.** This describes the intended release for
-`csbotos/reason-to-play`. Scientific payloads have not yet been published.
+`csbotos/reason-to-play`. Dataset files have not yet been published.
 
 VGDL-fMRI connects human video-game learning, fMRI recordings, model gameplay
 and model representations. It accompanies
@@ -39,7 +39,7 @@ sizes and checksums.
 | Model representations | Headline LLM activations, earlier-cohort comparisons and selected controls |
 | Generated behavior | Model gameplay with its system prompts, observations, actions and rationales in each replay file |
 | Baselines and analyses | Candidate baseline traces, selected checkpoints and neural/behavioral results |
-| Provenance | Dataset paths and checksums, scientific identities, source attribution and model/analysis settings |
+| Provenance | Dataset paths and checksums, participant, model and condition IDs, source attribution and model/analysis settings |
 
 Raw MRI is available from [OpenNeuro ds004323, version 1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).
 Historical and unreported feature extractions are excluded. The selection
@@ -52,7 +52,7 @@ another extraction run; exact regeneration is not guaranteed.
 
 The human data contains **576 JSON files**: 192 participant/game pairs across
 32 participants, with three prompt conditions each. Together these files occupy
-**411,043,253 compressed bytes** (411 MB); one condition is approximately 137 MB.
+**411,040,889 compressed bytes** (411 MB); one condition is approximately 137 MB.
 
 Each human behaviour JSON contains one participant's plays of one game across
 levels, attempts and scanner runs. The path is
@@ -93,13 +93,13 @@ row records its dataset path, content checksum, source attribution and
 publication state. The human-play catalogue contains **6,994 task attempts**
 covering **1,661,744 recorded engine states**, counted once across prompt
 conditions. Practice attempts are excluded from this task dataset; upper-level
-and cohort flags remain available for choosing a scientific comparison.
+and cohort flags remain available for choosing an analysis.
 
 During incremental publication, `planned_files` will describe the complete
 selection. `files` will appear after the first verified payload upload and
 contain only uploaded, byte-verified payloads. `human_plays` is a metadata
 table; its availability does not imply that every referenced payload is online.
-All configurations use a `data` split, which is not a scientific train/test split.
+All configurations use a `data` split, which is not a train/test split.
 
 Once those catalogues are published, load them with ordinary Python calls:
 
@@ -120,7 +120,7 @@ Catalogue loading fetches metadata. In the file catalogue, `release_path` and
 `source_release_path` and `source_payload_sha256`; several attempts can point to
 the same participant/game JSON. These hashes describe the compressed bytes.
 `provenance/human-manifest.jsonl.gz` also records each human file's schema,
-counts, checksum and scientific identity. Original S3 object identifiers are
+counts, checksum and participant/model/condition IDs. Original S3 object identifiers are
 source attribution; use dataset-relative paths for Hugging Face downloads.
 
 ## Using the research code

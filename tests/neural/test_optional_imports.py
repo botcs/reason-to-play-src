@@ -1,4 +1,4 @@
-"""Installed scientific readers must not initialize optional inference runtimes."""
+"""Installed data readers must not initialize optional inference runtimes."""
 
 import importlib.util
 from pathlib import Path
@@ -67,7 +67,7 @@ def test_editable_baseline_discovery_checks_pinned_sources():
     assert (directory / "VGDLEnv.py").is_file()
     source = ddqn.baseline_source_provenance(directory)
     assert source["distribution"] == "curated-vendor"
-    assert source["revision"] == ddqn.RECOVERED_RC_RL_REVISION
+    assert source["revision"] == ddqn.RC_RL_EXTRACTION_REVISION
 
 
 def test_install_without_vendor_requires_explicit_baseline_directory(tmp_path):
