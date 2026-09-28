@@ -20,12 +20,14 @@ from itertools import islice
 import json
 from pathlib import Path, PurePosixPath
 import re
+import shutil
 import sqlite3
 import tempfile
 from urllib.parse import quote
 
 
 SCHEMA_VERSION = 1
+DATASET_SCHEMA_VERSION = 2
 FORBIDDEN = {".git", ".aws", ".ssh", ".venv", "__pycache__", ".ipynb_checkpoints"}
 FORBIDDEN_FILES = {
     ".env",
@@ -326,6 +328,8 @@ def selected_rows(args):
 
 
 def check_row(row):
+    if row.get("schema_version") == DATASET_SCHEMA_VERSION:
+        return check_dataset_row(row)
     if row.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("Unsupported manifest schema")
     if not safe_relative(row["release_path"]) or not safe_source(row["source"]["key"]):
@@ -347,6 +351,58 @@ def check_row(row):
         raise ValueError("Invalid payload SHA-256")
 
 
+def payload_size(row):
+    """Released bytes can differ from the inputs used to generate an artifact."""
+    if row.get("schema_version") == DATASET_SCHEMA_VERSION:
+        return row["payload"]["size_bytes"]
+    return row["source"]["size_bytes"]
+
+
+def check_dataset_row(row):
+    if not safe_relative(row["release_path"]):
+        raise ValueError("Unsafe path in manifest")
+    if row["decision"] not in {"include", "optional"}:
+        raise ValueError("Manifest contains an unselected artifact")
+    if not re.fullmatch(r"sha256:[a-f0-9]{64}", row["artifact_id"]):
+        raise ValueError("Invalid artifact identity")
+    size = row["payload"].get("size_bytes")
+    if type(size) is not int or size < 0:
+        raise ValueError("Invalid payload size")
+    sha = row["payload"].get("sha256")
+    if sha is not None and not re.fullmatch(r"[a-f0-9]{64}", sha):
+        raise ValueError("Invalid payload SHA-256")
+    if row["payload"].get("validation") == "bytes-verified" and not sha:
+        raise ValueError("Verified payload is missing its SHA-256")
+    source = row["source"]
+    if source["kind"] == "s3":
+        if not safe_source(source["key"]):
+            raise ValueError("Unsafe source path")
+        if row["source_uri"] != f"s3://{source['bucket']}/{source['key']}":
+            raise ValueError("Source URI does not match the source object")
+        if size != source["size_bytes"]:
+            raise ValueError("Untransformed source and payload sizes differ")
+        if source.get("verification") == "version-pinned" and not source.get(
+            "version_id"
+        ):
+            raise ValueError("Pinned source is missing its version ID")
+        if row["artifact_id_scheme"] != "frozen-source-identity":
+            raise ValueError("Incorrect source artifact identity scheme")
+    elif source["kind"] == "generated":
+        if row["source_uri"] is not None or "local_path" in source:
+            raise ValueError("Generated records must not expose private file locations")
+        if (
+            row["artifact_id_scheme"] != "payload-sha256"
+            or row["artifact_id"] != f"sha256:{sha}"
+        ):
+            raise ValueError("Generated artifact identity must match its payload")
+        if row["payload"]["validation"] != "bytes-verified" or not sha:
+            raise ValueError("Generated payload must be byte-verified")
+    else:
+        raise ValueError("Unknown source kind")
+    if row.get("published") is not False:
+        raise ValueError("Preparation cannot assert remote publication")
+
+
 def validate(args):
     ids, paths, sources = set(), set(), set()
     counts = Counter()
@@ -357,11 +413,16 @@ def validate(args):
             (row["release_path"], paths, "release path"),
             (row["source_uri"], sources, "source URI"),
         ):
-            if value in seen:
+            if value is None:
+                continue
+            if value in seen and not (
+                label == "artifact ID"
+                and row.get("artifact_id_scheme") == "payload-sha256"
+            ):
                 raise ValueError(f"Duplicate {label}: {value}")
             seen.add(value)
         counts["objects"] += 1
-        counts["bytes"] += row["source"]["size_bytes"]
+        counts["bytes"] += payload_size(row)
         counts["version_pinned"] += bool(row["source"].get("version_id"))
         counts["payload_hashed"] += bool(row["payload"].get("sha256"))
         if args.require_staged and (
@@ -377,6 +438,8 @@ def validate(args):
 def pin_source(row, client):
     check_row(row)
     src = row["source"]
+    if src.get("kind") == "generated":
+        return row
     # IfMatch protects against a mutable key changing after the listing.
     request = {"Bucket": src["bucket"], "Key": src["key"], "IfMatch": src["etag"]}
     if src.get("version_id"):
@@ -482,6 +545,17 @@ def destination(root, relative):
 def stage_object(row, client, root):
     check_row(row)
     src = row["source"]
+    if src.get("kind") == "generated":
+        target = destination(root, row["release_path"])
+        if (
+            target.exists()
+            and target.stat().st_size == payload_size(row)
+            and digest_file(target) == row["payload"]["sha256"]
+        ):
+            return row
+        raise ValueError(
+            "Generated payload must be staged from its local assembly receipt"
+        )
     if src.get("verification") not in {"version-pinned", "head-verified-unversioned"}:
         raise ValueError("Freeze/verify source metadata before staging")
     target = destination(root, row["release_path"])
@@ -493,7 +567,11 @@ def stage_object(row, client, root):
         ):
             return {
                 **row,
-                "payload": {"sha256": expected, "validation": "bytes-verified"},
+                "payload": {
+                    **row["payload"],
+                    "sha256": expected,
+                    "validation": "bytes-verified",
+                },
             }
     kwargs = {"Bucket": src["bucket"], "Key": src["key"]}
     if src.get("version_id"):
@@ -529,7 +607,14 @@ def stage_object(row, client, root):
         if expected and sha != expected:
             raise ValueError("Payload SHA-256 mismatch")
         partial.replace(target)
-        return {**row, "payload": {"sha256": sha, "validation": "bytes-verified"}}
+        return {
+            **row,
+            "payload": {
+                **row["payload"],
+                "sha256": sha,
+                "validation": "bytes-verified",
+            },
+        }
     finally:
         body.close()
         if partial is not None:
@@ -540,7 +625,7 @@ def stage(args):
     import boto3
 
     chosen = list(selected_rows(args))
-    needed = sum(r["source"]["size_bytes"] for r in chosen)
+    needed = sum(payload_size(r) for r in chosen)
     if not chosen:
         raise ValueError("Selection is empty")
     if needed > args.max_bytes:
@@ -628,14 +713,56 @@ def catalogue(args):
                 "tier": row["tier"],
                 "component": row["component"],
                 "decision": row["decision"],
-                "size_bytes": row["source"]["size_bytes"],
+                "size_bytes": payload_size(row),
+                "artifact_id_scheme": row.get(
+                    "artifact_id_scheme", "frozen-source-identity"
+                ),
+                "source_kind": row["source"].get("kind", "s3"),
                 "sha256": row["payload"]["sha256"],
                 "source_uri": row["source_uri"],
                 "source_version_id": row["source"].get("version_id"),
                 "source_verification": row["source"]["verification"],
                 "payload_validation": row["payload"]["validation"],
                 "subject": row["metadata"].get("subject"),
-                "model_path_id": row["metadata"].get("model_path_id"),
+                "source_model_path_id": row["metadata"].get(
+                    "source_model_path_id", row["metadata"].get("model_path_id")
+                ),
+                **{
+                    name: row["metadata"].get(name)
+                    for name in (
+                        "model_family",
+                        "model_id",
+                        "game",
+                        "condition",
+                        "suggestion_level",
+                        "rationale_mode",
+                        "action_selection",
+                        "stream",
+                        "timebase",
+                        "paper_role",
+                        "seed",
+                        "checkpoint_id",
+                        "base_release_path",
+                        "base_sha256",
+                        "sample_order_status",
+                        "source_model_id",
+                        "source_game",
+                        "run_id",
+                        "run",
+                        "source_play_id",
+                        "source_play_index",
+                        "layer",
+                        "level",
+                        "fit_condition",
+                        "shuffle_unit",
+                        "artifact_role",
+                        "weight_initialization",
+                        "context_fraction",
+                        "frames",
+                        "plays",
+                        "steps",
+                    )
+                },
                 "license": row["license"],
                 "provenance_status": row["provenance"]["status"],
                 # A proposed HF path is not an existing public download URL.
@@ -648,9 +775,21 @@ def catalogue(args):
                 (
                     name,
                     pa.int64()
-                    if name == "size_bytes"
+                    if name
+                    in {
+                        "size_bytes",
+                        "seed",
+                        "source_play_index",
+                        "layer",
+                        "level",
+                        "frames",
+                        "plays",
+                        "steps",
+                    }
                     else pa.bool_()
                     if name == "published"
+                    else pa.float64()
+                    if name == "context_fraction"
                     else pa.string(),
                 )
                 for name in records[0]
@@ -669,9 +808,538 @@ def catalogue(args):
     print(f"Wrote {len(records):,} file records to {output}")
 
 
+def dataset_source_row(row, mapping, release_id):
+    """Apply an explicit reviewed path/metadata map without altering source bytes."""
+    check_row(row)
+    metadata = {**row.get("metadata", {}), **mapping.get("metadata", {})}
+    original_model_path = metadata.pop("model_path_id", None)
+    if original_model_path is not None:
+        metadata.setdefault("source_model_path_id", original_model_path)
+    if metadata.get("source_model_id") and not metadata.get("model_id"):
+        raise ValueError(
+            "An explicit public model_id is required for a source model alias"
+        )
+    provenance = {**row.get("provenance", {}), **mapping.get("provenance", {})}
+    # Reviewed package-relative references replace earlier preparation documents.
+    provenance["references"] = mapping.get("provenance", {}).get("references", [])
+    result = {
+        **row,
+        "schema_version": DATASET_SCHEMA_VERSION,
+        "release_id": release_id,
+        "artifact_id_scheme": "frozen-source-identity",
+        "source": {**row["source"], "kind": "s3"},
+        "payload": {**row["payload"], "size_bytes": row["source"]["size_bytes"]},
+        "release_path": mapping["release_path"],
+        "metadata": metadata,
+        "provenance": provenance,
+        "selection_reason": mapping["selection_reason"],
+        "published": False,
+    }
+    for name in ("component", "decision", "tier", "selection_rule"):
+        if name in mapping:
+            result[name] = mapping[name]
+    check_row(result)
+    return result
+
+
+def local_dataset_row(addition, release_id):
+    """Hash a generated/local artifact; its private path never enters the manifest."""
+    path = Path(addition["local_path"])
+    if not path.is_file():
+        raise ValueError(f"Missing local artifact: {path}")
+    size = path.stat().st_size
+    sha = digest_file(path)
+    payload = {
+        **addition.get("payload", {}),
+        "size_bytes": size,
+        "sha256": sha,
+        "validation": "bytes-verified",
+    }
+    expected = addition.get("payload", {})
+    if expected.get("sha256", sha) != sha or expected.get("size_bytes", size) != size:
+        raise ValueError(
+            f"Local artifact differs from supplied verification: {addition['release_path']}"
+        )
+    row = {
+        "schema_version": DATASET_SCHEMA_VERSION,
+        "release_id": release_id,
+        "artifact_id": f"sha256:{sha}",
+        "artifact_id_scheme": "payload-sha256",
+        "decision": addition.get("decision", "include"),
+        "tier": addition.get("tier", "core"),
+        "component": addition["component"],
+        "selection_rule": addition.get("selection_rule", "local-release-input"),
+        "selection_reason": addition["selection_reason"],
+        "release_path": addition["release_path"],
+        "source_uri": None,
+        "source": {"kind": "generated", "verification": "local-bytes-verified"},
+        "payload": payload,
+        "metadata": addition.get("metadata", {}),
+        "provenance": {
+            "status": "local payload verified",
+            **addition.get("provenance", {}),
+        },
+        "license": addition["license"],
+        "published": False,
+    }
+    check_row(row)
+    return row
+
+
+def check_public_dataset_paths(rows):
+    paths, sources, identities = set(), set(), {}
+    for row in rows:
+        check_row(row)
+        path = row["release_path"]
+        if re.search(r"%[0-9a-fA-F]{2}|\||\s", path):
+            raise ValueError(
+                f"Public path contains an encoded condition or whitespace: {path}"
+            )
+        if path.endswith((".bson", ".pkl")) or any(
+            tag in path for tag in (".imputed.", ".narration.")
+        ):
+            raise ValueError(f"Unsupported public dataset payload: {path}")
+        if path in paths:
+            raise ValueError(f"Release path collision: {path}")
+        paths.add(path)
+        source = row.get("source_uri")
+        if source is not None:
+            if source in sources:
+                raise ValueError(f"Source selected more than once: {source}")
+            sources.add(source)
+        identity = row["artifact_id"]
+        previous = identities.get(identity)
+        if previous and not (
+            previous.get("artifact_id_scheme")
+            == row.get("artifact_id_scheme")
+            == "payload-sha256"
+            and previous["payload"] == row["payload"]
+        ):
+            raise ValueError(f"Artifact identity collision: {identity}")
+        identities[identity] = row
+    by_path = {row["release_path"]: row for row in rows}
+    for row in rows:
+        base_path = row.get("metadata", {}).get("base_release_path")
+        if base_path:
+            if base_path not in by_path:
+                raise ValueError(
+                    f"Missing base input referenced by {row['release_path']}"
+                )
+            expected_sha = row["metadata"].get("base_sha256")
+            actual_sha = by_path[base_path]["payload"].get("sha256")
+            if expected_sha and expected_sha != actual_sha:
+                raise ValueError(
+                    f"Base checksum does not match selected input for {row['release_path']}"
+                )
+
+
+def verify_local_source(item, row):
+    """Reuse bytes only with evidence tying them to the selected S3 generation."""
+    if row["source"].get("kind") != "s3":
+        raise ValueError("Local source receipt must reference an S3 artifact")
+    expected = row["payload"].get("sha256")
+    receipt_sha = item.get("payload", {}).get("sha256")
+    if not expected:
+        evidence = item.get("source", {})
+        if (
+            any(
+                evidence.get(key) != row["source"].get(key)
+                for key in (
+                    "bucket",
+                    "key",
+                    "version_id",
+                    "etag",
+                    "size_bytes",
+                    "last_modified",
+                )
+            )
+            or not receipt_sha
+        ):
+            raise ValueError(
+                "Cached bytes need a matching source-generation receipt and SHA-256"
+            )
+        expected = receipt_sha
+    elif receipt_sha is not None and receipt_sha != expected:
+        raise ValueError("Cached source checksum conflicts with the manifest")
+    path = Path(item["local_path"])
+    if (
+        not path.is_file()
+        or path.stat().st_size != payload_size(row)
+        or digest_file(path) != expected
+    ):
+        raise ValueError(
+            f"Cached bytes do not match the selected source: {row['release_path']}"
+        )
+    row["payload"] = {
+        **row["payload"],
+        "sha256": expected,
+        "validation": "bytes-verified",
+    }
+    return item, row
+
+
+def apply_payload_evidence(item, row):
+    """Record a verified download without implying that bytes remain staged."""
+    evidence = item.get("source", {})
+    payload = item.get("payload", {})
+    digest = payload.get("sha256")
+    if row["source"].get("kind") != "s3" or any(
+        evidence.get(key) != row["source"].get(key)
+        for key in (
+            "bucket",
+            "key",
+            "version_id",
+            "etag",
+            "size_bytes",
+            "last_modified",
+        )
+    ):
+        raise ValueError(
+            "Payload evidence does not match the selected source generation"
+        )
+    if (
+        payload.get("validation") != "bytes-verified"
+        or payload.get("size_bytes") != payload_size(row)
+        or not isinstance(digest, str)
+        or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+    ):
+        raise ValueError("Payload evidence requires a verified size and SHA-256")
+    expected = row["payload"].get("sha256")
+    if expected is not None and expected != digest:
+        raise ValueError("Payload evidence checksum conflicts with the manifest")
+    row["payload"].update(sha256=digest, validation="bytes-verified")
+
+
+def write_dataset_card(template, root):
+    """Preserve approved prose and derive available HF metadata configurations."""
+    import yaml
+
+    text = Path(template).read_text()
+    match = re.match(r"\A---\r?\n(.*?)\r?\n---\r?\n", text, flags=re.DOTALL)
+    if not match:
+        raise ValueError("Dataset card requires YAML frontmatter")
+    metadata = yaml.safe_load(match[1])
+    if not isinstance(metadata, dict):
+        raise ValueError("Dataset card frontmatter must be a mapping")
+    configs = [
+        {
+            "config_name": "planned_files",
+            "default": True,
+            "data_files": [
+                {"split": "data", "path": "catalog/files/planned_files.parquet"}
+            ],
+        }
+    ]
+    if (root / "catalog/human_plays/human_plays.parquet").is_file():
+        configs.append(
+            {
+                "config_name": "human_plays",
+                "data_files": [
+                    {"split": "data", "path": "catalog/human_plays/human_plays.parquet"}
+                ],
+            }
+        )
+    metadata["configs"] = configs
+    # A files configuration would imply uploaded payload availability. Assembly
+    # provides only planned_files and the independently useful human-play table.
+    output = (
+        "---\n"
+        + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True)
+        + "---\n"
+        + text[match.end() :]
+    )
+    (root / "README.md").write_text(output)
+
+
+def assemble(args):
+    """Combine an explicit source selection with verified generated payloads."""
+    if args.workers < 1:
+        raise ValueError("--workers must be positive")
+    root = Path(args.output).resolve()
+    audit = Path(args.audit_output).resolve()
+    if audit == root or root in audit.parents:
+        raise ValueError("Private receipts must be outside the dataset directory")
+    root.mkdir(parents=True, exist_ok=True)
+    mapping = {}
+    for filename in args.path_map:
+        for item in read_rows(filename):
+            key = item["artifact_id"]
+            if key in mapping:
+                raise ValueError(f"Repeated mapping for {key}")
+            if item["action"] not in {"include", "exclude"} or not item.get(
+                "selection_reason"
+            ):
+                raise ValueError(
+                    "Every source mapping needs an explicit action and reason"
+                )
+            mapping[key] = item
+    rows, decisions = [], []
+    for row in read_rows(args.source_manifest):
+        item = mapping.pop(row["artifact_id"], None)
+        if item is None:
+            raise ValueError(
+                f"Source artifact has no reviewed mapping: {row['release_path']}"
+            )
+        decisions.append(
+            {"artifact_id": row["artifact_id"], "source_uri": row["source_uri"], **item}
+        )
+        if item["action"] == "include":
+            rows.append(dataset_source_row(row, item, args.release_id))
+    if mapping:
+        raise ValueError("Path map contains artifacts absent from the source manifest")
+    additions = []
+    for filename in args.local_files or []:
+        additions.extend(read_rows(filename))
+    if args.human_manifest:
+        if not args.human_directory:
+            raise ValueError("--human-manifest requires --human-directory")
+        human_root = Path(args.human_directory)
+        for row in read_rows(args.human_manifest):
+            relative = row["release_path"]
+            if not safe_relative(relative):
+                raise ValueError("Unsafe human file path")
+            additions.append(
+                {
+                    "local_path": str(human_root / relative),
+                    "release_path": relative,
+                    "component": "human_behavior",
+                    "metadata": {
+                        **row["metadata"],
+                        "condition": row["metadata"]["suggestion_level"],
+                        "timebase": "recorded-engine-frame",
+                        "paper_role": "human-reference",
+                    },
+                    "payload": row["payload"],
+                    "license": row["license"],
+                    "provenance": row["provenance"],
+                    "selection_reason": "Participant/game trajectory and exact action-only prompts; one self-contained file per condition",
+                }
+            )
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        local_rows = list(
+            pool.map(lambda item: local_dataset_row(item, args.release_id), additions)
+        )
+    rows.extend(local_rows)
+    staged_sources = []
+    if getattr(args, "source_files", None):
+        by_source = {
+            row["source_uri"]: row for row in rows if row["source_uri"] is not None
+        }
+        cached = [
+            item for filename in args.source_files for item in read_rows(filename)
+        ]
+        if len({item["source_uri"] for item in cached}) != len(cached):
+            raise ValueError("Duplicate local source receipt")
+        if any(item["source_uri"] not in by_source for item in cached):
+            raise ValueError("Local source receipt refers to an unselected artifact")
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            staged_sources = list(
+                pool.map(
+                    lambda item: verify_local_source(
+                        item, by_source[item["source_uri"]]
+                    ),
+                    cached,
+                )
+            )
+    if args.enrichments:
+        by_source = {
+            row["source_uri"]: row for row in rows if row["source_uri"] is not None
+        }
+        by_path = {row["release_path"]: row for row in rows}
+        for filename in args.enrichments:
+            for item in read_rows(filename):
+                row = (
+                    by_source.get(item.get("source_uri"))
+                    if item.get("source_uri")
+                    else by_path.get(item.get("release_path"))
+                )
+                if row is None:
+                    raise ValueError("Enrichment refers to an unselected source")
+                if (
+                    item.get("release_path")
+                    and item["release_path"] != row["release_path"]
+                ):
+                    raise ValueError("Enrichment source and public path disagree")
+                row["metadata"].update(item.get("metadata", {}))
+                row["provenance"].update(item.get("provenance", {}))
+                if "payload" in item:
+                    apply_payload_evidence(item, row)
+    rows.sort(key=lambda row: row["release_path"])
+    check_public_dataset_paths(rows)
+    total = sum(payload_size(row) for row in rows)
+    if total > args.max_bytes:
+        raise ValueError(
+            f"Selected payloads exceed capacity: {total} > {args.max_bytes}"
+        )
+    # Validate every destination before copying any local payloads. Source rows
+    # remain planned; no S3 or HF request is made by this operation.
+    reserved = {
+        "README.md",
+        "manifest.jsonl.gz",
+        "catalog/files/planned_files.parquet",
+        "catalog/metadata.json",
+    }
+    for row in rows:
+        if row["release_path"] in reserved:
+            raise ValueError("Payload path collides with generated catalogue metadata")
+    previous_manifest = root / "manifest.jsonl.gz"
+    if previous_manifest.exists():
+        selected_paths = {row["release_path"] for row in rows}
+        stale = [
+            row["release_path"]
+            for row in read_rows(previous_manifest)
+            if row["release_path"] not in selected_paths
+            and (root / row["release_path"]).exists()
+        ]
+        if stale:
+            raise ValueError(
+                "Output contains payloads absent from this selection; use a fresh directory or remove verified stale copies: "
+                + ", ".join(stale[:5])
+            )
+
+    replacement_paths = {row["release_path"] for row in local_rows} | {
+        row["release_path"] for _, row in staged_sources
+    }
+
+    def verify_retained_target(row):
+        if row["release_path"] in replacement_paths:
+            return
+        target = root / row["release_path"]
+        if not target.exists():
+            return
+        target = destination(root, row["release_path"])
+        expected = row["payload"].get("sha256")
+        if (
+            not target.is_file()
+            or not expected
+            or target.stat().st_size != payload_size(row)
+            or digest_file(target) != expected
+        ):
+            raise ValueError(
+                "Existing payload does not match this selection; provide verified replacement bytes: "
+                + row["release_path"]
+            )
+        row["payload"]["validation"] = "bytes-verified"
+        return {"local_path": str(target), "source_uri": row["source_uri"]}, row
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        staged_sources.extend(
+            item for item in pool.map(verify_retained_target, rows) if item is not None
+        )
+
+    def copy_local(pair):
+        addition, row = pair
+        original = Path(addition["local_path"]).resolve()
+        target = destination(root, row["release_path"])
+        if target == original:
+            return
+        if (
+            target.exists()
+            and target.stat().st_size == payload_size(row)
+            and digest_file(target) == row["payload"]["sha256"]
+        ):
+            return
+        with tempfile.NamedTemporaryFile(
+            dir=target.parent, prefix=".stage-", delete=False
+        ) as handle:
+            temporary = Path(handle.name)
+        try:
+            shutil.copyfile(original, temporary)
+            if (
+                temporary.stat().st_size != payload_size(row)
+                or digest_file(temporary) != row["payload"]["sha256"]
+            ):
+                raise ValueError("Local source changed during staging")
+            temporary.replace(target)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        list(pool.map(copy_local, [*zip(additions, local_rows), *staged_sources]))
+    with write_rows(root / "manifest.jsonl.gz") as handle:
+        for row in rows:
+            emit(handle, row)
+    catalogue(
+        argparse.Namespace(
+            manifest=root / "manifest.jsonl.gz",
+            tier=None,
+            component=None,
+            output=root / "catalog/files/planned_files.parquet",
+        )
+    )
+    groups = defaultdict(lambda: {"files": 0, "bytes": 0})
+    for row in rows:
+        groups[row["component"]]["files"] += 1
+        groups[row["component"]]["bytes"] += payload_size(row)
+    summary = {
+        "schema_version": DATASET_SCHEMA_VERSION,
+        "release_id": args.release_id,
+        "publication_status": "planned; no payload uploads performed",
+        "files": len(rows),
+        "payload_bytes": total,
+        "generated_local_files": len(local_rows),
+        "generated_local_bytes": sum(payload_size(row) for row in local_rows),
+        "source_files": len(rows) - len(local_rows),
+        "staged_source_files": len(staged_sources),
+        "staged_source_bytes": sum(payload_size(row) for _, row in staged_sources),
+        "payloads_with_sha256": sum(bool(row["payload"].get("sha256")) for row in rows),
+        "manifest_sha256": digest_file(root / "manifest.jsonl.gz"),
+        "components": dict(sorted(groups.items())),
+    }
+    write_json(root / "catalog/metadata.json", summary)
+    if getattr(args, "card", None):
+        write_dataset_card(args.card, root)
+    audit.mkdir(parents=True, exist_ok=True)
+    with write_rows(audit / "source-decisions.jsonl.gz") as handle:
+        for item in decisions:
+            emit(handle, item)
+    with write_rows(audit / "local-staging.jsonl.gz") as handle:
+        for addition, row in [*zip(additions, local_rows), *staged_sources]:
+            emit(
+                handle,
+                {
+                    "local_path": str(Path(addition["local_path"]).resolve()),
+                    "release_path": row["release_path"],
+                    "source_uri": row["source_uri"],
+                    "sha256": row["payload"]["sha256"],
+                    "size_bytes": payload_size(row),
+                },
+            )
+    print(json.dumps(summary, indent=2))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    p = commands.add_parser(
+        "assemble",
+        help="Assemble an explicit source-to-dataset map and verified local artifacts",
+    )
+    p.add_argument("--source-manifest", required=True)
+    p.add_argument("--path-map", action="append", required=True)
+    p.add_argument("--local-files", action="append")
+    p.add_argument("--human-manifest")
+    p.add_argument("--human-directory")
+    p.add_argument(
+        "--card",
+        help="Approved dataset-card Markdown; metadata configurations are generated from staged catalogues",
+    )
+    p.add_argument("--enrichments", action="append")
+    p.add_argument(
+        "--source-files",
+        action="append",
+        help="Private local-cache receipts tying bytes to selected source generations",
+    )
+    p.add_argument("--release-id", required=True)
+    p.add_argument("--output", required=True)
+    p.add_argument(
+        "--audit-output",
+        required=True,
+        help="Private receipts outside the dataset directory",
+    )
+    p.add_argument("--workers", type=int, default=32)
+    p.add_argument("--max-bytes", type=int, default=5_000_000_000_000)
+    p.set_defaults(func=assemble)
     p = commands.add_parser(
         "build", help="Select exact source objects with a versioned policy"
     )
@@ -709,7 +1377,7 @@ def main():
         if name in {"freeze", "stage"}:
             p.add_argument("--region", default="eu-west-2")
         if name == "freeze":
-            p.add_argument("--workers", type=int, default=16)
+            p.add_argument("--workers", type=int, default=32)
             p.add_argument(
                 "--reuse-pins",
                 help="Reuse matching version IDs from a previously verified manifest; preserves original check timestamps",

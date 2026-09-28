@@ -143,9 +143,24 @@ def test_subsampling_retains_matching_frame_references():
     )
 
 
-def test_multiturn_file_to_aligned_rows_uses_original_identity(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "game,record_game,filename",
+    [
+        ("vgfmri4_bait", "vgfmri4_bait", "bait_vgfmri4"),
+        ("vgfmri3_plaqueAttack", "vgfmri3_plaqueAttack", "plaqueAttack_vgfmri3"),
+        ("vgfmri3_plaqueattack", "vgfmri3_plaqueAttack", "plaqueAttack_vgfmri3"),
+    ],
+)
+def test_multiturn_file_to_aligned_rows_uses_original_identity(
+    tmp_path, monkeypatch, game, record_game, filename
+):
     torch = pytest.importorskip("torch")
     plays = {"a": original("a", 0), "b": original("b", 1)}
+    for play in plays.values():
+        play["game_name"] = record_game
+        play["_canonical"]["source_recording"] = (
+            f"sub-13/{filename}/elaborate.human.replay.json.gz"
+        )
     monkeypatch.setattr(align, "load_canonical_plays", lambda *args: plays)
     monkeypatch.setattr(
         align,
@@ -157,10 +172,16 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(tmp_path, monkeyp
     )
     np.savez(
         tmp_path / "base.npz",
+        subject="sub-13",
         tr=2.0,
         ar1_corrected=False,
         n_volumes=10,
-        game_names=["vgfmri4_bait"],
+        play_boundaries=[0, 5, 10],
+        tr_run_idx=[1] * 10,
+        tr_game_idx=[0] * 10,
+        tr_level_idx=[0] * 10,
+        tr_play_idx=[0] * 5 + [1] * 5,
+        game_names=[game],
         play_ids=["a", "b"],
         play_game_idx=[0, 0],
         play_levels=[0, 0],
@@ -189,7 +210,7 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(tmp_path, monkeyp
             "metadata": metadata,
             "features": torch.tensor(values, dtype=torch.float32),
         },
-        feature_dir / "bait_vgfmri4.pt",
+        feature_dir / f"{filename}.pt",
     )
     source = align.parse_llm_source_arg(
         f"name=fixture,dir={tmp_path / 'features'},stream=main"
@@ -201,7 +222,10 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(tmp_path, monkeyp
         output_dir=tmp_path / "output",
         llm_sources=[source],
     )
-    with np.load(result[0]) as output:
+    from reason_to_play.analysis.neural.alignment import validate_binding
+
+    with np.load(result[0]) as output, np.load(tmp_path / "base.npz") as base:
+        assert validate_binding(output, base, tmp_path / "base.npz")
         np.testing.assert_array_equal(
             output["llm_fixture_layer_1_aligned"].ravel(), [5] * 5 + [7] * 5
         )

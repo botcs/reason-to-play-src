@@ -25,7 +25,7 @@ Input:
 
 Output:
     Per-subject directory containing:
-    - aligned_data.npz: BOLD + DDQN + HRR + behavioral + metadata
+    - bold-ddqn-theory.npz: BOLD + DDQN + HRR + behavioral + metadata
     - aligned_llm_{source}.npz: One file per LLM source
     - aligned_ez.npz: EfficientZero features (if available)
     - aligned_hrr_decomposed.npz: Sprite/interaction/termination sub-vectors
@@ -51,6 +51,12 @@ from collections import OrderedDict, defaultdict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+from reason_to_play.analysis.neural.alignment import (
+    bind_to_base,
+    sample_order_sha256,
+    validate_binding,
+)
 
 
 def _torch():
@@ -206,6 +212,30 @@ class LLMSourceConfig:
             raise ValueError(f"subsample must be >= 1, got {self.subsample}")
 
 
+def _game_directory(root, subject, game):
+    from reason_to_play.data.behavior import canonical_game_id
+
+    candidates = [root / subject / canonical_game_id(game), root / subject / game]
+    found = list(dict.fromkeys(path for path in candidates if path.is_dir()))
+    if len(found) > 1:
+        raise ValueError(f"Multiple feature directories for {subject}/{game}: {found}")
+    return found[0] if found else candidates[0]
+
+
+def _level_files(directory):
+    found = {}
+    for path in directory.glob("level*.npz"):
+        match = re.fullmatch(r"level[-_](\d+)", path.stem)
+        if match:
+            level = int(match[1])
+            if level in found:
+                raise ValueError(
+                    f"Duplicate feature files for level {level}: {directory}"
+                )
+            found[level] = path
+    return found
+
+
 # =============================================================================
 # Conv Layer Pooling Functions
 # =============================================================================
@@ -233,10 +263,10 @@ def find_common_conv_resolution(
     """Find the minimum spatial resolution across all games for each conv layer."""
     layer_dims = {layer: [] for layer in n_channels.keys()}
     for game in games:
-        game_dir = model_dir / subject / game
+        game_dir = _game_directory(model_dir, subject, game)
         if not game_dir.exists():
             continue
-        npz_files = list(game_dir.glob("level_*.npz"))
+        npz_files = list(_level_files(game_dir).values())
         if not npz_files:
             continue
         data = np.load(npz_files[0])
@@ -732,17 +762,29 @@ def find_available_ez_plays(ez_dir: Path, subject: str) -> Tuple[Dict, bool]:
     available = {}
     has_play_ids = False
 
+    from reason_to_play.data.behavior import game_identity
+
     for game_dir in ez_dir.iterdir():
-        if not game_dir.is_dir() or not game_dir.name.startswith("vgfmri"):
+        if not game_dir.is_dir():
             continue
-        game_name = game_dir.name
-        subj_dir = game_dir / subj_str
-        if not subj_dir.exists():
+        try:
+            game, cohort = game_identity(game_dir.name)
+        except ValueError:
             continue
+        game_name = f"{cohort}_{game}"
+        candidates = [game_dir / f"sub-{subj_num:02d}", game_dir / subj_str]
+        candidates = [path for path in candidates if path.is_dir()]
+        if len(candidates) > 1:
+            raise ValueError(
+                f"Duplicate EfficientZero subject directories: {candidates}"
+            )
+        if not candidates:
+            continue
+        subj_dir = candidates[0]
         for run_dir in subj_dir.iterdir():
             if not run_dir.is_dir() or not run_dir.name.startswith("run"):
                 continue
-            run_id = int(run_dir.name.replace("run", ""))
+            run_id = int(run_dir.name.removeprefix("run").removeprefix("-"))
             for play_dir in run_dir.iterdir():
                 if not play_dir.is_dir() or not play_dir.name.startswith("play"):
                     continue
@@ -752,10 +794,20 @@ def find_available_ez_plays(ez_dir: Path, subject: str) -> Tuple[Dict, bool]:
 
                 # Check for a play ID in play{idx}_key{original_id}
                 play_dir_name = play_dir.name
-                if "_key" in play_dir_name:
+                if play_dir_name.startswith("play-") or "_key" in play_dir_name:
                     # Extract play_id directly without loading the trace file
                     has_play_ids = True
-                    play_id = play_dir_name.split("_key")[1]
+                    play_id = (
+                        play_dir_name.removeprefix("play-")
+                        if play_dir_name.startswith("play-")
+                        else play_dir_name.split("_key")[1]
+                    )
+                    if not re.fullmatch(r"[a-fA-F0-9]{24}", play_id):
+                        raise ValueError(f"Invalid original play identity: {play_dir}")
+                    if play_id in available:
+                        raise ValueError(
+                            f"Duplicate EfficientZero trace for original play {play_id}"
+                        )
                     available[play_id] = (trace_path, game_name, run_id)
                 else:
                     # Ordinal path: play{idx}; load later to match by frame count
@@ -1607,8 +1659,8 @@ def load_model_features_for_level(
     conv_target_sizes: dict = None,
 ) -> dict:
     """Load DDQN model features for a specific game/level."""
-    level_file = model_dir / subject / game / f"level_{level:02d}.npz"
-    if not level_file.exists():
+    level_file = _level_files(_game_directory(model_dir, subject, game)).get(level)
+    if level_file is None:
         return {}
     data = np.load(level_file, allow_pickle=True)
     num_plays = int(data["num_plays"])
@@ -1644,17 +1696,26 @@ def load_model_features_for_level(
 
 
 def find_games_and_levels(model_dir: Path, subject: str) -> dict:
-    """Find all games and levels available for a subject."""
+    """Discover canonical public names and supported source names without duplicates."""
+    from reason_to_play.data.behavior import game_identity
+
     subj_dir = model_dir / subject
     if not subj_dir.exists():
         return {}
     games_levels = {}
     for game_dir in subj_dir.iterdir():
-        if not game_dir.is_dir() or not game_dir.name.startswith("vgfmri"):
+        if not game_dir.is_dir():
             continue
-        levels = [int(f.stem.split("_")[1]) for f in game_dir.glob("level_*.npz")]
+        try:
+            game, cohort = game_identity(game_dir.name)
+        except ValueError:
+            continue
+        identity = f"{cohort}_{game}"
+        levels = _level_files(game_dir)
         if levels:
-            games_levels[game_dir.name] = sorted(levels)
+            if identity in games_levels:
+                raise ValueError(f"Multiple feature directories for {identity}")
+            games_levels[identity] = sorted(levels)
     return games_levels
 
 
@@ -1946,10 +2007,27 @@ def process_subject(
 
     # Incremental mode: skip base file + filter out already-aligned LLM sources
     output_subdir = output_dir / subject
-    base_file = output_subdir / "aligned_data.npz"
+    base_file = output_subdir / "bold-ddqn-theory.npz"
     skip_base_save = False
     skip_hrr_decomp_save = False
     skip_ez_save = False
+
+    if incremental and base_file.is_file():
+        with np.load(base_file, allow_pickle=True) as existing_base:
+            identity = bind_to_base(base_file, existing_base)
+            for existing_path in output_subdir.glob("aligned_*.npz"):
+                if existing_path == base_file:
+                    continue
+                with np.load(existing_path, allow_pickle=True) as existing_features:
+                    if not validate_binding(
+                        existing_features,
+                        existing_base,
+                        base_file,
+                        base_sha256=str(identity["alignment_base_sha256"]),
+                    ):
+                        raise ValueError(
+                            f"Cannot resume unbound feature archive: {existing_path}"
+                        )
 
     if incremental:
         # Skip base file if it already exists
@@ -2886,7 +2964,7 @@ def process_subject(
     # EZ metadata (has_ez_data, ez_layers, play_has_ez, stats) is still in base save_dict above
 
     # Save base file (BOLD + DDQN + HRR + EZ + behavioral + metadata, NO LLM)
-    base_file = output_subdir / "aligned_data.npz"
+    base_file = output_subdir / "bold-ddqn-theory.npz"
     if skip_base_save:
         logging.info("  [incremental] Skipping base file save (already exists)")
     else:
@@ -2895,6 +2973,14 @@ def process_subject(
             f"  Saved base: {base_file.name} ({base_file.stat().st_size / 1024**2:.1f} MB)"
         )
 
+    # Features are computed in save_dict's sample order, including during resume.
+    with np.load(base_file, allow_pickle=True) as stored_base:
+        if sample_order_sha256(stored_base) != sample_order_sha256(save_dict):
+            raise ValueError(
+                "Existing base has a different sample order; use a new output directory"
+            )
+        binding = bind_to_base(base_file, stored_base)
+
     # Save per-source LLM files
     if llm_manager and llm_concatenated:
         for src_name, meta in llm_manager.source_metadata.items():
@@ -2902,7 +2988,7 @@ def process_subject(
             prefix = f"llm_{src_name}"
 
             # Build per-source save dict with only this source's layers
-            llm_save_dict = {}
+            llm_save_dict = dict(binding)
             for layer_name in meta["layer_names"]:
                 key = f"{src_name}_{layer_name}"
                 if key in llm_concatenated:
@@ -2939,6 +3025,7 @@ def process_subject(
             )
         else:
             hrr_decomp_dict = {
+                **binding,
                 "hrr_sprites_aligned": hrr_sprites_concat,
                 "hrr_interactions_aligned": hrr_interactions_concat,
                 "hrr_terminations_aligned": hrr_terminations_concat,
@@ -2958,7 +3045,7 @@ def process_subject(
         if skip_ez_save:
             logging.info("  [incremental] Skipping EZ file save (already exists)")
         else:
-            ez_save_dict = {}
+            ez_save_dict = dict(binding)
             for ez_layer, arr in ez_concatenated.items():
                 safe_key = f"ez_{ez_layer.replace('.', '_')}_aligned"
                 ez_save_dict[safe_key] = arr
@@ -3116,7 +3203,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--incremental",
         action="store_true",
-        help="Skip aligned_data.npz if it exists; skip LLM sources that already have output files",
+        help="Skip bold-ddqn-theory.npz if it exists; skip LLM sources that already have output files",
     )
 
     args = parser.parse_args()

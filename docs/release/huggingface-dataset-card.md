@@ -35,11 +35,49 @@ sizes and checksums.
 | Component | Contents |
 | --- | --- |
 | Human behavior | One complete human JSON per participant and game, covering levels and attempts across scanner runs, with every recorded engine state, original timestamps, inputs/events, play IDs and nullable outcomes; selected task behaviour from 32 participants |
-| fMRI derivatives | Processed BOLD, sample order, nuisance inputs, selected preprocessing outputs and the explicit atlas/common mask used for ROI analysis |
+| Neural analysis inputs | Processed BOLD, DDQN/theory arrays, nuisance variables, sample order, model features sampled at scanner times, and the atlas/common mask used for ROI analysis |
 | Model representations | Headline LLM activations, earlier-cohort comparisons and selected controls |
 | Generated behavior | Model gameplay with its system prompts, observations, actions and rationales in each replay file |
 | Baselines and analyses | Candidate baseline traces, selected checkpoints and neural/behavioral results |
-| Provenance | Dataset paths and checksums, participant, model and condition IDs, source attribution and model/analysis settings |
+| Catalogues and source records | Dataset paths and checksums, participant, model and condition IDs, source attribution and model/analysis settings |
+
+```text
+behavior/
+  human/sub-XX/GAME/CONDITION.human.replay.json.gz
+  lrm/
+  ddqn/episode-history.json
+  efficientzero/GAME/episodes.csv
+  empa/GAME/trial-XX/level-YY.json
+features/
+  lrm/
+  ddqn/
+  efficientzero/
+analysis/
+  behavioral/
+  neural/
+    inputs/sub-XX/bold-ddqn-theory.npz
+    inputs/model-features/
+    inputs/atlas/
+    inputs/theory-regressors.json.gz
+    results/
+checkpoints/
+reconstruction/tomov23/fmriprep/
+website-assets/
+catalog/
+manifest.jsonl.gz
+```
+
+`behavior/` holds recorded gameplay, including replay JSON files. `features/`
+holds activations associated with recorded frames or selected prompt steps.
+`analysis/neural/inputs/model-features/` holds representations sampled at
+retained scanner times. These time bases are distinct.
+
+The `bold-ddqn-theory.npz` files contain joint analysis inputs: BOLD, DDQN and
+theory arrays, nuisance variables and sample identities. They are not pure BOLD
+images. Selected fMRIPrep outputs under `reconstruction/` are optional for
+earlier-stage reconstruction; ordinary analysis uses the processed inputs.
+Website assets contain the browser's RDM exports and indexes. Replay links
+refer to the files under `behavior/`.
 
 Raw MRI is available from [OpenNeuro ds004323, version 1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).
 Historical and unreported feature extractions are excluded. The selection
@@ -47,6 +85,19 @@ also omits **630 raw random-initialization and context-ablation tensors** used
 by paper controls. Their prompt records, selected aligned features and results
 remain included. Recomputing their alignment requires the omitted tensors or
 another extraction run; exact regeneration is not guaranteed.
+
+## Behavioral analysis inputs
+
+`behavior/ddqn/episode-history.json` contains all 170,546 recorded episodes
+from the 88 selected DDQN runs. The separate
+`analysis/behavioral/retained-episode-table.csv` contains the table used for the
+retained behavioral summaries; its DDQN rows contain 32,818 sampled episodes
+from those same runs. Use that table to render its summaries and the full
+histories when an analysis requires every episode.
+
+Model gameplay consists of 193 selected, self-contained replay files.
+Continued runs include their preceding gameplay. Attempt numbers can restart
+within a continued run; chronological frame boundaries distinguish attempts.
 
 ## Human behaviour files and prompt records
 
@@ -89,8 +140,9 @@ supports further source-data archaeology.
 ## Catalogues and downloads
 
 The publication package provides file and human-play catalogues. Each artifact
-row records its dataset path, content checksum, source attribution and
-publication state. The human-play catalogue contains **6,994 task attempts**
+row records its dataset path, source attribution and publication state, with a
+content checksum once the payload has been byte-verified. Planned entries can
+have a null checksum until their bytes have been read and checked. The human-play catalogue contains **6,994 task attempts**
 covering **1,661,744 recorded engine states**, counted once across prompt
 conditions. Practice attempts are excluded from this task dataset; upper-level
 and cohort flags remain available for choosing an analysis.
@@ -119,7 +171,7 @@ Catalogue loading fetches metadata. In the file catalogue, `release_path` and
 `sha256` identify a payload. In `human_plays`, the corresponding columns are
 `source_release_path` and `source_payload_sha256`; several attempts can point to
 the same participant/game JSON. These hashes describe the compressed bytes.
-`provenance/human-manifest.jsonl.gz` also records each human file's schema,
+The release manifest also records each human file's schema,
 counts, checksum and participant/model/condition IDs. Original S3 object identifiers are
 source attribution; use dataset-relative paths for Hugging Face downloads.
 
@@ -144,6 +196,12 @@ training; initialization and its separate environment are covered in the
 [baseline guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/baselines.md#efficientzero-training).
 Full retraining and exact producing-revision attribution for every checkpoint
 remain outside the validated scope.
+
+Separate model-feature archives have an adjacent `.npz.alignment.json`
+association record. Download it with the archive: the encoding reader checks
+both the feature hash and its binding to the base BOLD/sample order before
+fitting. Input coverage is recorded separately from alignment verification;
+zero-filled rows for unavailable source plays are not model observations.
 
 Use the code and dataset revisions recorded for the release when reproducing
 paper results. New experiments should state their own cohorts, models,

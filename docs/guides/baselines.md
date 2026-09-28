@@ -13,12 +13,21 @@ Run shell commands from the checkout root unless another directory is stated.
 
 ## Environment and included sources
 
-Use the checkout with the [analysis environment](dataset-analysis.md#install),
-a hardware-appropriate PyTorch build and:
+For EfficientZero feature extraction, install the checkout with its dedicated
+extra and a hardware-appropriate PyTorch build:
+
+```bash
+python -m pip install -e '.[efficientzero]'
+```
+
+For DDQN, use the [analysis environment](dataset-analysis.md#install), a
+hardware-appropriate PyTorch build and:
 
 ```bash
 python -m pip install -r baselines/requirements-inference.txt
 ```
+
+EfficientZero training uses the separate upstream environment described below.
 
 The baseline sources are included for inference without author GitHub
 credentials. Keep their engine revisions separate:
@@ -44,13 +53,14 @@ Pass the following optional arguments to the episode exporter in the
 
 | Argument | Input |
 | --- | --- |
-| `--ddqn` | DDQN episode-history JSON |
-| `--efficientzero` | Directory containing `GAME/self_play_episodes.csv` |
-| `--empa` | Directory containing EMPA1 episode-summary JSON |
+| `--ddqn` | `behavior/ddqn/episode-history.json` |
+| `--efficientzero` | `behavior/efficientzero/`, containing `GAME/episodes.csv` |
+| `--empa` | `behavior/empa/`, containing `GAME/trial-NN/level-NN.json` |
 
 EMPA2 is excluded from the paper comparison. No cloud access is required to
 read these files. The exporter retains levels 0–8, excludes practice, preserves
-episode order and converts EMPA's one-based level filenames. Human keypress
+episode order. Released EMPA files use zero-based level IDs and retain their
+original trial IDs; the source converter handles upstream one-based levels. Human keypress
 frames, LLM decisions and baseline recorded steps remain separate units;
 unknown frame counts remain null.
 
@@ -62,9 +72,9 @@ available or reached levels; the human and model advancement protocols differ.
 Only when collecting additional upstream records, use the source exporters:
 
 ```bash
-python tools/export_ddqn_history.py --output data/baselines/ddqn.json
+python tools/export_ddqn_history.py --workers 32 --output data/behavior/ddqn/episode-history.json
 python tools/convert_empa_summaries.py \
-  --input /absolute/data/EMPA1-behaviour --output data/empa-json --trusted-pickle
+  --input /absolute/data/EMPA1-behaviour --output data/behavior/empa --trusted-pickle
 ```
 
 The DDQN exporter requires W&B access to `dpag-rl/ddqn-vgdl` and uses
@@ -120,7 +130,7 @@ python -m agents.efficientzero.extract_traces \
   --play-key 606debc9b4f366ca0cba5fda \
   --heads all --device cpu \
   --trace-layers-json /absolute/reason-to-play-src/agents/efficientzero/trace_layers.json \
-  --trace-output /absolute/data/ez-features/vgfmri4_bait/subj12/run6/play0_key606debc9b4f366ca0cba5fda/traces.pt
+  --trace-output /absolute/data/ez-features/bait_vgfmri4/sub-12/run-06/play-606debc9b4f366ca0cba5fda/traces.pt
 ```
 
 `--dataset-root` accepts the human directory or a standalone self-contained
@@ -131,7 +141,7 @@ configuration, source and output hashes. This identifies the new extraction;
 it does not retroactively identify the checkpoint behind an archived trace.
 
 The base aligner's `--ez-features-dir` expects
-`GAME/subjN/runN/playN_keyID/traces.pt` below that directory and writes the
+`GAME/sub-XX/run-YY/play-ORIGINALID/traces.pt` below that directory and writes the
 aligned EZ feature sidecar. For representation activations and metrics instead
 of selected layer traces, inspect:
 

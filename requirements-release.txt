@@ -2,3 +2,4 @@
 # No GPU or model API packages are required.
 boto3>=1.42,<2
 pyarrow>=20,<24
+PyYAML>=6,<7

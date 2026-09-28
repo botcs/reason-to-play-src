@@ -10,11 +10,14 @@ import json
 import pickle
 from pathlib import Path
 
+from reason_to_play.data.behavior import canonical_game_id
+
 
 def convert(source: Path, output: Path) -> int:
     paths = sorted(source.glob("*/*/dumps/interaction_data/lvl_*.pkl"))
     if not paths:
         raise FileNotFoundError(f"No EMPA interaction-data pickles below {source}")
+    destinations = set()
     for path in paths:
         with path.open("rb") as stream:
             data = pickle.load(stream)
@@ -26,10 +29,30 @@ def convert(source: Path, output: Path) -> int:
             if not isinstance(outcome, str) or not outcome.strip():
                 raise ValueError(f"Unknown episode outcome {outcome!r} in {path}")
             episodes.append({"steps": int(steps), "outcome": outcome})
-        destination = (output / path.relative_to(source)).with_suffix(".json")
+        relative = path.relative_to(source)
+        game = canonical_game_id(relative.parts[0])
+        trial = int(relative.parts[1])
+        level = int(path.stem.removeprefix("lvl_")) - 1
+        if level < 0:
+            raise ValueError(f"Invalid one-based EMPA level in {path}")
+        destination = output / game / f"trial-{trial:02d}" / f"level-{level:02d}.json"
+        if destination in destinations:
+            raise ValueError(f"Multiple EMPA source files map to {destination}")
+        destinations.add(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(
-            json.dumps({"episode_summaries": episodes}, indent=2) + "\n"
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "game": game,
+                    "source_game": relative.parts[0],
+                    "trial": trial,
+                    "level": level,
+                    "episode_summaries": episodes,
+                },
+                indent=2,
+            )
+            + "\n"
         )
     return len(paths)
 

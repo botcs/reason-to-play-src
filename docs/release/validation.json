@@ -1,21 +1,22 @@
 {
   "date": "2026-09-28",
-  "scope": "Public Python workflows and self-contained human JSON, with bounded analysis and browser checks. Complete paper reproduction and dataset publication are not asserted.",
+  "scope": "Public Python workflows and self-contained dataset inputs, with offline behavioral analysis, feature/sample associations, bounded encoding and browser checks. Complete historical paper reproduction and dataset publication are not asserted.",
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 428,
+      "passed": 447,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/ and tools/ (102 scoped files).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/, tools/ and the manifest assembler (105 scoped files).",
     "documentation": {
-      "links_and_anchors_checked": 151,
+      "links_and_anchors_checked": 152,
       "failures": 0,
       "original_source_reference_and_translator_unchanged": true
-    }
+    },
+    "dataset_assembly": "Tests cover stale retained payloads, frozen source identities, safe atomic replacements, content hashes, catalogue types and source-to-public path consistency."
   },
   "environment": {
     "python": "3.12.10",
@@ -74,7 +75,7 @@
     },
     "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
     "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
-    "figures": "Historical behavioral and neural figure commands ran against separately held tables; partial-table neural plotting also passed a headless synthetic smoke. Those tables are not included in this code release.",
+    "figures": "Behavioral figures from complete episode histories and the retained summary table, and the archived neural figure, ran using the dataset package with network connections and source-service imports blocked.",
     "generative_gameplay": {
       "backend": "mock",
       "frames": 25,
@@ -110,7 +111,12 @@
       "level_attempt_boundaries_checked": 20,
       "fractional_positions": true,
       "idle_trajectory": true,
-      "invalid_input_and_recovery_cases": 6
+      "invalid_input_and_recovery_cases": 6,
+      "continued_model_files_checked_per_build": 11,
+      "continued_model_attempt_boundaries_per_build": 172,
+      "same_label_clock_resets_per_build": 5,
+      "source_and_deployed_builds_checked": true,
+      "deployed_bytes_match_tested_bytes": true
     },
     "archived_roi_rows": {
       "rows_compared": 6426,
@@ -118,7 +124,10 @@
       "fresh_seeded_fit_samples": 1470,
       "fresh_seeded_fit_voxels": 16,
       "repeated_fits_identical": true,
-      "whole_brain_reproduction": false
+      "whole_brain_reproduction": false,
+      "maximum_absolute_error": 3.725290305400808e-09,
+      "fresh_seeded_fit_feature": "Qwen3.5-9B layer1",
+      "network_and_source_services_denied": true
     },
     "archived_encoding_figure": {
       "main_band_rows": 1169226,
@@ -127,7 +136,41 @@
       "missing_result_cells_acknowledged": 2,
       "establishes_historical_checkpoint_identity": false
     },
-    "text_observation_generator": "Lazy imports, CLI help and fake vLLM batching across files; no real vLLM GPU generation."
+    "text_observation_generator": "Lazy imports, CLI help and fake vLLM batching across files; no real vLLM GPU generation.",
+    "dataset_behavior": {
+      "network_and_source_services_denied": true,
+      "workers": 32,
+      "human_level_rows": 1713,
+      "human_comparison_plays": 6652,
+      "absent_theoretical_human_level_combinations": 15,
+      "lrm_files": 193,
+      "lrm_attempts": 2087,
+      "lrm_decisions": 162892,
+      "all_lrm_episode_arrays_independently_checked": true,
+      "ddqn_runs": 88,
+      "ddqn_complete_history_episodes": 170546,
+      "retained_table_ddqn_episodes": 32818,
+      "empa1_json_files": 162,
+      "empa1_episodes_match_source": true,
+      "efficientzero_game_files": 12,
+      "exported_agent_game_level_rows": 3121,
+      "raw_mri_used": false
+    },
+    "base_sample_identity": {
+      "participants": 32,
+      "plays": 6642,
+      "samples": 46581,
+      "source_identity_or_sample_boundary_mismatches": 0
+    },
+    "feature_alignment": {
+      "strict_base_and_sample_order_binding": true,
+      "qwen35_9b_sub13_layers_numerically_compared": 32,
+      "qwen35_9b_sub13_samples_per_layer": 1470,
+      "hrr_decomposed_participants": 21,
+      "hrr_arrays_per_participant": 3,
+      "maximum_absolute_error": 0.0,
+      "scope": "Recorded arrays independently realigned from frozen features/theory JSON and human clocks; coverage gaps remain explicit."
+    }
   },
   "not_executed": [
     "Full fMRIPrep container execution on participant MRI.",
@@ -141,7 +184,7 @@
   "package": {
     "build": "setuptools wheel",
     "imports_checked": 14,
-    "module_help_checked": 13,
+    "module_help_checked": 10,
     "import_location": "Installed wheel outside the checkout",
     "bson_or_pymongo_installed": false,
     "single_file_reader": {
@@ -155,7 +198,13 @@
       "training_imports_blocked": true,
       "cpu_checkpoint_trace_frames": 64,
       "source_manifest_files_present": true
-    }
+    },
+    "baseline_dataset_readers": {
+      "empa1_rows": 162,
+      "ddqn_rows": 472,
+      "efficientzero_rows": 67
+    },
+    "feature_binding_module_in_wheel": true
   },
   "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
 }

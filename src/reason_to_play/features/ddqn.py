@@ -512,10 +512,12 @@ def save_model_features_for_level(
     subj_str = subject if subject.startswith("sub-") else f"sub-{int(subject):02d}"
     model_dir = Path(output_dir) / f"model-{model_id}"
     subj_dir = model_dir / subj_str
-    game_dir = subj_dir / game_name
+    from reason_to_play.data.behavior import canonical_game_id
+
+    game_dir = subj_dir / canonical_game_id(game_name)
     game_dir.mkdir(parents=True, exist_ok=True)
 
-    output_file = game_dir / f"level_{level:02d}.npz"
+    output_file = game_dir / f"level-{level:02d}.npz"
 
     save_dict = {}
     play_ids = []

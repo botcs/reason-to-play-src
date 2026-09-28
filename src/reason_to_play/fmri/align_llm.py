@@ -27,6 +27,8 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
+from reason_to_play.analysis.neural.alignment import bind_to_base, validate_binding
+
 
 def _torch():
     """Load the optional tensor reader only when a .pt input is requested."""
@@ -110,12 +112,13 @@ _CANONICAL_TO_MULTITURN = {
     "vgfmri3_helper": "helper_vgfmri3",
     "vgfmri3_lemmings": "lemmings_vgfmri3",
     "vgfmri3_zelda": "zelda_vgfmri3",
+    "vgfmri3_plaqueattack": "plaqueAttack_vgfmri3",
 }
 
 
 def _multiturn_file_for(llm_dir: Path, subject: str, game: str) -> Optional[Path]:
     """Return path to the multiturn per-game .pt if it exists, else None."""
-    mt_name = _CANONICAL_TO_MULTITURN.get(game)
+    mt_name = _CANONICAL_TO_MULTITURN.get(game.lower())
     if mt_name is None:
         return None
     p = llm_dir / subject / f"{mt_name}.pt"
@@ -382,7 +385,7 @@ def _load_multiturn_game_file(pt_path: Path, subject: str, game: str) -> dict:
     — do not collide. Without the path component the second variant would
     silently receive cached data from the first.
     """
-    key = (str(pt_path.resolve()), subject, game)
+    key = (str(pt_path.resolve()), subject, game.lower())
     if key in _MULTITURN_CACHE:
         return _MULTITURN_CACHE[key]
     logging.info(
@@ -854,7 +857,8 @@ class LLMFeatureManager:
         for src_name, meta in self.source_metadata.items():
             src = meta["config"]
             games_levels = meta["games_levels"]
-            if game not in games_levels or level not in games_levels[game]:
+            levels = games_levels.get(game, games_levels.get(game.lower(), ()))
+            if level not in levels:
                 result[src_name] = {}
                 continue
             llm_by_local_index = load_llm_features_for_level(
@@ -1117,6 +1121,11 @@ def process_subject(
     subj_str = subject if subject.startswith("sub-") else f"sub-{int(subject):02d}"
     subj_num = int(subj_str.replace("sub-", ""))
 
+    if not aligned_data_path.is_file():
+        raise FileNotFoundError(aligned_data_path)
+    base = np.load(aligned_data_path, allow_pickle=True)
+    binding = bind_to_base(aligned_data_path, base)
+
     # -------------------------------------------------------------------------
     # Incremental mode: filter out already-aligned LLM sources
     # -------------------------------------------------------------------------
@@ -1126,6 +1135,16 @@ def process_subject(
         for src in llm_sources:
             llm_file = output_subdir / f"aligned_llm_{src.name}.npz"
             if llm_file.exists():
+                with np.load(llm_file, allow_pickle=False) as existing:
+                    if not validate_binding(
+                        existing,
+                        base,
+                        aligned_data_path,
+                        base_sha256=str(binding["alignment_base_sha256"]),
+                    ):
+                        raise ValueError(
+                            f"Cannot resume unbound feature archive: {llm_file}"
+                        )
                 logging.info(f"  [incremental] Skipping {src.name} — already aligned")
             else:
                 new_sources.append(src)
@@ -1149,8 +1168,6 @@ def process_subject(
     if not aligned_data_path.exists():
         raise FileNotFoundError(f"aligned_data.npz not found: {aligned_data_path}")
     logging.info(f"  Loading base alignment: {aligned_data_path}")
-    base = np.load(aligned_data_path, allow_pickle=True)
-
     tr = float(base["tr"])
     ar1_corrected = bool(base["ar1_corrected"])
     n_volumes_total = int(base["n_volumes"])
@@ -1275,7 +1292,7 @@ def process_subject(
                 pid: play
                 for pid, play in all_plays_by_id.items()
                 if int(play["subj_id"]) == subj_num
-                and play["game_name"] == game
+                and play["game_name"].lower() == game.lower()
                 and int(play["level_id"]) == level
             }
             multiturn_by_source = {
@@ -1569,7 +1586,7 @@ def process_subject(
         src = meta["config"]
         prefix = f"llm_{src_name}"
 
-        llm_save_dict = {}
+        llm_save_dict = dict(binding)
         for layer_name in meta["layer_names"]:
             key = f"{src_name}_{layer_name}"
             if key in llm_concatenated:

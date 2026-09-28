@@ -50,6 +50,11 @@ The [dataset analysis guide](docs/guides/dataset-analysis.md) starts from canoni
 human recordings and processed neural inputs, without OpenNeuro BSON or raw MRI.
 The [data format guide](docs/data-format.md) explains self-contained per-game
 human files, conversations, frames, actions and measurement identities.
+The dataset groups gameplay under `behavior/`, frame and prompt activations
+under `features/`, and BOLD/model inputs and results under `analysis/neural/`.
+Agent families use the same names in each group. The
+[dataset card](docs/release/huggingface-dataset-card.md) describes the layout and
+download catalogues. Preprocessing outputs for reconstruction are optional.
 
 Minimal install (OpenRouter-backed gameplay and action-only human replay; no local GPU inference):
 
@@ -113,7 +118,7 @@ Datasets and model weights are separate from this code checkout.
 The Hugging Face release is being prepared for `csbotos/reason-to-play`:
 canonical human recordings, model prompts and gameplay, activations, processed
 fMRI inputs, ROI resources and analysis outputs. It has not been uploaded. The
-manifest records each file’s identity, contents and checksum. The [dataset card draft](docs/release/huggingface-dataset-card.md)
+manifest records each file’s identity, contents and checksum when byte-verified. The [dataset card draft](docs/release/huggingface-dataset-card.md)
 describes the selection, omissions and catalogue loading interface.
 
 Dataset paths are recorded in the release manifest. They do not depend on where

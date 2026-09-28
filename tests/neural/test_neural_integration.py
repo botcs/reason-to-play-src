@@ -294,7 +294,9 @@ def test_json_records_drive_ddqn_and_theory_alignment(synthetic_alignment):
         behavior_dir=recordings,
         regressors_json_path=regressor_path,
     )
-    with np.load(output / subject / "aligned_data.npz", allow_pickle=True) as result:
+    with np.load(
+        output / subject / "bold-ddqn-theory.npz", allow_pickle=True
+    ) as result:
         np.testing.assert_array_equal(result["play_boundaries"], [0, 20, 40, 60, 80])
         np.testing.assert_array_equal(result["play_levels"], [0, 3, 6, 9])
         assert result["voxel_ts"].shape == (27, 80)
@@ -350,6 +352,14 @@ def test_preprocess_base_llm_and_ridge(synthetic_alignment, layer, sidecar, nuis
             np.savez_compressed(
                 root / "aligned" / subject / sidecar,
                 **{f"{layer}_aligned": llm["llm_fixture_layer_1_aligned"]},
+                **{
+                    key: llm[key]
+                    for key in (
+                        "alignment_binding_version",
+                        "alignment_base_sha256",
+                        "alignment_samples_sha256",
+                    )
+                },
             )
     encoder.run_encoding_model(
         subject,
@@ -553,6 +563,12 @@ def test_llm_alignment_preserves_scan_truncated_play(tmp_path, ar1_corrected):
         play_game_idx=[0],
         play_levels=[0],
         play_n_volumes=[retained],
+        subject=subject,
+        play_boundaries=[0, retained],
+        tr_run_idx=np.ones(retained, dtype=int),
+        tr_game_idx=np.zeros(retained, dtype=int),
+        tr_level_idx=np.zeros(retained, dtype=int),
+        tr_play_idx=np.zeros(retained, dtype=int),
     )
     recordings = write_human_replay(
         tmp_path / "recording.human.replay.json.gz", [play], run

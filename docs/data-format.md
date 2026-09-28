@@ -41,6 +41,10 @@ Its start time is derived from the nine play records, which all agree on that ti
 embedded scanner entry records this derivation and has `clock_only: true`.
 The other selected runs use their original scanner clocks.
 
+Top-level `started_at` and `finished_at` describe the replay export, not the
+participant's session. Use play timestamps, frame `realworld_ts` and
+`scanner.scan_start_ts` for measurements and neural alignment.
+
 Human play outcomes are **true, false, or null**. `outcome` distinguishes `win`,
 `avatar_died`, `loss` and `incomplete`. Avatar-death events are checked before
 classifying a null result as incomplete. A frame's terminal `win=-1` or a
@@ -95,6 +99,8 @@ quantization and alignment rules; those do not replace recorded geometry.
 metadata. A step is a selected observation/action pair, not every engine tick.
 Idle frames and plays without selected prompt turns remain in `states` and
 `plays`. `state_index` points into the embedded expanded trajectory.
+`meta.action_frames_only` describes which observations were selected for prompt
+steps; it does not remove idle frames from the recorded trajectory.
 
 Each real step also identifies its source measurement:
 
@@ -134,7 +140,7 @@ with expanded viewer states and unchanged conversations. Inspect files with the
 [web replay viewer](https://botcs.github.io/reason-to-play/replay.html).
 
 EMPA theory regressors are a separate model input at
-`features/theory/empa/source-regressors.json.gz`; they are not human behaviour.
+`analysis/neural/inputs/theory-regressors.json.gz`; they are not human behaviour.
 
 ## Replay source roles
 

@@ -63,8 +63,8 @@ resampling stage to those derivatives.
 
 Set `DATASET` to the downloaded derivative dataset root, `DDQN_FEATURES` to the
 selected per-frame DDQN NPZ directory and `EMPA_REGRESSORS` to the selected
-`source-regressors.json.gz`. Choose those input paths from the release manifest.
-The DDQN directory must contain `sub-XX/GAME/level_YY.npz`; the extractor writes
+`analysis/neural/inputs/theory-regressors.json.gz`. Choose those input paths from the release manifest.
+The DDQN directory must contain `sub-XX/GAME/level-YY.npz`; the extractor writes
 that structure beneath its `model-MODEL_ID/` directory.
 
 ```bash
@@ -87,7 +87,7 @@ scanner runs. The worked LLM comparison uses the vgfmri4 cohort and levels 0–8
 The base archive contains BOLD, DDQN/theory features, nuisance variables and
 sample boundaries. The aligner currently requires DDQN inputs even for later
 LLM fits. Select the matching per-frame DDQN inputs explicitly. The command
-writes `/data/reconstruction/analysis-inputs/sub-13/aligned_data.npz` and any
+writes `/data/reconstruction/analysis-inputs/sub-13/bold-ddqn-theory.npz` and any
 configured feature sidecars; that base file can be passed to the encoder as
 `--base-data`. Existing processed base archives avoid this reconstruction step.
 

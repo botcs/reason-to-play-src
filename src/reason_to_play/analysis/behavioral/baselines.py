@@ -57,12 +57,18 @@ def _win(value: int) -> str:
 
 
 def efficientzero_rows(root: Path) -> list[dict]:
-    """Read GAME/self_play_episodes.csv, ordered by preserved episode_index."""
-    files = sorted(root.glob("*/self_play_episodes.csv"))
+    """Read GAME/episodes.csv, ordered by preserved episode_index."""
+    files = sorted(root.glob("*/episodes.csv"))
+    files += sorted(root.glob("*/self_play_episodes.csv"))
     if not files:
-        raise FileNotFoundError(f"No GAME/self_play_episodes.csv below {root}")
+        raise FileNotFoundError(f"No GAME/episodes.csv below {root}")
     output = []
+    seen_games = set()
     for path in files:
+        game_key = game_identity(path.parent.name)
+        if game_key in seen_games:
+            raise ValueError(f"Duplicate EfficientZero game {game_key} below {root}")
+        seen_games.add(game_key)
         with path.open(newline="") as stream:
             episodes = sorted(
                 csv.DictReader(stream), key=lambda row: int(row["episode_index"])
@@ -128,22 +134,41 @@ def ddqn_rows(path: Path) -> list[dict]:
 
 
 def empa_rows(root: Path) -> list[dict]:
-    """Read GAME/TRIAL/dumps/interaction_data/lvl_N.json (one-based levels)."""
-    files = sorted(root.glob("*/*/dumps/interaction_data/lvl_*.json"))
+    """Read GAME/trial-NN/level-NN.json with zero-based level IDs."""
+    files = sorted(root.glob("*/trial-*/level-*.json"))
+    files += sorted(root.glob("*/*/dumps/interaction_data/lvl_*.json"))
     if not files:
         raise FileNotFoundError(f"No EMPA episode-summary JSON below {root}")
     output = []
+    seen = set()
     for path in files:
-        match = re.fullmatch(r"lvl_(\d+)", path.stem)
+        current = path.name.startswith("level-")
+        match = re.fullmatch(r"level-(\d+)" if current else r"lvl_(\d+)", path.stem)
         if match is None:
             raise ValueError(f"Invalid EMPA level filename: {path}")
-        level = int(match[1]) - 1
+        level = int(match[1]) - (0 if current else 1)
         if not 0 <= level <= 8:
             continue
         relative = path.relative_to(root)
         game, trial = relative.parts[:2]
+        if current:
+            trial_match = re.fullmatch(r"trial-(\d+)", trial)
+            if trial_match is None:
+                raise ValueError(f"Invalid EMPA trial directory: {path}")
+            trial = str(int(trial_match[1]))
+        identity = (*game_identity(game), trial, level)
+        if identity in seen:
+            raise ValueError(f"Duplicate EMPA game/trial/level {identity}")
+        seen.add(identity)
         row = _row("empa1", "EMPA", game, f"trial{trial}", level, relative.as_posix())
         document = json.loads(path.read_text())
+        if current:
+            if (
+                game_identity(document["game"]) != game_identity(game)
+                or document["trial"] != int(trial)
+                or document["level"] != level
+            ):
+                raise ValueError(f"EMPA metadata disagrees with path: {path}")
         for episode in document["episode_summaries"]:
             _append(row, episode["steps"], episode["outcome"])
         output.append(row)

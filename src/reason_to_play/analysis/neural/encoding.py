@@ -64,6 +64,13 @@ from pathlib import Path
 import numpy as np
 from sklearn.decomposition import PCA
 
+from reason_to_play.analysis.neural.alignment import (
+    external_binding,
+    file_sha256,
+    released_llm_path,
+    validate_binding,
+)
+
 # Himalaya imports
 from himalaya.ridge import GroupRidgeCV
 from himalaya.scoring import correlation_score
@@ -223,7 +230,13 @@ def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files
     if base_data is None:
         if data_dir is None:
             raise ValueError("Provide --base-data or --data-dir")
-        base_data = Path(data_dir) / subject / "aligned_data.npz"
+        root = Path(data_dir)
+        if (root / "analysis/neural/inputs").is_dir():
+            root = root / "analysis/neural/inputs"
+        clean_base = root / subject / "bold-ddqn-theory.npz"
+        base_data = (
+            clean_base if clean_base.is_file() else root / subject / "aligned_data.npz"
+        )
     paths = [Path(base_data)]
     if feature_files is not None:
         paths.extend(Path(path) for path in feature_files)
@@ -238,7 +251,12 @@ def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files
         elif layer.startswith("hrr_"):
             sidecar = "aligned_hrr_decomposed.npz"
         if sidecar:
-            candidate = paths[0].parent / sidecar
+            clean = released_llm_path(layer, subject)
+            if layer.startswith("hrr_"):
+                clean = Path("model-features/theory/hrr-decomposed") / f"{subject}.npz"
+            candidate = paths[0].parent.parent / clean if clean is not None else None
+            if candidate is None or not candidate.is_file():
+                candidate = paths[0].parent / sidecar
             if candidate.exists():
                 paths.append(candidate)
     for path in paths:
@@ -247,12 +265,34 @@ def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files
     return paths
 
 
-def load_aligned_data(paths, subject, layer):
+def load_aligned_data(paths, subject, layer, *, require_binding=True):
     with np.load(paths[0], allow_pickle=True) as source:
         data = dict(source)
+    base = data
+    binding_status = []
+    base_digest = file_sha256(paths[0]) if len(paths) > 1 else None
     for path in paths[1:]:
         with np.load(path, allow_pickle=True) as source:
-            data = merge_feature_sidecar(data, dict(source), path)
+            sidecar = dict(source)
+        verified = validate_binding(sidecar, base, paths[0], base_sha256=base_digest)
+        association = external_binding(path)
+        if association is not None:
+            validate_binding(association, base, paths[0], base_sha256=base_digest)
+            verified = True
+        if not verified:
+            if require_binding:
+                raise ValueError(
+                    f"Feature sidecar lacks a recorded base/sample-order binding: {path}"
+                )
+            logging.warning(
+                "Unbound feature archive %s: sample-order association is unverified",
+                path,
+            )
+        binding_status.append(
+            {"path": str(path), "status": "verified" if verified else "unverified"}
+        )
+        data = merge_feature_sidecar(data, sidecar, path)
+    data["alignment_verification_json"] = json.dumps(binding_status, sort_keys=True)
     validate_aligned_data(data, layer, subject)
     return data
 
@@ -268,6 +308,14 @@ def input_fingerprints(paths):
         identities.append(
             {"role": "base" if index == 0 else "feature", "sha256": digest.hexdigest()}
         )
+        association_path = Path(str(path) + ".alignment.json")
+        if index and association_path.is_file():
+            identities.append(
+                {
+                    "role": "alignment-association",
+                    "sha256": file_sha256(association_path),
+                }
+            )
     return json.dumps(identities, sort_keys=True)
 
 
@@ -641,6 +689,7 @@ def run_encoding_model(
     seed: int | None = None,
     base_data: Path | None = None,
     feature_files: list[Path] | None = None,
+    allow_unverified_alignment: bool = False,
 ) -> dict:
     """
     Run banded ridge encoding model for one subject.
@@ -688,7 +737,9 @@ def run_encoding_model(
 
     paths = encoding_input_paths(subject, data_dir, layer, base_data, feature_files)
     source_fingerprints = input_fingerprints(paths)
-    data = load_aligned_data(paths, subject, layer)
+    data = load_aligned_data(
+        paths, subject, layer, require_binding=not allow_unverified_alignment
+    )
     if n_iter < 1 or n_targets_batch < 1 or n_alphas_batch < 1:
         raise ValueError("Iteration and batch counts must be positive")
     if seed is not None and not 0 <= seed < 2**32:
@@ -1138,6 +1189,8 @@ def run_encoding_model(
         "completion_status": "complete",
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "input_files_json": source_fingerprints,
+        "alignment_verification_json": data["alignment_verification_json"],
+        "allow_unverified_alignment": allow_unverified_alignment,
         "runtime_versions_json": json.dumps(
             {
                 name: importlib.metadata.version(name)
@@ -1317,6 +1370,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Skip existing results only if successful completion and run settings match",
     )
+    parser.add_argument(
+        "--allow-unverified-alignment",
+        action="store_true",
+        help="Permit archived sidecars without base/sample-order bindings; result metadata records unverified association",
+    )
     args = parser.parse_args()
     if args.base_data is None and args.data_dir is None:
         parser.error("provide --base-data or --data-dir")
@@ -1366,6 +1424,7 @@ if __name__ == "__main__":
                         Path(__file__).read_bytes()
                     ).hexdigest(),
                     "n_iter": args.n_iter,
+                    "allow_unverified_alignment": args.allow_unverified_alignment,
                     "seed": args.seed if args.seed is not None else -1,
                     "n_targets_batch": args.n_targets_batch,
                     "n_alphas_batch": args.n_alphas_batch,
@@ -1392,6 +1451,7 @@ if __name__ == "__main__":
                 data_dir=Path(args.data_dir) if args.data_dir is not None else None,
                 base_data=args.base_data,
                 feature_files=args.feature_file,
+                allow_unverified_alignment=args.allow_unverified_alignment,
                 output_dir=Path(args.output_dir),
                 layer=layer,
                 max_level=args.max_level,

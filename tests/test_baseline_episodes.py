@@ -1,6 +1,7 @@
 """Preserve baseline outcome, chronology, and cross-cohort contracts."""
 
 import json
+import pickle
 from types import SimpleNamespace
 
 import pytest
@@ -11,6 +12,7 @@ from reason_to_play.analysis.behavioral.baselines import (
     empa_rows,
 )
 from tools.export_ddqn_history import export
+from tools.convert_empa_summaries import convert
 
 
 def test_ez_orders_episodes_and_excludes_warmup(tmp_path):
@@ -87,3 +89,41 @@ def test_ddqn_export_uses_unsampled_scan_and_deduplicates_runs():
     (record,) = export(api, "test/project", ["first", "second"])
     assert len(record["episodes"]) == 1100
     assert record["seed"] == 7
+
+
+def test_empa_conversion_preserves_episodes_in_flat_dataset_paths(tmp_path):
+    source = tmp_path / "source"
+    directory = source / "vgfmri4_avoidgeorge/15/dumps/interaction_data"
+    directory.mkdir(parents=True)
+    episodes = [{"steps": 3, "outcome": "loss"}, {"steps": 12, "outcome": "win"}]
+    (directory / "lvl_2.pkl").write_bytes(pickle.dumps({"episode_summaries": episodes}))
+    output = tmp_path / "output"
+    assert convert(source, output) == 1
+    path = output / "avoidGeorge_vgfmri4/trial-15/level-01.json"
+    document = json.loads(path.read_text())
+    assert document["episode_summaries"] == episodes
+    (row,) = empa_rows(output)
+    assert (row["game"], row["cohort"], row["instance_id"], row["level"]) == (
+        "avoidgeorge",
+        "vgfmri4",
+        "trial15",
+        1,
+    )
+    assert row["episode_steps"] == [3, 12]
+    document["level"] = 2
+    path.write_text(json.dumps(document))
+    with pytest.raises(ValueError, match="metadata disagrees"):
+        empa_rows(output)
+
+
+def test_ez_release_and_source_alias_cannot_double_count(tmp_path):
+    source = tmp_path / "vgfmri4_bait"
+    released = tmp_path / "bait_vgfmri4"
+    source.mkdir()
+    released.mkdir()
+    data = "episode_index,resolved_level,episode_len,win\n0,0,12,1\n"
+    (released / "episodes.csv").write_text(data)
+    assert efficientzero_rows(tmp_path)[0]["episode_steps"] == [12]
+    (source / "self_play_episodes.csv").write_text(data)
+    with pytest.raises(ValueError, match="Duplicate EfficientZero"):
+        efficientzero_rows(tmp_path)

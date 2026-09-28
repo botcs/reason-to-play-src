@@ -100,9 +100,23 @@ def test_replay_synthetic_markers_and_resumed_fragments(tmp_path):
             "suggestion_level": "minimal",
         },
         "steps": [
-            {"level": 0, "attempt": 0, "action": "right", "won": True},
+            {
+                "step": 0,
+                "state_index": 0,
+                "level": 0,
+                "attempt": 0,
+                "action": "right",
+                "won": True,
+            },
             {"level": 0, "attempt": 0, "action": "_level_advance"},
-            {"level": 0, "attempt": 1, "action": "left", "lose": True},
+            {
+                "step": 1,
+                "state_index": 1,
+                "level": 0,
+                "attempt": 1,
+                "action": "left",
+                "lose": True,
+            },
         ],
         "states": [
             {"level": 0, "attempt": 0, "time": 5},
@@ -119,7 +133,88 @@ def test_replay_synthetic_markers_and_resumed_fragments(tmp_path):
     replay["meta"]["resumed_at_level"] = 1
     with gzip.open(path, "wt") as stream:
         json.dump(replay, stream)
-    with pytest.raises(ValueError, match="Merge resumed"):
+    with pytest.raises(ValueError, match="Continuation must include"):
+        replay_rows(path)
+
+
+def test_cumulative_replay_keeps_repeated_attempts_separate(tmp_path):
+    replay = {
+        "source": "generative",
+        "game": "bait_vgfmri4",
+        "started_at": "2026-09-27",
+        "total_steps": 3,
+        "start_level": 1,  # Current invocation can start later than its copied prefix.
+        "meta": {
+            "model": "test/model",
+            "seed": 0,
+            "rationale_mode": "action-only",
+            "suggestion_level": "minimal",
+            "resumed_at_level": 0,
+            "resumed_from_steps": 2,
+        },
+        "states": [
+            {"level": 0, "attempt": 0, "time": 0},
+            {"level": 0, "attempt": 0, "time": 5},
+            {"level": 0, "attempt": 0, "time": 0},
+            {"level": 0, "attempt": 0, "time": 2},
+        ],
+        "steps": [
+            {"step": 0, "state_index": 0, "level": 0, "attempt": 0, "action": "right"},
+            {
+                "step": 1,
+                "state_index": 1,
+                "level": 0,
+                "attempt": 0,
+                "action": "left",
+                "lose": True,
+            },
+            {
+                "step": 2,
+                "state_index": 2,
+                "level": 0,
+                "attempt": 0,
+                "action": "right",
+                "won": True,
+            },
+        ],
+    }
+    path = tmp_path / "continued.generative.replay.json.gz"
+
+    def save():
+        with gzip.open(path, "wt") as stream:
+            json.dump(replay, stream)
+
+    save()
+    (row,) = replay_rows(path)
+    assert row["episode_steps"] == [2, 1]
+    assert row["episode_frames"] == [5, 2]
+    assert row["episode_outcomes"] == ["loss", "win"]
+    replay["steps"] = replay["steps"][2:]
+    save()
+    with pytest.raises(ValueError, match="ordered action steps starting at zero"):
+        replay_rows(path)
+
+
+def test_replay_rejects_action_frame_disagreement(tmp_path):
+    replay = {
+        "source": "generative",
+        "game": "bait_vgfmri4",
+        "started_at": "2026-09-27",
+        "meta": {
+            "model": "test/model",
+            "seed": 0,
+            "rationale_mode": "action-only",
+            "suggestion_level": "minimal",
+        },
+        "states": [{"level": 0, "attempt": 0, "time": 0}],
+        "steps": [
+            {"step": 0, "state_index": 0, "level": 1, "attempt": 0, "action": "right"}
+        ],
+    }
+    path = tmp_path / "invalid.generative.replay.json.gz"
+    with gzip.open(path, "wt") as stream:
+        json.dump(replay, stream)
+    with pytest.raises(ValueError, match="disagree on level/attempt"):
         replay_rows(path)
 
 

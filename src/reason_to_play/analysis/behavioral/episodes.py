@@ -2,8 +2,8 @@
 
 No experiment database is required. Human steps count non-idle keypress frames;
 model steps count decisions. Engine frames are stored separately. Select one
-complete generative replay per run; resumed fragments are rejected to avoid
-silently double-counting or discarding earlier levels.
+complete generative replay per run, including the preceding steps when a run
+continues from a checkpoint. Episode boundaries follow the recorded frame clocks.
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ import gzip
 import hashlib
 import json
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from reason_to_play.data.behavior import (
@@ -24,7 +25,7 @@ from reason_to_play.data.behavior import (
     play_states,
 )
 
-from reason_to_play.data.replay_behavior import play_recording_path
+from reason_to_play.data.replay_behavior import play_recording_path, replay_paths
 
 __all__ = ["GAMES", "game_identity", "human_outcome", "human_rows", "replay_rows"]
 FIELDS = [
@@ -95,8 +96,6 @@ def replay_rows(path: Path) -> list[dict]:
     if replay.get("source") != "generative":
         raise ValueError(f"Expected generative replay: {path}")
     meta = replay["meta"]
-    if "resumed_at_level" in meta or "resumed_from_steps" in meta:
-        raise ValueError(f"Merge resumed replay fragments before exporting: {path}")
     game, cohort = game_identity(replay["game"])
     if game not in GAMES:
         return []
@@ -111,16 +110,58 @@ def replay_rows(path: Path) -> list[dict]:
         meta.get("wandb_run_url"),
     ]
     instance = hashlib.sha256(json.dumps(identity).encode()).hexdigest()[:20]
+    actions = [s for s in replay["steps"] if not s["action"].startswith("_")]
+    if [s.get("step") for s in actions] != list(range(len(actions))):
+        raise ValueError(
+            f"Expected complete, ordered action steps starting at zero: {path}"
+        )
+    states = replay.get("states", [])
+    if not states:
+        raise ValueError(f"Replay has no recorded frames: {path}")
+    if "resumed_at_level" in meta or "resumed_from_steps" in meta:
+        prefix = meta.get("resumed_from_steps")
+        first = states[0]
+        if (
+            not isinstance(prefix, int)
+            or not 0 <= prefix <= len(actions)
+            or replay.get("total_steps") != len(actions)
+            or int(first["attempt"]) != 0
+            or first["time"] != 0
+        ):
+            raise ValueError(
+                f"Continuation must include its complete preceding history: {path}"
+            )
+
+    # Attempt labels can restart after continuation. The frame timeline is the
+    # identity of an episode; a repeated (level, attempt) is not the same play.
+    frame_episodes = []
+    frames: dict[int, int] = {}
+    episode = -1
+    previous = None
+    for state in states:
+        identity = int(state["level"]), int(state["attempt"])
+        if previous is None or identity != previous[:2] or state["time"] < previous[2]:
+            episode += 1
+        frame_episodes.append(episode)
+        frames[episode] = max(frames.get(episode, 0), state["time"])
+        previous = (*identity, state["time"])
     groups: dict[tuple, list[dict]] = defaultdict(list)
-    for step in replay["steps"]:
-        if not step["action"].startswith("_") and 0 <= int(step["level"]) <= 8:
-            groups[int(step["level"]), int(step["attempt"])].append(step)
-    frames: dict[tuple, int] = {}
-    for state in replay.get("states", []):
-        key = int(state["level"]), int(state["attempt"])
-        frames[key] = max(frames.get(key, 0), state["time"])
+    previous_index = -1
+    for step in actions:
+        index = step.get("state_index")
+        if not isinstance(index, int) or not previous_index <= index < len(states):
+            raise ValueError(f"Invalid or unordered action frame reference: {path}")
+        state = states[index]
+        level, attempt = int(step["level"]), int(step["attempt"])
+        if (level, attempt) != (int(state["level"]), int(state["attempt"])):
+            raise ValueError(
+                f"Action and referenced frame disagree on level/attempt: {path}"
+            )
+        previous_index = index
+        if 0 <= level <= 8:
+            groups[level, frame_episodes[index]].append(step)
     rows: dict[int, dict] = {}
-    for (level, attempt), steps in groups.items():
+    for (level, episode), steps in groups.items():
         row = rows.setdefault(
             level,
             {
@@ -142,7 +183,7 @@ def replay_rows(path: Path) -> list[dict]:
             },
         )
         row["episode_steps"].append(len(steps))
-        row["episode_frames"].append(frames.get((level, attempt)))
+        row["episode_frames"].append(frames[episode])
         row["episode_outcomes"].append(
             "win"
             if any(s.get("won") is True for s in steps)
@@ -160,11 +201,18 @@ def main() -> None:
         type=Path,
         help="Canonical behavior/human directory, or downloaded release root",
     )
-    parser.add_argument("--replays", type=Path, nargs="*", default=[])
+    parser.add_argument(
+        "--replays",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="Generative replay files or directories searched recursively",
+    )
+    parser.add_argument("--workers", type=int, default=32)
     parser.add_argument(
         "--efficientzero",
         type=Path,
-        help="Directory containing GAME/self_play_episodes.csv",
+        help="Directory containing GAME/episodes.csv",
     )
     parser.add_argument(
         "--ddqn", type=Path, help="Archived or unsampled-export DDQN JSON"
@@ -180,15 +228,32 @@ def main() -> None:
         (args.human_data, args.replays, args.efficientzero, args.ddqn, args.empa)
     ):
         parser.error("provide at least one input source")
-    rows = human_rows(args.human_data) if args.human_data else []
-    seen = set()
+    if args.workers < 1:
+        parser.error("--workers must be positive")
+    human_files = replay_paths(args.human_data) if args.human_data else []
+    if args.human_data and not human_files:
+        parser.error(f"No human files below {args.human_data}")
+    model_files = []
     for path in args.replays:
-        for row in replay_rows(path):
-            identity = row["instance_id"], row["game"], row["cohort"], row["level"]
-            if identity in seen:
-                raise ValueError(f"Duplicate run/level input: {path}")
-            seen.add(identity)
-            rows.append(row)
+        if path.is_dir():
+            files = sorted(path.rglob("*.generative.replay.json.gz"))
+            if not files:
+                parser.error(f"No generative replay files below {path}")
+            model_files.extend(files)
+        else:
+            model_files.append(path)
+    rows = []
+    seen = set()
+    with ProcessPoolExecutor(max_workers=args.workers) as pool:
+        for group in pool.map(human_rows, human_files):
+            rows.extend(group)
+        for path, group in zip(model_files, pool.map(replay_rows, model_files)):
+            for row in group:
+                identity = row["instance_id"], row["game"], row["cohort"], row["level"]
+                if identity in seen:
+                    raise ValueError(f"Duplicate run/level input: {path}")
+                seen.add(identity)
+                rows.append(row)
     from reason_to_play.analysis.behavioral.baselines import (
         ddqn_rows,
         efficientzero_rows,

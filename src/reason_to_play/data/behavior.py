@@ -88,6 +88,15 @@ def game_identity(name: str) -> tuple[str, str]:
     return game.lower(), cohort.lower()
 
 
+def canonical_game_id(name: str) -> str:
+    """Use the game identifiers shared by released human and agent data."""
+    game, cohort = game_identity(name)
+    if game not in GAMES:
+        raise ValueError(f"Unrecognized game: {name!r}")
+    spelling = {"avoidgeorge": "avoidGeorge", "plaqueattack": "plaqueAttack"}
+    return f"{spelling.get(game, game)}_{cohort}"
+
+
 def human_outcome(doc: dict, states: list[dict] | None = None) -> str:
     """Classify original play outcome; avatar deaths precede null/incomplete."""
     win = doc["win"]

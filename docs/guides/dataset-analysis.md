@@ -21,9 +21,9 @@ The Python modules below can be called from any working directory after install.
 Relative paths to `experiments/` in the plotting examples are relative to the
 code checkout; supply absolute configuration paths from another directory.
 
-Set `DATASET` to your downloaded dataset root. For other input variables below,
-select the matching artifact from that revision's manifest and set its actual
-local path. Output paths in these examples are local directories you choose.
+Set `DATASET` to your downloaded dataset root. The examples use the paths
+listed below; other models and conditions are indexed in `manifest.jsonl.gz`.
+Output paths are local directories you choose.
 
 ```bash
 DATASET=/data/reason-to-play
@@ -74,20 +74,35 @@ for the historical archive. That reference is not the public replay schema.
 ```bash
 python -m reason_to_play.analysis.behavioral.episodes \
   --human-data "$DATASET/behavior/human" \
-  --replays /data/selected-replays/*.generative.replay.json.gz \
+  --replays "$DATASET/behavior/lrm" --workers 32 \
+  --ddqn "$DATASET/behavior/ddqn/episode-history.json" \
+  --efficientzero "$DATASET/behavior/efficientzero" \
+  --empa "$DATASET/behavior/empa" \
   --output /results/episodes.csv
 python -m reason_to_play.analysis.behavioral.plots discovery_curriculum_combined \
   --csv /results/episodes.csv --output-dir /results/figures
 ```
 
-Set the glob to the actual selected generative files; the shell expands it. Add the
-recorded baseline inputs with `--ddqn`, `--efficientzero` and `--empa` as
-specified in the [baseline guide](baselines.md). Human keypress
+The replay argument accepts a directory or explicit files; directories are
+searched recursively. Baseline input formats are described in the [baseline guide](baselines.md). Human keypress
 frames, model decisions and engine frames are separate columns. Practice runs
 and levels outside 0–8 are excluded by the comparison exporter. Participant
 advancement used a fixed scanner schedule; the model curriculum required
 consecutive wins. The plotting rule does not make those collection protocols
 identical.
+
+The dataset also includes `analysis/behavioral/retained-episode-table.csv`,
+the input table for the retained behavioral summaries. Its DDQN rows use sampled
+W&B histories: 32,818 episodes from 88 runs. The separate DDQN history JSON
+contains all 170,546 recorded episodes from those same runs. Use the table to
+render its summaries and the full histories for analyses requiring every episode;
+the two are different analysis inputs.
+
+```bash
+python -m reason_to_play.analysis.behavioral.plots discovery_curriculum_combined \
+  --csv "$DATASET/analysis/behavioral/retained-episode-table.csv" \
+  --output-dir /results/retained-behavior-figures
+```
 
 ## Neural encoding from processed inputs
 
@@ -95,9 +110,15 @@ An encoding fit needs processed BOLD, its mask/affine, sample/play boundaries,
 CV partitions, nuisance variables, and the selected model features in exactly
 that sample order. Existing base archives also contain DDQN and theory
 features; they are shared analysis inputs, not fMRIPrep images. Feature files
-can be supplied explicitly. Set `BASE_DATA` to the participant's BOLD/base NPZ
-and `MODEL_FEATURES` to its Qwen3.5-9B, `all`, `main` feature NPZ from the manifest.
-The layer key below is stored inside that feature archive.
+can be supplied explicitly. `all` selects all prompt action steps; it does not
+describe file compression. The following paths select participant 13 and the
+Qwen3.5-9B elaborate/all/main condition. The layer key is stored inside that
+feature archive.
+
+```bash
+BASE_DATA="$DATASET/analysis/neural/inputs/sub-13/bold-ddqn-theory.npz"
+MODEL_FEATURES="$DATASET/analysis/neural/inputs/model-features/lrm/qwen3.5-9b/elaborate/all/main/sub-13.npz"
+```
 
 ```bash
 python -m reason_to_play.analysis.neural.encoding \
@@ -108,6 +129,14 @@ python -m reason_to_play.analysis.neural.encoding \
   --max-level 8 --include-nuisance-bands --seed 23 \
   --output-dir /results/encoding
 ```
+
+Download the adjacent `.npz.alignment.json` file with each separate model-feature
+archive. It binds the feature bytes to the BOLD archive and its sample order;
+the reader checks those identities before fitting. New alignment outputs embed
+the same identities. An archived input without this evidence requires the
+explicit `--allow-unverified-alignment` option and is recorded as unverified.
+Verified alignment does not imply that features exist for every play: missing
+source inputs and their zero-filled rows remain reported separately.
 
 The example's seed defines a fresh repeatable fit. The historical fitting seed
 was not recorded, so it does not claim to recover the original random search.
@@ -124,13 +153,20 @@ comparison.
 
 ## ROI aggregation and figures
 
-Set `ATLAS`, `ATLAS_LABELS` and `COMMON_MASK` to the released AAL-SPM12 image,
-its label table and the 32-participant intersection-mask NPZ. Select them by
-manifest identity, rather than downloading another atlas version.
+Use the included AAL-SPM12 image, label table and the intersection mask from
+all 32 participants:
+
+```bash
+ATLAS="$DATASET/analysis/neural/inputs/atlas/aal-spm12/ROI_MNI_V4.nii"
+ATLAS_LABELS="$DATASET/analysis/neural/inputs/atlas/aal-spm12/ROI_MNI_V4.txt"
+COMMON_MASK="$DATASET/analysis/neural/inputs/atlas/common-mask.npz"
+```
+
+Verify their manifest hashes rather than downloading another atlas version.
 
 ```bash
 python -m reason_to_play.analysis.neural.roi \
-  --results-dir /results/encoding \
+  --results-dir /results/encoding --workers 32 \
   --fit-condition with-nuisance \
   --atlas "${ATLAS:?Set ATLAS to the released AAL-SPM12 image}" \
   --atlas-labels "${ATLAS_LABELS:?Set ATLAS_LABELS to its label table}" \
@@ -171,7 +207,7 @@ retain that uncertainty unless an evidence-backed condition declaration is
 available.
 
 To render the archived summary table, set `ARCHIVED_TABLE` to the downloaded
-`master_encoding_data.csv` and use its separate selection:
+`analysis/neural/results/master_encoding_data.csv` and use its separate selection:
 
 ```bash
 python -m reason_to_play.analysis.neural.plots groups \
@@ -206,7 +242,7 @@ python -m reason_to_play.fmri.align_llm \
 Each feature must retain its original observation timestamp and play identity.
 Alignment uses all frame timestamps plus scanner start time, clips to retained
 scan volumes, and applies the recorded AR(1) offset. A feature row number is
-not a scanner-volume index. Original EMPA theory sequences are separate model
+not a scanner-volume index. Recorded theory-regressor sequences are separate model
 data; [base alignment](fmri-preprocessing.md#process-bold-and-align-baseline-features)
 accepts their explicit JSON file. Output NPZs are written under
 `/results/aligned/sub-13/`; pass the required file with `--feature-file` when fitting.

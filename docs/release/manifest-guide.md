@@ -50,6 +50,38 @@ marked as such and checked by metadata/conditional requests; a source change
 fails staging. `freeze --reuse-pins PREVIOUS.jsonl.gz` can reuse matching
 immutable pins. Source errors remain explicit and cause a nonzero exit.
 
+## Assemble the dataset layout
+
+Use an explicit path map to combine selected source objects with generated
+JSON, atlas/mask files and other local inputs. Source identifiers and current
+payload identities are separate fields. One schema-version-2
+`manifest.jsonl.gz` describes the complete dataset; the human-play catalogue
+indexes attempts within its human files.
+
+```bash
+python scripts/release/prepare_manifest.py assemble \
+    --source-manifest out/selected/source-verified.jsonl.gz \
+    --path-map /absolute/path/to/source-path-map.jsonl \
+    --local-files /absolute/path/to/local-files.jsonl \
+    --source-files /absolute/path/to/verified-cache.jsonl \
+    --release-id YOUR_RELEASE_ID \
+    --output out/dataset --audit-output out/private-receipts --workers 32
+```
+
+Each path-map row identifies a source by its frozen `artifact_id`, gives an
+explicit include/exclude decision, and supplies the selected `release_path`,
+component and experiment metadata. Local-input rows supply `local_path`,
+`release_path`, `component`, `metadata`, `license`, `provenance`, `tier` and
+`selection_reason`. Cache receipts additionally pin local bytes to the original
+source generation and checksum. Local filesystem paths remain in private
+receipts outside the dataset.
+
+The assembler checks path and identity collisions, required input references,
+source generations and local payload hashes. It writes
+`catalog/files/planned_files.parquet` and `catalog/metadata.json` from the same
+selection. Source objects whose payloads have not been staged retain that
+status; an inventory size or ETag does not become a SHA-256 checksum.
+
 ## Stage selected bytes and build catalogues
 
 Choose a component defined by your policy. Staging defaults to a 1 GB byte
@@ -84,7 +116,7 @@ Build a per-play catalogue from the human JSON files:
 ```bash
 python scripts/release/build_behavior_catalogue.py \
     --input /data/reason-to-play/behavior/human \
-    --output /data/catalog/human_plays --workers 4
+    --output /data/catalog/human_plays --workers 32
 ```
 
 Adjust `--workers` to the machine’s available CPU and memory; the default is 1.
@@ -98,11 +130,12 @@ scanner run and identifies its current compressed JSON through
 `source_release_path`, `source_payload_sha256` and `source_artifact_id`.
 No source archive or separate prompt file is needed.
 
-## Human-file manifest
+## Human rows in the manifest
 
-`provenance/human-manifest.jsonl.gz` describes the current human JSON files,
-one row per participant/game/prompt condition. Its schema is
-`reason-to-play/human-manifest`, version 1:
+The unified manifest contains one row per participant/game/prompt-condition
+file with `component: "human_behavior"`. Its payload schema is
+`reason-to-play/human-replay`, version 1; the containing manifest row uses
+schema version 2:
 
 | Field | Meaning |
 | --- | --- |

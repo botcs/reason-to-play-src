@@ -12,6 +12,8 @@ import nibabel as nib
 import numpy as np
 import pytest
 
+from reason_to_play.analysis.neural.alignment import bind_to_base
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -38,6 +40,10 @@ def aligned(tmp_path):
     features = rng.normal(size=(90, 3)).astype(np.float32)
     data = {
         "subject": np.array("sub-13"),
+        "tr": 2.0,
+        "ar1_corrected": True,
+        "play_ids": np.array([f"{i:024x}" for i in range(6)]),
+        "tr_run_idx": np.ones(90, dtype=int),
         "fc1_aligned": features,
         "voxel_ts": rng.normal(size=(3, 90)).astype(np.float32),
         "n_voxels": 3,
@@ -91,9 +97,13 @@ def test_sidecar_cannot_replace_alignment_identity(aligned, tmp_path):
     sidecar = tmp_path / "chosen-features.npz"
     np.savez(sidecar, subject="sub-14", new_aligned=data["fc1_aligned"])
     with pytest.raises(ValueError, match="conflicts.*subject"):
-        encoder.load_aligned_data([path, sidecar], "sub-13", "new")
+        encoder.load_aligned_data(
+            [path, sidecar], "sub-13", "new", require_binding=False
+        )
     np.savez(sidecar, subject="sub-13", new_aligned=data["fc1_aligned"])
-    loaded = encoder.load_aligned_data([path, sidecar], "sub-13", "new")
+    loaded = encoder.load_aligned_data(
+        [path, sidecar], "sub-13", "new", require_binding=False
+    )
     np.testing.assert_array_equal(loaded["new_aligned"], data["fc1_aligned"])
 
 
@@ -293,7 +303,11 @@ def test_explicit_input_cli_resume_checks_content_from_other_directory(
         base, **{key: value for key, value in original.items() if key != "fc1_aligned"}
     )
     features = tmp_path / "features-with-readable-name.npz"
-    np.savez(features, llm_fixture_layer_1_aligned=original["fc1_aligned"])
+    np.savez(
+        features,
+        llm_fixture_layer_1_aligned=original["fc1_aligned"],
+        **bind_to_base(base, original),
+    )
     output = tmp_path / "encoded"
     command = [
         sys.executable,

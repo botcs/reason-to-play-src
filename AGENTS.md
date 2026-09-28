@@ -70,6 +70,13 @@ moving an implementation; do not leave a second implementation at the old path.
   outcome. Preserve practice/cohort flags and comparison denominators.
 - Engine frames, model decisions and scanner TRs are distinct units. Preserve
   timestamps, play/run identifiers, lag boundaries and alignment metadata.
+  Separate model-feature archives must bind their bytes to the exact base BOLD
+  archive and ordered samples, in embedded metadata or an adjacent
+  `.npz.alignment.json`. Row counts alone do not establish correspondence.
+  Keep missing-feature coverage separate from a verified alignment.
+- Continued model runs may embed their preceding gameplay and restart attempt
+  numbers. Use chronological frame boundaries and action `state_index` references
+  to distinguish attempts; `(level, attempt)` alone is not a unique identity.
 - Preserve fractional replay positions from the original rendering rectangles.
   Human replay visuals use the recorded frame's rectangle coordinates; prompt
   alignment and model input quantization are separate operations.
