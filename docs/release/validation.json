@@ -4,7 +4,7 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 447,
+      "passed": 453,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
@@ -169,7 +169,8 @@
       "hrr_decomposed_participants": 21,
       "hrr_arrays_per_participant": 3,
       "maximum_absolute_error": 0.0,
-      "scope": "Recorded arrays independently realigned from frozen features/theory JSON and human clocks; coverage gaps remain explicit."
+      "scope": "Recorded arrays independently realigned from frozen features/theory JSON and human clocks; coverage gaps remain explicit.",
+      "recorded_play_identity": "Exact participant/run/original-document IDs take precedence over timestamp proximity, with original-frame timestamp validation and conflicting-identity rejection."
     }
   },
   "not_executed": [

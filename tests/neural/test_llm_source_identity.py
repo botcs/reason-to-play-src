@@ -292,3 +292,36 @@ def test_referenced_features_require_actual_per_game_human_path(path):
     # unique-play matching rule; they do not invent a missing path.
     candidate["metadata"]["source_references"] = None
     assert align.match_multiturn_plays({0: candidate}, {"a": play}) == {"a": candidate}
+
+
+def test_composite_original_identity_disambiguates_overlapping_clocks():
+    plays = {"a": original("a", 4), "b": original("b", 7)}
+    candidate = feature(plays["b"], linked=False)
+    candidate["metadata"]["play_id"] = "sub-13_1_7"
+    assert align.match_multiturn_plays({0: candidate}, plays) == {"b": candidate}
+
+
+@pytest.mark.parametrize("identity", ["sub-12_1_7", "sub-13_2_7", "sub-13_1_8"])
+def test_composite_identity_cannot_fall_back_to_nearby_timestamps(identity):
+    play = original("b", 7)
+    candidate = feature(play, linked=False)
+    candidate["metadata"]["play_id"] = identity
+    with pytest.raises(ValueError, match="Composite feature identity"):
+        align.match_multiturn_plays({0: candidate}, {"b": play})
+
+
+def test_composite_identity_requires_exact_original_frame_clocks():
+    play = original("b", 7)
+    candidate = feature(play, linked=False)
+    candidate["metadata"]["play_id"] = "sub-13_1_7"
+    candidate["timestamps"][0] += 0.01
+    with pytest.raises(ValueError, match="timestamps disagree"):
+        align.match_multiturn_plays({0: candidate}, {"b": play})
+
+
+def test_composite_and_linked_identities_must_agree():
+    plays = {"a": original("a", 4), "b": original("b", 7)}
+    candidate = feature(plays["a"])
+    candidate["metadata"]["play_id"] = "sub-13_1_7"
+    with pytest.raises(ValueError, match="identities disagree"):
+        align.match_multiturn_plays({0: candidate}, plays)

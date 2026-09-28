@@ -563,8 +563,10 @@ def match_multiturn_plays(features_by_index, source_plays, *, slop_seconds=2.0):
     """Resolve feature groups before aligning; never select the first possible play.
 
     Linked features require exact original IDs and per-frame clocks. Historical
-    groups without source references retain their timestamp-range rule, but must
-    match exactly one original play. Two groups cannot occupy the same play.
+    groups named sub-XX_RUN_DOCUMENT use the recorded participant, run and
+    original document ordinal, with exact frame-clock validation. Other groups
+    retain their timestamp-range rule and must match one original play.
+    Two groups cannot occupy the same play.
     Supply the complete subject/game/level inventory, including plays absent from
     BOLD or feature inputs, so a reduced cohort cannot hide ambiguity.
     """
@@ -588,6 +590,31 @@ def match_multiturn_plays(features_by_index, source_plays, *, slop_seconds=2.0):
             any(ref.get(field) is not None for field in SOURCE_REFERENCE_FIELDS)
             for ref in references
         )
+        # run_replay constructs this identifier before extraction; DOCUMENT is
+        # the original run document ordinal, not the game-local attempt index.
+        composite = re.fullmatch(
+            r"sub-(\d{2})_(\d+)_(\d+)", str(feature["metadata"].get("play_id", ""))
+        )
+        composite_pid = None
+        if composite is not None:
+            subject, run, document = map(int, composite.groups())
+            candidates = [
+                pid
+                for pid, play in source_plays.items()
+                if int(play["subj_id"]) == subject
+                and int(play["run_id"]) == run
+                and play.get("_canonical", {}).get("source_document_index") == document
+            ]
+            if len(candidates) != 1:
+                raise ValueError(
+                    "Composite feature identity must name exactly one original "
+                    "participant/run/document in the source game/level"
+                )
+            composite_pid = candidates[0]
+            if not np.isin(times, source_times[composite_pid]).all():
+                raise ValueError(
+                    "Feature timestamps disagree with the composite original play identity"
+                )
         if has_references:
             if len(references) != len(times) or any(
                 any(ref.get(field) is None for field in SOURCE_REFERENCE_FIELDS)
@@ -602,6 +629,10 @@ def match_multiturn_plays(features_by_index, source_plays, *, slop_seconds=2.0):
                     "One feature play contains conflicting original play IDs"
                 )
             pid = next(iter(ids))
+            if composite_pid is not None and composite_pid != pid:
+                raise ValueError(
+                    "Linked and composite original play identities disagree"
+                )
             if pid not in source_plays:
                 raise ValueError(
                     f"Linked feature play {pid!r} is absent from the source game/level"
@@ -652,6 +683,8 @@ def match_multiturn_plays(features_by_index, source_plays, *, slop_seconds=2.0):
                 raise ValueError(
                     f"Feature timestamps differ from referenced original frames for play {pid}"
                 )
+        elif composite_pid is not None:
+            pid = composite_pid
         else:
             candidates = [
                 pid
