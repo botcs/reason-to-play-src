@@ -154,7 +154,7 @@ documents the manifest and verification process.
 
 ### Do LRMs learn the way humans do?
 
-We compare how quickly each agent discovers the rules of a game, and how far through a curriculum of nine difficulty levels it can progress. Human participants, deep-RL baselines (DDQN, EfficientZero, EMPA), and eight frontier LRMs play related VGDL game variants. Humans advanced on a fixed scanner schedule, while LRMs used blocked advancement; the analysis applies an explicit comparison rule. Some converted game variants also differ in their timeout rules. See the reproduction guide before comparing raw level counts or elapsed time.
+We compare how quickly each agent discovers the rules of a game, and how far through a curriculum of nine difficulty levels it can progress. Human participants, baseline agents (DDQN, EfficientZero, EMPA), and eight frontier LRMs play related VGDL game variants. Humans advanced on a fixed scanner schedule, while LRMs used blocked advancement; the analysis applies an explicit comparison rule. Some converted game variants also differ in their timeout rules. See the reproduction guide before comparing raw level counts or elapsed time.
 
 The best LRMs cluster tightly around the human learning distribution. On the discovery metric, the top LRM is nearly indistinguishable from the human median; on the curriculum metric, it tracks human-level progression through all nine difficulty levels. The deep-RL baselines, by contrast, are far slower and plateau much earlier.
 
