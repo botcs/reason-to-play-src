@@ -62,7 +62,10 @@ if _repo_path not in sys.path:
     sys.path.insert(0, _repo_path)
 
 from src.llm_eval.human_replay.feature_saver import sanitize_model_id  # noqa: E402
-from src.llm_eval.human_replay.prompt_utils import _mt_user_content  # noqa: E402
+from src.llm_eval.human_replay.prompt_utils import (  # noqa: E402
+    _mt_user_content,
+    source_reference_metadata,
+)
 from src.llm_eval.shared.config import ExtractionConfig  # noqa: E402
 from src.llm_eval.shared.replay_codec import load_replay as _load_replay_gz  # noqa: E402
 
@@ -1241,6 +1244,7 @@ def extract_for_session(
             w = windows[w_idx]
             md.append(
                 {
+                    **source_reference_metadata(step),
                     "play_id": step.get("play_id"),
                     "step_num": step["step"],
                     "level_id": step["level"],

@@ -5,16 +5,17 @@ from pygame.math import Vector2
 from src.vgdl.render import SpriteLibrary
 from src.vgdl.ontology.constants import RIGHT, BLACK, GOLD
 
-import os
 import numpy as np
 
 
-class PygameRenderer:
+class OffscreenRenderer:
+    """Draw experimental image inputs without an SDL display or event loop."""
+
     def __init__(self, game, block_size, render_sprites=True):
         self.game = game
         # In pixels
         self.block_size = block_size
-        self.game_dims = (game.width, game.height)
+        self.screen = pygame.Surface(self.screen_dims, depth=32)
         self.render_sprites = render_sprites
         if self.render_sprites:
             self.sprite_cache = SpriteLibrary.default()
@@ -23,63 +24,11 @@ class PygameRenderer:
     def screen_dims(self):
         return (self.game.width * self.block_size, self.game.height * self.block_size)
 
-    @property
-    def display_dims(self):
-        return (self.game.width * self.block_size, self.game.height * self.block_size)
-
-    def init_screen(self, headless, title=None):
-        self.headless = headless
-        # Right now display_dims and screen_dims are the same,
-        # Likewise screen and display are interchangeable, for now.
-        # I think it'd be good to allow resizing, just keep screen the same
-        # and scale onto the resized display
-        # self.display_dims = self.screen_dims
-
-        # The screen surface will be used for drawing on
-        # It will be displayed on the `display` surface, possibly magnified
-        # The background is currently solely used for clearing away sprites
-        if headless:
-            os.environ["SDL_VIDEODRIVER"] = "dummy"
-            self.screen = pygame.display.set_mode(self.display_dims)
-            self.display = pygame.display.set_mode(
-                self.display_dims, pygame.RESIZABLE, 32
-            )
-            self.background = pygame.Surface(self.screen_dims)
-        else:
-            if "SDL_VIDEODRIVER" in os.environ.keys():
-                del os.environ["SDL_VIDEODRIVER"]
-                pygame.quit()
-                pygame.init()
-            self.screen = pygame.Surface(self.screen_dims)
-            self.screen.fill((255, 255, 255))
-            self.background = self.screen.copy()
-            self.display = pygame.display.set_mode(
-                self.display_dims, pygame.RESIZABLE, 32
-            )
-            title_prefix = "VGDL"
-            title = title_prefix + " " + title if title else title_prefix
-            if title:
-                pygame.display.set_caption(title)
-
     def draw_all(self):
-        self.clear()
         self.screen.fill((200, 200, 200))
-        # for s in self.game.kill_list:
-        #     self.clear_sprite(s)
-        #
-        # # This is for games where a sprite can disappear and leave black
-        # # background, mainly. Other games do not need clearing
-        # for s in self.game.sprite_registry.sprites():
-        #     self.clear_sprite_last_if_necessary(s)
 
         for s in self.game.sprite_registry.sprites():
             self.draw_sprite(s)
-
-    def update_display(self):
-        # TODO this could be quicker for headless
-        # Use actual display size rather than property, since window may have been resized
-        pygame.transform.scale(self.screen, self.display.get_size(), self.display)
-        pygame.display.update()
 
     def calculate_render_rect(self, rect, shrinkfactor=0):
         displacement_factor = self.block_size / max(rect.size)
@@ -144,47 +93,7 @@ class PygameRenderer:
                 self.screen.fill(BLACK, rest)
                 offset += barheight
 
-    def clear_sprite(self, sprite):
-        # Shrunk objects clear non-shrunk rectangles, I think that's alright
-        rect = self.calculate_render_rect(sprite.rect)
-        self.screen.blit(self.background, rect, rect)
-
-    def clear_sprite_last(self, sprite):
-        rect = self.calculate_render_rect(sprite.lastrect)
-        self.screen.blit(self.background, rect, rect)
-
-    def clear_sprite_last_if_necessary(self, s):
-        if s.rect != s.lastrect:
-            self.clear_sprite_last(s)
-
-    def clear(self):
-        # TODO properly draw background
-        # self.screen.blit()
-        self.screen.fill((0, 0, 0))
-
-    def force_display(self):
-        self.clear()
-        self.draw_all()
-        self.update_display()
-
-    def _resize_display(self, target_size):
-        # Doesn't actually work on quite a few systems
-        # https://github.com/pygame/pygame/issues/201
-        w_factor = target_size[0] / self.display_dims[0]
-        h_factor = target_size[1] / self.display_dims[1]
-        factor = min(w_factor, h_factor)
-
-        self.display_dims = (
-            int(self.display_dims[0] * factor),
-            int(self.display_dims[1] * factor),
-        )
-        self.display = pygame.display.set_mode(self.display_dims, pygame.RESIZABLE, 32)
-
     def get_image(self):
         return np.flipud(
             np.rot90(pygame.surfarray.array3d(self.screen).astype(np.uint8))
         )
-
-    def close(self):
-        pygame.display.quit()
-        pygame.quit()

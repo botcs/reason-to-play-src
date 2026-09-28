@@ -1,4 +1,0 @@
-# Preserve original recovered-file hashes across checkout line-ending settings.
-provenance/fmriprep/** -text
-# Preserve the original generated citation boilerplate byte for byte.
-provenance/fmriprep/logs/CITATION.md -whitespace

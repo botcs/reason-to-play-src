@@ -4,6 +4,7 @@ import copy
 import gzip
 import json
 import os
+import subprocess
 import sys
 
 import pytest
@@ -16,6 +17,30 @@ from src.llm_eval.shared.replay_codec import (
     load_replay,
     save_replay,
 )
+
+
+def test_delta_bytes_independent_of_python_hash_seed():
+    """Release checksums must not depend on process hash randomization."""
+    script = """
+import json
+from reason_to_play.data.replay_codec import delta_encode_states
+keys = ['wall', 'avatar', 'goal', 'projectile', 'floor', 'resource']
+record = {'states': [
+    {'sprites': {key: [{'col': 0}] for key in keys}},
+    {'sprites': {key: [{'col': 1}] for key in keys[:-1]}},
+]}
+delta_encode_states(record)
+print(json.dumps(record, separators=(',', ':')))
+"""
+    outputs = [
+        subprocess.check_output(
+            [sys.executable, "-c", script],
+            env={**os.environ, "PYTHONHASHSEED": str(seed)},
+        )
+        for seed in (1, 23, 981)
+    ]
+    assert outputs[0] == outputs[1] == outputs[2]
+
 
 # ---------------------------------------------------------------------------
 # Helpers

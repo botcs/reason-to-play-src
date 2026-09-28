@@ -7,20 +7,22 @@
     {
       "file": "get_efficientzero_activations.py",
       "sha256": "2ce9c2dc02cfa2032cc3a752f45027bdde52a88130e3a4f77539b56a5e84c752",
-      "adaptation": "none; original bytes",
+      "adaptation": "Read released per-game human replays through the shared behavior reader. Render their recorded rectangles/colors with the authoritative translated game description for draw order, preserving historical canvas, resize, grayscale, stacking and action-index association. Keep the original level-text renderer for optional source-import verification; Input discovery accepts a standalone JSON replay or a dataset directory. Preserve nullable original play win in reported metadata.",
       "recorded_head_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
       "source_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
       "matches_recorded_head": true,
-      "recovered_repository_path": "scripts/python/get_efficientzero_activations.py"
+      "recovered_repository_path": "scripts/python/get_efficientzero_activations.py",
+      "adapted_sha256": "c95be1dc5adf49490b38c5637c68eb23c3cb4a51838b69d68bd73954e2f65bc4"
     },
     {
       "file": "get_attention_matrix.py",
       "sha256": "f32dddddf529814de177f01fca6388c9abfc90953440ce29c9af6de431826ac4",
-      "adaptation": "none; original bytes",
+      "adaptation": "Read released per-game human replays through the shared behavior reader. Render their recorded rectangles/colors with the authoritative translated game description for draw order, preserving historical canvas, resize, grayscale, stacking and action-index association. Keep the original level-text renderer for optional source-import verification; Input discovery accepts a standalone JSON replay or a dataset directory.",
       "recorded_head_git_blob": "5531d34ee136b494cac017311bfda095d3d1a665",
       "source_git_blob": "3db5ecd6f6679bcbc671f5bcd7b4a32241d31962",
       "matches_recorded_head": false,
-      "recovered_repository_path": "scripts/python/get_attention_matrix.py"
+      "recovered_repository_path": "scripts/python/get_attention_matrix.py",
+      "adapted_sha256": "13a34d602ddc3dac9e8a428273ec7db0026529563ea464d142257a73c1a8dbef"
     },
     {
       "file": "trace_layers.json",
@@ -32,5 +34,6 @@
       "recovered_repository_path": "scripts/bash/trace_layers.json"
     }
   ],
-  "recovery_location": "Author-provided research backup; transport/object-listing metadata is retained in the separate local release evidence."
+  "recovery_location": "Author-provided research backup; transport/object-listing metadata is retained in the separate local release evidence.",
+  "checksum_scope": "sha256 and Git blob fields describe recovered source bytes; adapted_sha256 describes the current locally adapted extractor. Engine/model source locks are unchanged."
 }

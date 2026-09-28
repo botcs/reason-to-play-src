@@ -1,7 +1,10 @@
 # Translating Roomworld Layouts to VGDL
 
-This document describes how to convert roomworld layout files (from the
-roomworld-analysis dataset) into VGDL level files for the `roomworld_v0` game.
+This optional game suite supports Roomworld experiments. It is separate from
+the VGDL-fMRI games used in the NeurIPS 2026 study. This note documents manual
+layout conversion for [`roomworld.txt`](roomworld.txt); it is not a dataset
+preprocessing step. The [gameplay guide](../../docs/reproducibility.md#replay-and-model-gameplay)
+describes running game definitions through the harness.
 
 ## Source Format
 
@@ -54,7 +57,7 @@ Source column N maps to VGDL column N+1. Source row N maps to VGDL row N+1.
 | `x`         | `x`       | floor goal         |                                          |
 | `c1`-`c6`  | `c`       | floor catapult     | All catapult instances share one type     |
 | `k1`        | `K`       | floor key1         | Pairs with d1                            |
-| `d1`        | `D`       | floor door1        | Opened by key1                           |
+| `d1`        | `D`       | floor door1        | Traversed once with key1                           |
 | `k6`        | `k`       | floor key6         | Pairs with d6                            |
 | `d6`        | `G`       | floor door6        | Opened by key6                           |
 | `k4`        | `e`       | floor key4         | Pairs with d4 (no door4 sprite yet)      |
@@ -84,16 +87,22 @@ Currently defined sprites and which roomworld instance IDs they cover:
 | k1                 | key1        | K         | Collected as resource    |
 | k4                 | key4        | e         | Collected as resource    |
 | k6                 | key6        | k         | Collected as resource    |
-| d1                 | door1       | D         | Opens with key1          |
+| d1                 | door1       | D         | Traversed once with key1          |
 | d2 (no key in level) | door2     | d         | Always blocks (stepBack) |
-| d6                 | door6       | G         | Opens with key6          |
+| d6                 | door6       | G         | Traversed once with key6          |
 | 1st paired tN      | t6 (Portal) | T         | Bidirectional teleport   |
 | 2nd paired tN      | tp4 (Portal)| P         | Bidirectional teleport (orange hexagon) |
 | unpaired/fake tN   | teleporter  | t         | No effect                |
 | fake (green)       | t3          | S         | No effect (visual only)  |
 | c1-c6              | catapult    | c         | catapultForward          |
 
-Keys k2, k3, k5 and doors d2-d5 have no dedicated sprites yet. When a layout
+The `F` mapping creates a red `c6` sprite with no catapult interaction; it is
+not equivalent to the active `c` catapult. Successful doors, catapults and
+paired portals change into their corresponding `*_used` sprites. Used doors
+block subsequent traversal.
+
+Keys k2, k3, k5 and doors d3-d5 have no dedicated sprites. Door2 is
+defined only as an unconditional obstacle. When a layout
 contains one of these, reuse an existing key/door sprite that is not otherwise
 used in that level (e.g. map k5 to key1/`K` if no k1 appears in the same
 layout). For doors without a matching key in the layout, use door2/`d`

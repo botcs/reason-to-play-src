@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: >-
+  Please cite the NeurIPS 2026 paper in preferred-citation when using this
+  research code or its accompanying dataset.
+type: software
+title: Reason to Play
+authors: &authors
+  - family-names: Botos
+    given-names: Csaba
+  - family-names: Kumar
+    given-names: Sreejan
+  - family-names: Andrews
+    given-names: Austin Tudor David
+  - family-names: Hunt
+    given-names: Laurence
+  - family-names: Summerfield
+    given-names: Chris
+  - family-names: Tenenbaum
+    given-names: Joshua B.
+  - family-names: Ponte Costa
+    given-names: Rui
+  - family-names: Mattar
+    given-names: Marcelo G.
+  - family-names: Tomov
+    given-names: Momchil
+repository-code: https://github.com/botcs/reason-to-play-src
+url: https://botcs.github.io/reason-to-play/
+preferred-citation:
+  type: conference-paper
+  title: >-
+    Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs
+    and Human Game Learners
+  authors: *authors
+  collection-title: Advances in Neural Information Processing Systems
+  conference:
+    name: NeurIPS 2026
+  year: 2026
+  notes: Accepted at NeurIPS 2026.
+  url: https://openreview.net/forum?id=Y1oX1yuaWM

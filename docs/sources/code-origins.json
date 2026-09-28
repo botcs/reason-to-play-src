@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "scope": "Origins of scientific implementations; source pins alone do not identify the producing run for paper outputs",
+  "files": {
+    "src/reason_to_play/fmri/preprocess.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
+      "path": "encoding_model_code/preprocess.py"
+    },
+    "src/reason_to_play/fmri/align_llm.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
+      "path": "encoding_model_code/align.py"
+    },
+    "src/reason_to_play/analysis/neural/encoding.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
+      "path": "encoding_model_code/encoding_model.py"
+    },
+    "src/reason_to_play/analysis/neural/roi.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
+      "path": "encoding_model_code/load_and_parse.py"
+    },
+    "src/reason_to_play/fmri/align_baselines.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
+      "path": "encoding_model_slurm/stages/align.py"
+    },
+    "src/reason_to_play/features/ddqn.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
+      "path": "stages/extract_model_features_to_npz.py"
+    },
+    "src/reason_to_play/fmri/extract_bold.py": {
+      "repository": "https://github.com/botcs/tomov23-analysis",
+      "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
+      "path": "utils/extract_bold_to_npz.py"
+    },
+    "src/reason_to_play/fmri/fmriprep.py": {
+      "origin": "Scientific settings from the original RC_RL launcher and retained execution configurations",
+      "original_launcher": "../../src/reason_to_play/resources/fmriprep/original-launcher/source.json",
+      "config_manifest": "../../src/reason_to_play/resources/fmriprep/manifest.json"
+    }
+  },
+  "analysis_methods": "../analysis-methods.md"
+}

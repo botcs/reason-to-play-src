@@ -775,27 +775,22 @@ class TestReplayAgent:
         assert records[1]["score"] == 2  # post-action score at raw frame 2
 
 
-# Real BSON data integration tests for ReplayAgent
+# Human JSON integration tests for ReplayAgent
 
-BSON_DATA_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "workdir",
-    "prepare_behavioral_data",
-)
+HUMAN_DATA = os.environ.get("REASON_TO_PLAY_HUMAN_DATA")
 
 
 @pytest.mark.skipif(
-    not os.path.isdir(os.path.join(BSON_DATA_DIR, "plays")),
-    reason="Behavioral data not available locally",
+    not HUMAN_DATA,
+    reason="Set REASON_TO_PLAY_HUMAN_DATA to a human JSON file or dataset root",
 )
 class TestReplayAgentRealData:
-    """Integration tests using actual BSON behavioral data."""
+    """Integration tests using recorded human JSON data."""
 
     def _load_first_bait_play(self):
         from src.llm_eval.human_replay.data_loader import HumanPlayLoader
 
-        loader = HumanPlayLoader(BSON_DATA_DIR)
+        loader = HumanPlayLoader(HUMAN_DATA)
         for subject in loader.list_subjects():
             for run in loader.list_runs(subject):
                 plays = loader.list_plays(subject, run)
@@ -1124,16 +1119,16 @@ class TestReplayFormatNoAction:
 
 
 @pytest.mark.skipif(
-    not os.path.isdir(os.path.join(BSON_DATA_DIR, "plays")),
-    reason="Behavioral data not available locally",
+    not HUMAN_DATA,
+    reason="Set REASON_TO_PLAY_HUMAN_DATA to a human JSON file or dataset root",
 )
 class TestPersistentRealDataMockLLM:
-    """Real BSON data tests with mock LLM for persistent modes."""
+    """Recorded human JSON tests with a mock LLM for rationale generation."""
 
     def _load_first_bait_play(self):
         from src.llm_eval.human_replay.data_loader import HumanPlayLoader
 
-        loader = HumanPlayLoader(BSON_DATA_DIR)
+        loader = HumanPlayLoader(HUMAN_DATA)
         for subject in loader.list_subjects():
             for run in loader.list_runs(subject):
                 plays = loader.list_plays(subject, run)

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reason-to-play"
+version = "0.1.0"
+description = "Behavioral and neural comparisons of human and model game learning"
+requires-python = ">=3.11"
+license = "MIT"
+
+[project.optional-dependencies]
+analysis = [
+  "numpy>=1.26,<3",
+  "scipy>=1.14,<2",
+  "pandas>=2.2,<4",
+  "matplotlib>=3.8,<4",
+  "scikit-learn>=1.5,<2",
+  "nibabel>=5.3,<6",
+  "nilearn>=0.14,<0.15",
+  "himalaya>=0.4.11,<0.5",
+  "tqdm>=4.66,<5",
+]
+download = ["huggingface_hub>=1,<2"]
+features = ["torch>=2.2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["reason_to_play*"]
+
+[tool.setuptools.package-data]
+"reason_to_play.resources" = ["fmriprep/**/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]

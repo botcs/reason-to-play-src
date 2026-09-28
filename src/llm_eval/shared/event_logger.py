@@ -152,7 +152,7 @@ class EventLogger:
         # Outcomes are mutually exclusive. [WIN] / [LOSE] mean the engine
         # resolved the play; [LEVEL TIMEOUT] means the level's time
         # budget expired without a resolution (see
-        # VGFMRI_DB_README.md:174-176).
+        # docs/sources/tomov23-behavior-notes.md).
         if won:
             result = (result + " [WIN]").lstrip()
         elif lose:

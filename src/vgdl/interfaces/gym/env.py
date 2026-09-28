@@ -18,7 +18,7 @@ BG_COLOR = "LIGHTGRAY"
 
 
 class VGDLEnv(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 25}
+    metadata = {"render.modes": ["rgb_array"], "video.frames_per_second": 25}
 
     def __init__(self, game_file=None, level_file=None, obs_type="image", **kwargs):
         # For rendering purposes only
@@ -27,7 +27,6 @@ class VGDLEnv(gym.Env):
         self.ontology_registry = registry
         # Variables
         self._obs_type = obs_type
-        self.viewer = None
         self.game_args = kwargs
         self.notable_sprites = kwargs.get("notable_sprites", None)
 
@@ -254,28 +253,26 @@ class VGDLEnv(gym.Env):
         state, info = self._get_obs(with_img=with_img)
         return state, info
 
-    def render(self, mode="human", close=False):
-        headless = mode != "human"
-
-        if self.renderer is None:
-            from src.vgdl.render import PygameRenderer
-
-            self.renderer = PygameRenderer(self.game, self.render_block_size)
-            self.renderer.init_screen(headless)
-
-        self.renderer.draw_all()
-        self.renderer.update_display()
-
+    def render(self, mode="rgb_array", close=False):
+        """Return an offscreen RGB image; interactive viewing belongs to the web app."""
+        if mode != "rgb_array":
+            raise ValueError(
+                f"Unsupported render mode {mode!r}; use 'rgb_array' for image inputs "
+                "or the web app for interactive viewing."
+            )
         if close:
-            self.renderer.close()
-        if mode == "rgb_array":
-            img = self.renderer.get_image()
-            return img
-        elif mode == "human":
-            return True
+            self.close()
+            return None
+        if self.renderer is None:
+            from src.vgdl.render import OffscreenRenderer
+
+            self.renderer = OffscreenRenderer(self.game, self.render_block_size)
+        self.renderer.draw_all()
+        return self.renderer.get_image()
 
     def close(self):
-        self.renderer.close()
+        """Release this environment's image surface without global SDL changes."""
+        self.renderer = None
 
     def set_state(self, hidden_state, return_obs=False, with_img=False):
         self.level_width, self.level_height = hidden_state["shape"]

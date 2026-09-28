@@ -108,7 +108,7 @@ class LoggingConfig:
 
 @dataclass
 class ReplayConfig:
-    data_dir: str = "./workdir/prepare_behavioral_data"
+    data_dir: str = "./data/behavior/human"
     subject: str = ""  # empty = all subjects
     game_filter: str = ""  # empty = all games
     action_frames_only: bool = True

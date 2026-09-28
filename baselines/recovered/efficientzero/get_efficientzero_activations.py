@@ -6,7 +6,6 @@ import inspect
 import math
 import os
 import sys
-import zlib
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
@@ -15,6 +14,12 @@ import numpy as np
 import pandas as pd
 import torch
 from torch import Tensor
+
+from reason_to_play.data.behavior import (
+    behavior_root,
+    iter_plays as canonical_plays,
+    play_states,
+)
 from omegaconf import OmegaConf
 
 try:
@@ -27,11 +32,7 @@ try:
 except ImportError:  # pragma: no cover - optional dependency
     pygame = None  # type: ignore
 
-try:
-    from bson import BSON, decode_file_iter
-except ImportError:  # pragma: no cover - optional dependency
-    BSON = None  # type: ignore
-    decode_file_iter = None  # type: ignore
+
 
 try:
     from vgdl import colors  # type: ignore
@@ -67,7 +68,7 @@ from ez.agents.models.base_model import (  # noqa: E402
     SupportNetwork,
     ValuePolicyNetwork,
 )
-from ez.utils.format import DiscreteSupport, symexp
+from ez.utils.format import DiscreteSupport, symexp  # noqa: E402
 
 
 class HiddenStateExtractor:
@@ -392,13 +393,6 @@ def _require_pygame() -> None:
         )
 
 
-def _require_bson() -> None:
-    if BSON is None or decode_file_iter is None:  # type: ignore[truthy-bool]
-        raise ImportError(
-            "pymongo is required to read the Mongo dump. "
-            "Install it with `pip install pymongo`."
-        )
-
 
 def _require_vgdl() -> None:
     global createRLInputGameFromStrings, colors
@@ -424,16 +418,6 @@ def _ensure_pygame_initialized() -> None:
         pygame.init()  # type: ignore[call-arg]
         _PYGAME_INITIALIZED = True
 
-
-def _binary_to_bytes(payload: Any) -> bytes:
-    if payload is None:
-        raise ValueError("Expected binary payload but received None")
-    if isinstance(payload, (bytes, bytearray, memoryview)):
-        return bytes(payload)
-    try:
-        return bytes(payload)
-    except Exception as exc:  # pragma: no cover - defensive
-        raise TypeError(f"Unable to coerce payload of type {type(payload).__name__!r} to bytes") from exc
 
 
 def _rect_to_bounds(rect: Any) -> Tuple[int, int, int, int]:
@@ -544,34 +528,27 @@ def _stack_frame_sequence(frames: "np.ndarray", n_stack: int) -> "np.ndarray":
 
 
 class VGDLZStateLoader:
-    """Utility for reading VGDL z-states from the ds004323 Mongo dump."""
+    """Read self-contained human JSON replays for baseline extraction."""
 
-    def __init__(self, dataset_root: Union[str, Path], *, rc_rl_root: Optional[Union[str, Path]] = None) -> None:
+    def __init__(
+        self,
+        dataset_root: Union[str, Path],
+        *,
+        rc_rl_root: Optional[Union[str, Path]] = None,
+
+    ) -> None:
         self.dataset_root = Path(dataset_root).expanduser().resolve()
-        self.dump_root = self._resolve_dump_root()
+        from reason_to_play.data.replay_behavior import replay_paths
+
+        self.dump_root = behavior_root(self.dataset_root)
+        if not replay_paths(self.dump_root):
+            raise FileNotFoundError(
+                f"Human JSON replay data is missing under {self.dataset_root}. "
+                "Use a standalone human replay, release root or behavior/human directory."
+            )
         self.rc_rl_root = Path(rc_rl_root).expanduser() if rc_rl_root else _DEFAULT_RC_RL_ROOT
         if self.rc_rl_root and self.rc_rl_root.exists() and str(self.rc_rl_root) not in sys.path:
             sys.path.append(str(self.rc_rl_root))
-
-    def _resolve_dump_root(self) -> Path:
-        direct_candidate = self.dataset_root
-        if direct_candidate.is_dir() and (direct_candidate / "plays.bson").exists():
-            return direct_candidate
-        nested_candidate = self.dataset_root / "behavior" / "dump" / "vgfmri"
-        if nested_candidate.is_dir() and (nested_candidate / "plays.bson").exists():
-            return nested_candidate
-        raise FileNotFoundError(
-            "Could not locate a Mongo dump beneath the provided dataset root. "
-            "Ensure you have extracted behavior/dump.tar.gz into behavior/dump/."
-        )
-
-    def _iter_collection(self, collection: str) -> Iterable[Mapping[str, Any]]:
-        _require_bson()
-        collection_path = self.dump_root / f"{collection}.bson"
-        if not collection_path.exists():
-            raise FileNotFoundError(f"Expected {collection_path} to exist. Did you extract the Mongo dump?")
-        with collection_path.open("rb") as handle:
-            yield from decode_file_iter(handle)  # type: ignore[arg-type]
 
     def iter_plays(
         self,
@@ -583,8 +560,12 @@ class VGDLZStateLoader:
         limit: Optional[int] = None,
     ) -> Iterable[Mapping[str, Any]]:
         count = 0
-        for doc in self._iter_collection("plays"):
-            if subj_id is not None and str(doc.get("subj_id")) != str(subj_id):
+        subject_number = (
+            int(str(subj_id).removeprefix("sub-")) if subj_id is not None else None
+        )
+        documents = canonical_plays(self.dump_root, subject=subject_number, run=run_id)
+        for doc in documents:
+            if subject_number is not None and int(doc.get("subj_id", -1)) != subject_number:
                 continue
             if run_id is not None and int(doc.get("run_id", -1)) != int(run_id):
                 continue
@@ -617,13 +598,7 @@ class VGDLZStateLoader:
             raise LookupError(f"No play matched filters {filters}") from exc
 
     def decode_zstates(self, play_doc: Mapping[str, Any]) -> Sequence[Mapping[str, Any]]:
-        raw = _binary_to_bytes(play_doc.get("zstates"))
-        decompressed = zlib.decompress(raw)
-        payload = BSON(decompressed).decode()  # type: ignore[call-arg]
-        states = payload.get("states", [])
-        if not isinstance(states, Sequence) or isinstance(states, (bytes, str)):
-            raise TypeError("Decoded zstates payload does not contain a sequence of states")
-        return states
+        return play_states(play_doc)
 
     def render_frames(
         self,
@@ -637,11 +612,21 @@ class VGDLZStateLoader:
         _require_vgdl()
         _ensure_pygame_initialized()
 
+        if "grid_size" in play_doc:
+            from reason_to_play.features.efficientzero import render_recorded_frames
+
+            return render_recorded_frames(
+                play_doc,
+                self.decode_zstates(play_doc),
+                resize=resize,
+                num_channels=num_channels,
+                background=colors.LIGHTGRAY if colors is not None else (211, 211, 211),
+            )
+        # The optional source-import route retains its original level text.
         game_str = play_doc.get("game_str")
         level_str = play_doc.get("level_str")
         if not game_str or not level_str:
-            raise ValueError("play document is missing 'game_str' or 'level_str'")
-
+            raise ValueError("play requires game_str and grid_size (or legacy level_str)")
         env = createRLInputGameFromStrings(game_str, level_str)  # type: ignore[call-arg]
         env.visualize = False  # type: ignore[attr-defined]
         frames = []
@@ -717,6 +702,7 @@ class EfficientZeroActivationEvaluator:
         *,
         device: Optional[str] = None,
         config_override: Optional[OmegaConf] = None,
+
     ) -> None:
         extractor = load_hidden_state_extractor(
             model_path,
@@ -771,7 +757,9 @@ class EfficientZeroActivationEvaluator:
         reward_predictions: List[torch.Tensor] = []
 
         human_actions = self._human_action_indices(play_doc)
-        human_win = bool(play_doc.get("win"))
+        human_win = play_doc["win"]
+        if human_win is not True and human_win is not False and human_win is not None:
+            raise ValueError("Human play win must be true, false, or null")
         human_score = play_doc.get("score")
 
         with torch.no_grad():
@@ -855,6 +843,8 @@ class EfficientZeroActivationEvaluator:
         return h, c
 
     def _human_action_indices(self, play_doc: Dict[str, Any]) -> List[int]:
+        if "_canonical" in play_doc and "actions" not in play_doc:
+            raise ValueError("Canonical play lacks the original human actions required by EfficientZero")
         raw_actions = play_doc.get("actions") or []
         converted = []
         for entry in raw_actions:
@@ -921,7 +911,7 @@ def _parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
         description="Evaluate EfficientZero on VGDL playthroughs and collect subnetwork activations.",
     )
     parser.add_argument("--model", required=True, help="Path to the EfficientZero checkpoint (.pt).")
-    parser.add_argument("--dataset-root", required=True, help="Local directory containing the Mongo dump.")
+    parser.add_argument("--dataset-root", required=True, help="Canonical release root or behavior/human directory.")
     parser.add_argument("--game-name", help="Filter plays by VGDL game name.")
     parser.add_argument("--subj-id", help="Optional subject identifier.")
     parser.add_argument("--run-id", type=int, help="Optional run index.")
@@ -946,6 +936,7 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
         Path(args.dataset_root),
         device=args.device,
         config_override=config_override,
+
     )
 
     if args.save_activations:

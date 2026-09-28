@@ -1,64 +1,37 @@
 # Copyright (c) 2026 Botos Csaba. MIT License. See LICENSE for details.
-"""Load human behavioral data from BSON files."""
+"""Load human JSON recordings for replay and extraction."""
 
-import zlib
-from pathlib import Path
-
-import bson
-
-
-def decompress_zstates(zstates_binary: bytes) -> list[dict]:
-    """
-    Decompress zstates from BSON plays collection.
-
-    Args:
-        zstates_binary: Binary data from plays.zstates field
-
-    Returns:
-        List of state dicts, one per timestep
-    """
-    decompressed = zlib.decompress(zstates_binary)
-    data = bson.decode(decompressed)
-    return data["states"]
-
-
-def read_bson_file(bson_path: Path) -> list[dict]:
-    """
-    Read BSON file and return list of documents.
-
-    Args:
-        bson_path: Path to .bson file
-
-    Returns:
-        List of documents
-    """
-    documents = []
-    with open(bson_path, "rb") as f:
-        while True:
-            doc_iter = bson.decode_file_iter(f)
-            doc = next(doc_iter, None)
-            if doc is None:
-                break
-            documents.append(doc)
-    return documents
+from reason_to_play.data.behavior import behavior_root, iter_plays, play_states
+from reason_to_play.data.replay_behavior import read_record, replay_paths
 
 
 class HumanPlayLoader:
-    """Load human gameplay data from behavioral research BSON files."""
+    """Read measured human plays from JSON recordings."""
 
     def __init__(self, data_dir: str):
         """
         Initialize the loader.
 
         Args:
-            data_dir: Path to prepare_behavioral_data directory
-                      (e.g., ./workdir/prepare_behavioral_data)
+            data_dir: Canonical behavior/human directory or dataset root.
         """
-        self.data_dir = Path(data_dir)
-        self.plays_dir = self.data_dir / "plays"
+        self.data_dir = behavior_root(data_dir)
+        if not replay_paths(self.data_dir):
+            raise FileNotFoundError(
+                f"No human JSON recordings found in {self.data_dir}"
+            )
+        self.per_game = True
+        self.canonical = True
+        self._cached_run = None
+        self._cached_documents = None
 
-        if not self.plays_dir.exists():
-            raise FileNotFoundError(f"Plays directory not found: {self.plays_dir}")
+    def _load_run(self, subject: str, run: int) -> list[dict]:
+        key = (subject, run)
+        if self._cached_run != key:
+            documents = list(iter_plays(self.data_dir, subject=subject, run=run))
+            self._cached_run = key
+            self._cached_documents = documents
+        return self._cached_documents
 
     def list_subjects(self) -> list[str]:
         """
@@ -67,11 +40,12 @@ class HumanPlayLoader:
         Returns:
             List of subject IDs like ['sub-01', 'sub-02', ...]
         """
-        subjects = []
-        for subdir in sorted(self.plays_dir.iterdir()):
-            if subdir.is_dir() and subdir.name.startswith("sub-"):
-                subjects.append(subdir.name)
-        return subjects
+        return sorted(
+            {
+                read_record(path, expand=False)["subject"]
+                for path in replay_paths(self.data_dir)
+            }
+        )
 
     def list_runs(self, subject: str) -> list[int]:
         """
@@ -83,16 +57,13 @@ class HumanPlayLoader:
         Returns:
             List of run numbers like [0, 1, 2, ...]
         """
-        subj_dir = self.plays_dir / subject
-        if not subj_dir.exists():
-            raise FileNotFoundError(f"Subject directory not found: {subj_dir}")
-
-        runs = []
-        for bson_file in sorted(subj_dir.glob("run-*.bson")):
-            # Extract run number from filename like "run-00.bson"
-            run_str = bson_file.stem.replace("run-", "")
-            runs.append(int(run_str))
-        return runs
+        return sorted(
+            {
+                int(play["run_id"])
+                for path in replay_paths(self.data_dir, subject)
+                for play in read_record(path, expand=False)["plays"]
+            }
+        )
 
     def list_plays(self, subject: str, run: int) -> list[dict]:
         """
@@ -105,20 +76,19 @@ class HumanPlayLoader:
         Returns:
             List of dicts with keys: game_name, level_id, win, score, play_idx
         """
-        bson_path = self.plays_dir / subject / f"run-{run:02d}.bson"
-        if not bson_path.exists():
-            raise FileNotFoundError(f"Run file not found: {bson_path}")
-
-        documents = read_bson_file(bson_path)
+        documents = self._load_run(subject, run)
         plays = []
-        for idx, doc in enumerate(documents):
+        for doc in documents:
             plays.append(
                 {
-                    "play_idx": idx,
+                    "play_idx": doc["_canonical"]["source_document_index"],
                     "game_name": doc["game_name"],
                     "level_id": doc["level_id"],
                     "win": doc.get("win"),
+                    "outcome": doc.get("_canonical", {}).get("outcome"),
                     "score": doc.get("score"),
+                    "source_play_id": str(doc["_id"]),
+                    "source_recording": doc["_canonical"]["source_recording"],
                 }
             )
         return plays
@@ -127,7 +97,7 @@ class HumanPlayLoader:
         self, subject: str, run: int, play_idx: int
     ) -> tuple[dict, list[dict]]:
         """
-        Load a specific play and its decompressed states.
+        Load a specific play and its measured states.
 
         Args:
             subject: Subject ID (e.g., 'sub-01')
@@ -135,26 +105,22 @@ class HumanPlayLoader:
             play_idx: Index of play within the run
 
         Returns:
-            Tuple of (play_doc, decompressed_states)
+            Tuple of (play_doc, states)
             - play_doc: Full play document with metadata
-            - decompressed_states: List of state dicts, one per timestep
+            - states: List of state dicts, one per timestep
         """
-        bson_path = self.plays_dir / subject / f"run-{run:02d}.bson"
-        if not bson_path.exists():
-            raise FileNotFoundError(f"Run file not found: {bson_path}")
+        documents = self._load_run(subject, run)
 
-        documents = read_bson_file(bson_path)
-
-        if play_idx < 0 or play_idx >= len(documents):
+        matching = [
+            doc
+            for doc in documents
+            if doc["_canonical"]["source_document_index"] == play_idx
+        ]
+        if len(matching) != 1:
             raise IndexError(
-                f"Play index {play_idx} out of range [0, {len(documents) - 1}]"
+                f"Original play ordinal {play_idx} not found uniquely in {subject} run {run}"
             )
-
-        play_doc = documents[play_idx]
-        zstates_binary = play_doc["zstates"]
-        states = decompress_zstates(zstates_binary)
-
-        return play_doc, states
+        return matching[0], play_states(matching[0])
 
     def get_num_plays(self, subject: str, run: int) -> int:
         """
@@ -167,8 +133,4 @@ class HumanPlayLoader:
         Returns:
             Number of plays in the run
         """
-        bson_path = self.plays_dir / subject / f"run-{run:02d}.bson"
-        if not bson_path.exists():
-            raise FileNotFoundError(f"Run file not found: {bson_path}")
-
-        return len(read_bson_file(bson_path))
+        return len(self._load_run(subject, run))

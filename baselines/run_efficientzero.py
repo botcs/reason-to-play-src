@@ -79,11 +79,27 @@ def command(
     # Historical wrappers use both names; point both at the EZ-specific engine.
     env["RC_RL_ROOT"] = env["RC_RL_PATH"] = str(engine)
     env["PYTHONPATH"] = os.pathsep.join(
-        [env["RC_RL_ROOT"], env["EZ_ROOT"], env.get("PYTHONPATH", "")]
+        [
+            env["RC_RL_ROOT"],
+            env["EZ_ROOT"],
+            str(ROOT.parent / "src"),
+            str(ROOT.parent),  # The translated-game parser lives in src.vgdl.
+            env.get("PYTHONPATH", ""),
+        ]
     )
     env.setdefault("SDL_VIDEODRIVER", "dummy")
     env.setdefault("SDL_AUDIODRIVER", "dummy")
     env.setdefault("MPLBACKEND", "Agg")
+    # The child uses the recovered source directory as cwd. Resolve dataset roots
+    # against the caller's cwd before crossing that boundary.
+    args = list(args)
+    for index, value in enumerate(args):
+        if value == "--dataset-root" and index + 1 < len(args):
+            args[index + 1] = str(Path(args[index + 1]).expanduser().resolve())
+        elif value.startswith("--dataset-root="):
+            args[index] = "--dataset-root=" + str(
+                Path(value.split("=", 1)[1]).expanduser().resolve()
+            )
     return [sys.executable, str(script), *args], env, source_dir
 
 

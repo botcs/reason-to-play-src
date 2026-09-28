@@ -5,8 +5,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.analysis.baseline_episodes import ddqn_rows, efficientzero_rows, empa_rows
-from scripts.analysis.export_ddqn_history import export
+from reason_to_play.analysis.behavioral.baselines import (
+    ddqn_rows,
+    efficientzero_rows,
+    empa_rows,
+)
+from tools.export_ddqn_history import export
 
 
 def test_ez_orders_episodes_and_excludes_warmup(tmp_path):

@@ -1,13 +1,9 @@
 # Inventory, manifest and staging workflow
 
-This code-only repository ships release tooling and configuration examples.
-The actual inventory, selection policy, source manifest, participant catalogues,
-historical tables and staged payloads are maintained separately. No Hugging Face
-dataset upload is claimed. The proposed target is `csbotos/reason-to-play`.
-
-The [inventory summary](derivative-inventory.md) describes the proposed scale:
-24.53 TB in source storage, a 7.91 TB selection and a 511 GB core. A proposed
-canonical path is not a public URL or a claim that bytes have been downloaded.
+This guide covers dataset catalogues and tools for maintaining a source
+inventory. Scientific payloads and generated catalogues belong in the dataset,
+not the code repository. The [dataset card](huggingface-dataset-card.md) records
+publication status for `csbotos/reason-to-play`.
 
 ## Build and verify a selection
 
@@ -83,44 +79,60 @@ bytes are reused only when size and SHA-256 match. Merging verified rows rejects
 changed source identities or destinations. A catalogue may describe selected
 but unstaged objects; its verification/publication fields must distinguish them.
 
-After separately staging the human behavior component and merging its verified
-rows, the optional per-play catalogue can be built locally:
+Build a per-play catalogue from the human JSON files:
 
 ```bash
 python scripts/release/build_behavior_catalogue.py \
-    --manifest out/selected/release-manifest.jsonl.gz \
-    --stage-root out/hf-stage \
-    --output out/hf-stage/catalog/human_plays --workers 4
+    --input /data/reason-to-play/behavior/human \
+    --output /data/catalog/human_plays --workers 4
 ```
 
-The builder preserves all source plays and expresses exclusions as flags. It
-retains nullable original outcomes and distinguishes engine frames from non-idle
-keypress frames. This command generates participant-derived data, which belongs
-to the separate dataset publication process rather than this Git release.
+Adjust `--workers` to the machine’s available CPU and memory; the default is 1.
+The builder selects one prompt condition (`elaborate` by default), includes its
+plays once, and expresses analysis exclusions as flags. It
+retains nullable outcomes and distinguishes engine frames from non-idle
+keypress frames. Use `--condition minimal` or `--condition oracle` to select
+another condition. `--input` also accepts the dataset root or a single human
+JSON file. Each catalogue row preserves the play’s original ordinal within its
+scanner run and identifies its current compressed JSON through
+`source_release_path`, `source_payload_sha256` and `source_artifact_id`.
+No source archive or separate prompt file is needed.
+
+## Human-file manifest
+
+`provenance/human-manifest.jsonl.gz` describes the current human JSON files,
+one row per participant/game/prompt condition. Its schema is
+`reason-to-play/human-manifest`, version 1:
+
+| Field | Meaning |
+| --- | --- |
+| `release_path` | Dataset-relative path to the human JSON |
+| `artifact_id` | `sha256:` followed by the compressed payload checksum |
+| `payload` | Human JSON schema/version, compressed byte count and SHA-256 |
+| `metadata` | Participant, game, prompt condition and play/frame/step counts |
+| `provenance.scientific_sha256` | Identity of measured behavior; agrees across prompt conditions for one participant/game |
+| `provenance.recorded_behavior` | Original human study and associated OpenNeuro dataset/version |
+| `provenance.upstream_replay` | Source attribution: frozen source artifact ID, source checksum and exact S3 bucket/key/version |
+
+The current payload identity and the upstream source artifact identity have
+separate meanings. Source inventory IDs identify an observed source generation;
+they are not content checksums. Download the current `release_path` from the
+dataset and verify `payload.sha256`. The upstream S3 location is provenance,
+not a required consumer input.
 
 ## Path and publication contract
 
-Canonical destinations are relative to one release root. Each source path
-segment is percent-encoded reversibly; separators remain separators. Source
-keys are unchanged. Model IDs and scientific condition fields remain explicit
-metadata rather than being reconstructed from sanitized filenames.
+Dataset destinations are relative to one release root. Original source keys
+remain in provenance metadata. Model IDs and scientific condition fields remain
+explicit rather than being reconstructed from filenames. The manifest supplies
+the exact path for every feature, BOLD input, atlas, result and website asset;
+follow the [dataset analysis guide](../guides/dataset-analysis.md) to select the
+inputs for a workflow. Human files use
+`behavior/human/sub-XX/GAME/CONDITION.human.replay.json.gz`.
 
-| Component | Proposed canonical root |
-| --- | --- |
-| Prepared human records | `behavior/human/` |
-| Recorded replays | `replays/human/`, `replays/generative/` |
-| Preprocessing outputs | `derivatives/fmri/fmriprep/` |
-| Aligned analysis inputs | `derivatives/fmri/aligned/` |
-| Encoding outputs | `analysis/encoding/` |
-| Raw model features | `features/raw/pytorch/` |
-
-A release root is not automatically a pipeline workdir. Use the explicit paths
-in the [reproduction guide](../reproducibility.md), retaining original subject,
-cohort, game, layer and timing identifiers. Never infer a missing correspondence
-by renaming files.
-
-The planned Hugging Face configurations are `files` and `human_plays`, each with
+The planned Hugging Face configurations are `planned_files`, `files` and
+`human_plays`, each with
 split name **`data`**. This is an organizational split, not a scientific
 train/test partition; `all` is reserved by the datasets loader. Before publishing,
 test the actual local package by configuration name, then test the uploaded
-repository at its immutable dataset commit. See the [publication plan](huggingface-plan.md).
+repository at its immutable dataset commit. See the [dataset card](huggingface-dataset-card.md) for catalogue contents.

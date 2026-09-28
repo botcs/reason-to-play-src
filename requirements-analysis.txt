@@ -1,10 +1,3 @@
--r requirements.txt
-matplotlib==3.10.8
-pandas==3.0.2
-scipy>=1.14,<2
-
-# Neural postprocessing/alignment (PyTorch is needed for PT feature loading).
-nibabel>=5.4,<6
-nilearn>=0.14,<0.15
-himalaya>=0.4.11,<0.5
-# Install a hardware-appropriate torch build separately; see the reproduction guide.
+# Install the reusable analysis package without the gameplay/API stack.
+-e .[analysis]
+# Install a hardware-appropriate Torch build separately for PT feature loading.

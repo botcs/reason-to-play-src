@@ -635,10 +635,10 @@ class TestAdaptFrame:
     def test_timeout_detection(self):
         """ended=True with win=None should be treated as timeout, not lose.
 
-        Per VGFMRI_DB_README.md:174-176 the dataset has three outcomes:
-        WIN, LOSS, and Incomplete/Timeout (~42% of plays).  Collapsing
-        timeout into lose is misleading -- the level's time budget
-        expired without the engine resolving the play.
+        This checks the display flags for a supplied null result. Human
+        outcome analysis separately checks avatar-death events before
+        classifying a null play as incomplete; see
+        docs/sources/tomov23-behavior-notes.md.
         """
         adapter = ZstateAdapter(block_size=35)
         prev = _make_zstate(SIMPLE_OBJECTS, score=0)
@@ -718,29 +718,24 @@ class TestRealignZstatePositions:
 
 
 # ===================================================================
-# Integration test with real BSON data (conditional)
+# Integration tests with a supplied human JSON file or dataset (conditional)
 # ===================================================================
 
-BSON_DATA_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "workdir",
-    "prepare_behavioral_data",
-)
+HUMAN_DATA = os.environ.get("REASON_TO_PLAY_HUMAN_DATA")
 
 
 @pytest.mark.skipif(
-    not os.path.isdir(os.path.join(BSON_DATA_DIR, "plays")),
-    reason="Behavioral data not available locally",
+    not HUMAN_DATA,
+    reason="Set REASON_TO_PLAY_HUMAN_DATA to a human JSON file or dataset root",
 )
 class TestWithRealData:
-    """Integration tests using actual BSON behavioral data."""
+    """Integration tests using recorded human JSON data."""
 
     def _load_first_bait_play(self):
         """Load the first bait play from any subject (deterministic game)."""
         from src.llm_eval.human_replay.data_loader import HumanPlayLoader
 
-        loader = HumanPlayLoader(BSON_DATA_DIR)
+        loader = HumanPlayLoader(HUMAN_DATA)
         # Search across subjects for any bait play
         for subject in loader.list_subjects():
             for run in loader.list_runs(subject):
@@ -771,7 +766,7 @@ class TestWithRealData:
         assert len(grid) > 0, "Grid width is 0"
         assert len(grid[0]) > 0, "Grid height is 0"
 
-        # Should contain avatar (color is subject-specific per VGFMRI_DB_README.md)
+        # Avatar colour is participant-specific; see the original behaviour notes.
         avatar_found = False
         for x, col in enumerate(grid):
             for y, cell in enumerate(col):

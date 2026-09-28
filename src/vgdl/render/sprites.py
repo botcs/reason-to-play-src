@@ -41,8 +41,11 @@ class SpriteLibrary:
         if name not in cache:
             path = self.sprite_path(name)
             img = pygame.image.load(str(path))
-            # This will only work after the display has been initialised
-            img = img.convert_alpha()
+            # Use an explicit RGBA surface: convert_alpha() requires an SDL
+            # display even when the caller only needs an image array.
+            img = pygame.image.frombytes(
+                pygame.image.tobytes(img, "RGBA"), img.get_size(), "RGBA"
+            )
 
             if block_size != max(img.get_rect().size):
                 img = pygame.transform.smoothscale(img, (block_size, block_size))

@@ -1,142 +1,112 @@
 # Reproducing Reason to Play
 
-[Paper](https://arxiv.org/abs/2605.08019) ·
-[Interactive results](https://botcs.github.io/reason-to-play/) ·
-[Raw OpenNeuro dataset, version 1.0.0](https://openneuro.org/datasets/ds004323/versions/1.0.0)
+[NeurIPS 2026 paper](https://openreview.net/forum?id=Y1oX1yuaWM) ·
+[Citation](../CITATION.cff) ·
+[Interactive results](https://botcs.github.io/reason-to-play/)
 
-Run commands from this repository's root. The data and model weights are not
-part of the source checkout. The [inventory summary](release/derivative-inventory.md) and
-[Hugging Face plan](release/huggingface-plan.md)
-distinguish artifacts selected for publication from historical experiments.
-Keep the raw OpenNeuro version and original S3 keys in provenance; a release
-path is a mapping to an existing artifact, not evidence that it was regenerated.
-Detailed manifests, participant catalogues and historical tables are prepared
-separately and are not included in this Git release. Acquire the raw snapshot
-through OpenNeuro and run the preprocessing guide, or use a separately
-published, verified derivative release when available. The
-[manifest workflow](release/manifest-guide.md) explains how to prepare such a
-release with an explicit selection policy.
+Start with the [dataset analysis guide](guides/dataset-analysis.md) to analyze
+canonical human recordings, processed BOLD and model features from a local
+copy of the derivative dataset. Ordinary analysis needs neither OpenNeuro BSON
+nor raw MRI, author cloud credentials or an online atlas download. The release
+is being prepared; pin the verified dataset and code revisions when published.
+
+For new gameplay or feature extraction, follow the examples below. Gameplay
+and extraction modules currently run from the checkout root; installed
+`reason_to_play` analysis modules can run from any working directory. Data and
+model weights are separate from this code checkout.
 
 ## Pipeline and inputs
 
-| Stage | Code | Input | Output |
+| Stage | Implementation | Input | Output |
 | --- | --- | --- | --- |
-| fMRI preprocessing | `analysis/tomov23/` (integrated original launcher/configuration records) | ds004323 1.0.0 BIDS plus recorded fMRIPrep configuration | fMRIPrep derivatives and postprocessed BOLD |
-| Behavioural preparation and scanner alignment | `analysis/tomov23/` | original behavioural records, scanner timing, baseline features | `plays/sub-*/run-*.bson`, run metadata, aligned neural targets |
-| Human replay generation | `src/llm_eval/human_replay/run_replay.py` | prepared behavioural BSON | `.human.replay.json.gz` or `.imputed.replay.json.gz` plus `.narration.replay.json.gz` |
-| Model gameplay generation | `src/llm_eval/generative_gameplay/run.py` | VGDL descriptions, layouts, prompts, model ID | `.generative.replay.json.gz` |
-| Latent activation extraction | `src/llm_eval/human_replay/extract_features.py` | replay sessions plus extraction model weights | `.pt` session tensors and `_prompts.jsonl.gz` |
-| Neural alignment and encoding | `analysis/tomov23/` | raw activations, their timestamps, scanner-aligned BOLD and nuisance regressors | TR-aligned features and voxelwise encoding results |
-| Behavioural analysis | `scripts/analysis/build_episodes.py`, `plot_behavioural.py` | human BSON, complete generative replays, recorded DDQN JSON/EfficientZero CSV/EMPA JSON | episode CSV and behavioural figures |
-| Neural figures | `scripts/analysis/plot_encoding.py` | aggregated encoding result CSV | encoding figures |
+| Human replay | `src.llm_eval.human_replay.run_replay` | Released per-game human files | New replay conversations with embedded trajectories |
+| Model gameplay | `src.llm_eval.generative_gameplay.run` | Game definitions, prompts and model | Generative replays |
+| LLM feature extraction | `src.llm_eval.human_replay.extract_features` | Prompt records and model weights | Activations, target metadata and exact prompts |
+| fMRI reconstruction | `reason_to_play.fmri.fmriprep`, `.preprocess` | Raw BIDS, then fMRIPrep output | Preprocessed BOLD |
+| Neural alignment | `reason_to_play.fmri.align_baselines`, `.align_llm` | Canonical behavior, BOLD and features | Features and nuisance variables sampled on the BOLD timeline |
+| Behavioral analysis | `reason_to_play.analysis.behavioral` | Canonical behavior and recorded model runs | Episode tables and figures |
+| Neural analysis | `reason_to_play.analysis.neural` | Processed BOLD/features, folds, masks and atlas | Encoding results, ROI tables and figures |
 
-Raw activations and TR-aligned features are different products. The neural
-alignment stage must join activations using their recorded timestamps and
-scanner timing. In particular, `action_compression=true` produces irregular
-intervals between targets: tensor row number is not a scanner-volume index.
+Raw model activations and features sampled at scanner times are different
+products. Join them using recorded timestamps and scanner timing. In particular,
+compressed-action tensor row numbers are not scanner-volume indices.
 
 ## fMRI reconstruction and shared data paths
 
-The [curated preprocessing/encoding guide](../analysis/tomov23/README.md)
-contains the ordered commands from raw OpenNeuro acquisition through result
-aggregation. Its commands run from `analysis/tomov23/`; its `workdir/` is a
-single explicit local data root. The original `RC_RL` fMRIPrep launcher from
-16 October 2025 is retained with checksums, alongside all 38 recorded 24.1.0
-TOMLs. The portable runner selects the latest recorded configuration for each
-subject, replays its scientific flags explicitly, and records the supplied
-container image hash. The original launcher invokes Docker while the TOMLs
-report Singularity; this does not establish the exact producing invocation for
-every archived derivative.
+The [optional raw preprocessing guide](guides/fmri-preprocessing.md) starts from
+OpenNeuro ds004323 v1.0.0 and the recorded fMRIPrep configurations. It is useful
+when studying preprocessing choices or reconstructing upstream derivatives.
+For fitting the supplied analysis inputs or aligning a new model to the supplied
+BOLD, use the [dataset guide](guides/dataset-analysis.md).
 
-The preprocessing, base alignment, LLM alignment, encoding, and ROI scripts are
-included in this checkout. [Exact source pins](../analysis/tomov23/docs/source-map.json)
-and [scientific conventions](../analysis/tomov23/docs/scientific-conventions.md)
-distinguish the integrated code from historical sibling branches. Historical
-tags refer to the research repository, not this public checkout. Optional
-DDQN regeneration uses the [bundled baseline sources](../baselines/README.md)
-and explicit local checkpoints, so its default engine path needs no private
-GitHub access. The extractor verifies the curated file manifest before import;
-existing indexed DDQN features can be used without regeneration.
-
-Follow stages 1–4 there first. Point the replay command below at the resulting
-`analysis/tomov23/workdir/prepare_behavioral_data` directory (or its absolute
-location). The worked neural path uses **sub-13, vgfmri4**, which is compatible
-with the submitted LLM alignment script's game mapping. The sub-01/bait
-example in the quickstart is a separate replay demonstration; it is not an
-input for the vgfmri4 neural example.
-
-After extracting Qwen features below, the exact directory supplied to the
-alignment `--llm-source` argument is:
-
-```text
-out/features/action-only/minimal/wf-0.3-overlap-0.5/model-Qwen_Qwen3.5-9B/all
-```
-
-From this repository root, for the default local preprocessing root:
-
-```bash
-python analysis/tomov23/encoding_model_code/align.py --subject sub-13 \
-    --aligned-data analysis/tomov23/workdir/aligned_data/sub-13/aligned_data.npz \
-    --plays-bson analysis/tomov23/workdir/raw_behavior/dump/heroku_7lzprs54/plays.bson \
-    --runs-bson analysis/tomov23/workdir/prepare_behavioral_data/runs.bson \
-    --llm-source 'name=qwen35_9b_sugmin__all__main,dir=out/features/action-only/minimal/wf-0.3-overlap-0.5/model-Qwen_Qwen3.5-9B/all,stream=main' \
-    --output-dir analysis/tomov23/workdir/aligned_data
-python analysis/tomov23/encoding_model_code/encoding_model.py --subject sub-13 \
-    --data-dir analysis/tomov23/workdir/aligned_data \
-    --output-dir analysis/tomov23/workdir/encoding_results \
-    --layer llm_qwen35_9b_sugmin__all__main_layer_1 --max-level 8 --include-nuisance-bands
-```
-
-These commands illustrate an action-only/minimal condition, not an assertion
-that it is the headline paper condition. Match the archived model, rationale,
-suggestion, window and compression settings when reproducing a reported result.
-The base-alignment dependency is explicit: use the indexed DDQN-curriculum
-features or existing aligned BOLD. DDQN extraction accepts `--checkpoint-map`
-and `--rc-rl-dir`; newly generated features record checkpoint SHA-256 and source
-revision. The old trial1-sequential W&B mapping does not prove the identity of
-the later indexed curriculum checkpoints.
-
-EfficientZero traces from `baselines/run_efficientzero.py` enter base alignment
-through `--ez-features-dir`; EMPA theory records enter through
-`--regressors-bson`. The base builder writes separate EZ and decomposed HRR
-sidecars, which the encoder now loads alongside base BOLD. The archived aligned
-objects inspected so far do not contain the EZ inputs that generated the
-published baseline CSV; keep that provenance gap explicit.
-
-The submitted encoder defaults to main features only. The explicit nuisance
-flag adds game/level identity, button presses, and time; `--max-level 8` keeps
-cross-cohort comparisons on levels 0–8. Past lags 2–5 and within-fold PCA are
-preserved. A failed fold produces no result, a failed layer makes the command
-exit nonzero, and `--resume` checks completed-result metadata. Use a fresh output
-directory when inputs change. The preserved unseeded ridge search and historical
-shuffle behavior prevent a claim of identical rerun scores; see the conventions
-record before changing scientific settings.
+The original launcher, recorded configurations and scientific conventions carry
+source attribution. Available source code does not prove
+the producing invocation, checkpoint or random seed of every archived result;
+the [reproduction limits](reproduction-limits.md) distinguishes these.
 
 ## Installation
 
-Use Python 3.12 and `pip install -r requirements.txt` for API gameplay and
-human action-only replay. DDQN and EfficientZero inference additionally use
-`baselines/requirements-inference.txt` plus a hardware-appropriate Torch build;
-the essential baseline engines, model classes, and extraction scripts are
-included without private repository access. `requirements-analysis.txt` adds the dependencies
-for CSV generation and figures without installing GPU inference kernels.
-`requirements-full.txt` records the original CUDA 12.8/B200 environment for
-local feature extraction; adapt hardware-specific kernel packages as described
-in the top-level README. fMRI processing uses the separate requirements and
-container recipe in `analysis/tomov23/`.
+For API gameplay and action-only human replay, run from the checkout using
+Python 3.12:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+For local model inference and feature extraction, the pinned environment uses
+CUDA 12.8 on an HGX B200 node with eight GPUs. The matching install is:
+
+```bash
+python -m pip install -r requirements-full.txt \
+  --extra-index-url https://download.pytorch.org/whl/cu128
+```
+
+These pins describe that hardware environment. For another CUDA/GPU stack,
+select compatible Torch, Triton and kernel builds; the Blackwell-oriented extras
+include `tilelang`, `flash-linear-attention`, `causal-conv1d` and
+`torch-c-dlpack-ext`. Do not treat the complete pinned environment as a portable
+CPU install. The [DeepSeek runtimes](#optional-deepseek-runtimes) have additional
+kernel and model-conversion requirements. Full-model execution on other hardware
+is outside the bounded validation reported here.
+
+Dataset analysis has its own smaller [installation](guides/dataset-analysis.md#install),
+also available through `requirements-analysis.txt`. DDQN and EfficientZero use
+the [baseline environment](guides/baselines.md), including its separately
+pinned engines and hardware-appropriate Torch build. Raw-MRI reconstruction
+requires the container and external inputs in the
+[fMRI guide](guides/fmri-preprocessing.md).
 
 The source tree can run without the private DynamoDB experiment tables:
 `exp_db.enabled=false` is the default. `logging.wandb_project=''` disables
 remote logging. API gameplay additionally needs `OPENROUTER_API_KEY`.
 
-The optional [legacy text-observation generator](legacy-observation-generation.md)
-has a recovered vLLM batch wrapper and uses a separate GPU environment. Its
-archived JSONL format is outside the replay/feature workflow below.
+Optional [Text-observation experiments](guides/text-observations.md) use a
+separate vLLM environment and JSONL interface. They are separate from the
+paper's human replay and feature workflow below.
 
 ## Replay and model gameplay
 
-The prepared behavioural input root must contain `plays/sub-01/run-01.bson`
-and the other subject/run files. Point to the directory itself:
+Open saved replay files in the [web viewer](https://botcs.github.io/reason-to-play/replay.html).
+The same webapp provides [interactive play](https://botcs.github.io/reason-to-play/interactive-gameplay.html)
+and the [replay catalogue](https://botcs.github.io/reason-to-play/catalogue.html).
+Python environments run headlessly. Their `rgb_array` output supplies image
+arrays to computation; it does not open a player window.
+
+The Python `VGDLEnv` interface returns `(observation, info)` from `reset()`
+and `(observation, reward, terminated, truncated, info)` from `step()`.
+Call `reset()` before stepping and `close()` when finished.
+
+Conversation history persists across decisions. `harness.suggestion_level`
+selects `minimal`, `elaborate`, or `oracle`; oracle supplies the game rules.
+Gameplay supports `action-only`, `prompted-rationale`, and `copied-reasoning`.
+The `game.advancement` strategy selects `blocked_curricula` or `fixed_budget`;
+frame budgets count engine updates, including idle frames, separately from
+model decisions. Their configuration is defined in
+[`shared/config.py`](../src/llm_eval/shared/config.py).
+
+The human data root contains
+`sub-XX/GAME/CONDITION.human.replay.json.gz`, with the trajectory, conversation
+and scanner metadata embedded in each file. Point to that directory:
 
 ```bash
 python -m src.llm_eval.human_replay.run_replay \
@@ -146,7 +116,14 @@ python -m src.llm_eval.human_replay.run_replay \
     logging.output_dir=out/replays/action-only/minimal
 ```
 
-Action-only replay makes no model API call. For imputed reasoning, set
+Action-only replay makes no model API call. It creates new conversations from
+the recorded observations and embeds the trajectory for browser inspection.
+Each selected step retains its original play ID and frame index. For paper
+feature reproduction, use the already saved conversations in the release;
+regenerating prompts with a different harness revision can change model inputs.
+Completed action-only output retains the complete selected participant/game
+inventory; partial-play subsets are rejected. Imputed and narration artifacts
+are not part of the released human dataset. For a new imputation experiment, set
 `harness.rationale_mode=copied-reasoning` and a reasoning-capable
 `llm.model`. The model is given the recorded action, then its reasoning is
 copied into the saved trace; this is not evidence of the participant's actual
@@ -198,11 +175,11 @@ the tokenizer and model weights, and records both `requested_model_revision` and
 the resolved `model_revision` in the session and provenance. Historical files
 without that metadata remain unpinned; a present model ID alone is not a
 checkpoint hash. Pinned extraction requires `exp_db.enabled=false`: the
-legacy experiment-table slot IDs lack a revision dimension, so enabling them
+experiment-table slot IDs lack a revision dimension, so enabling them
 would risk reusing a different checkpoint.
 
 Use a distinct `output_dir` for each revision/rationale/suggestion/window condition;
-those dimensions are recorded in the payload but absent from its legacy
+those dimensions are recorded in the payload but absent from its
 filename. The `session.model` and `provenance.model` fields preserve the exact
 Hugging Face ID; filesystem sanitization is not a reversible model identifier.
 Keep all three tensor streams, target `metadata`, `windows`, `session`,
@@ -218,9 +195,9 @@ failed sessions are counted separately.
 
 ### Optional DeepSeek runtimes
 
-`deepseek_inference/` restores the V3.2 custom runtime and checkpoint converter
-from the development snapshot. Its upstream MIT notice is included. Preserve
-[the original source provenance](source-provenance.md) when updating it.
+`deepseek_inference/` contains the V3.2 custom runtime and checkpoint converter.
+Its upstream MIT notice and [sources](sources/README.md#sources-and-implementations) identify
+the implementation.
 Convert model weights for the same tensor-parallel size used during extraction:
 
 ```bash
@@ -242,7 +219,7 @@ The leading `+` on the two DeepSeek-specific overrides is required because
 they are not members of the shared Hydra extraction config. V3.2 also needs
 its runtime kernel dependencies, including `fast_hadamard_transform`; see
 `deepseek_inference/requirements.txt` and the full environment requirements.
-No GPU-scale extraction was rerun as part of the release audit.
+Full-scale GPU extraction is outside the bounded checks reported here.
 
 The V4 runtime is also included in `deepseek_v4_inference/`, with the MIT
 notice and exact upstream Hugging Face revision recorded in its provenance.
@@ -260,143 +237,50 @@ torchrun --nproc-per-node 8 --standalone \
     output_dir=out/features-v4-flash/action-only/minimal
 ```
 
-Read each runtime's README and converter help before converting weights; V4
-uses different expert counts and quantization from V3.2. Source completeness
+Read each runtime's `convert.py --help` and `requirements.txt` before converting
+weights; V4 uses different expert counts and quantization from V3.2. Run V3.2
+and V4 in separate processes because their runtime module names overlap.
+Match the V4 model variant, expert count and runtime configuration; Pro, Flash
+and corresponding Base configurations are included. Source completeness
 and configuration checks do not establish a successful full-model GPU run.
 
 ## Behavioural analysis without cloud credentials
 
-Build one row per subject/model run, game variant, and level:
+The [behavioral workflow](guides/dataset-analysis.md#behavioral-analysis) reads
+complete human recordings and model gameplay. It preserves original nullable
+outcomes, identifies avatar deaths from events, excludes practice and uses an
+explicit cohort/level selection. Human keypress frames, model decisions and
+engine frames remain separate measurements.
 
-```bash
-python scripts/analysis/build_episodes.py \
-    --human-data /absolute/path/to/behavior/human \
-    --replays /absolute/path/to/selected-replays/*.generative.replay.json.gz \
-    --output out/behavioural_cache/episodes.csv
-
-python scripts/analysis/plot_behavioural.py discovery_curriculum_combined \
-    --csv out/behavioural_cache/episodes.csv --output-dir out/figures
-```
-
-The exporter includes levels 0–8 and excludes practice `run-00`. It reads the
-play document's three-valued `win` field, checks avatar `killSprite` events
-before classifying a `None` outcome as incomplete, and retains `avatar_died`,
-`loss`, and `incomplete` separately. Terminal zstate `win=-1` is never used as
-an outcome. It rejects resumed replay fragments and duplicate run/level
-inputs; select or reconstruct a complete run before export. Baseline DDQN,
-EfficientZero, and EMPA rows come from their own recorded runs. Add
-`--ddqn /absolute/data/ddqn.json`, `--efficientzero /absolute/data/EZV2-behaviour`,
-and `--empa /absolute/data/empa-json` to include them. The
-[baseline guide](../baselines/README.md) contains the unsampled W&B exporter,
-trusted-pickle-to-JSON conversion, and offline input schemas. EMPA labels such
-as `fmri_timeout` remain intact; missing baseline frame counts remain null.
-
-`episode_steps` follows the historical figure convention: human non-idle
-keypress frames and model decisions. These are different clocks. The exporter
-also retains `episode_frames` separately, with human frames equal to
-`n_states - 1` and model frames taken from the per-attempt engine clock. A
-missing model clock is JSON `null`, never an inferred duration. Zero-action
-human episodes remain zero, rather than being silently changed to one.
-
-The plotting code retains the historical figure computations, with explicit
-CSV/output paths and optional `--tex` for an installed LaTeX distribution.
-Its default retrospective curriculum rule requires two consecutive wins.
-Humans actually advanced on a fixed schedule; model experiments used blocked
-advancement. Do not describe their raw advancement conditions as identical.
-The denominator is also material: available levels versus reached levels
-produce different solve rates. EMPA means `empa1`; `empa2` remains excluded
-by default. Original-vs-converted game Timeout rules differ on some vgfmri4
-variants, so elapsed-time comparisons require checking the source rules.
+The [baseline guide](guides/baselines.md) covers offline DDQN, EfficientZero
+and EMPA inputs. The plot's retrospective blocked-curriculum rule does not make
+the original human and model advancement protocols identical. Report whether
+solve rates divide by available levels or reached levels.
 
 ## Neural figures
 
-The historical figure script consumes a table with columns including
-`model`, `variant`, `subject`, `layer_idx`, `ROI`, `band`, and `performance`.
-
-Generate LLM ROI rows from completed fits with an explicitly supplied AAL atlas:
-
-```bash
-python analysis/tomov23/encoding_model_code/load_and_parse.py \
-    --results-dir analysis/tomov23/workdir/encoding_results \
-    --fit-condition with-nuisance \
-    --atlas /absolute/path/to/ROI_MNI_V4.nii \
-    --atlas-labels /absolute/path/to/ROI_MNI_V4.txt \
-    --output out/analysis/encoding_roi_streams.csv
-```
-
-For fresh baseline fits, add `--baseline-map /absolute/path/to/layer-map.json`.
-Each map entry declares a semantic feature name, model, layer index/count,
-and normalized depth; [the example](../analysis/tomov23/docs/baseline-layer-map.example.json)
-labels new FC1/HRR runs. The recovered EZ extractor has 15 named hooks, while
-the published baseline CSV has 11 numeric layer labels with no recovered
-mapping. This connector does not invent that mapping. The archived CSV remains
-the source for those reported results until its producing inputs are identified.
-ROI aggregation fails on unreadable files or inconsistent masks instead of
-silently exporting partial results.
-Its `fit_condition` column distinguishes main-only and nuisance fits from the
-emitted performance `band`. Mixed fit conditions require explicit selection
-with `--fit-condition main-only` or `with-nuisance` into separate CSVs.
-
-```bash
-python scripts/analysis/plot_encoding.py groups \
-    --csv /absolute/path/to/master_encoding_data.csv --outdir out/figures
-```
-
-To plot just the fresh Qwen condition from the worked example:
-
-```bash
-python scripts/analysis/plot_encoding.py groups \
-    --csv out/analysis/encoding_roi_streams.csv \
-    --models qwen35_9b_sugmin --variant all --fit-condition with-nuisance \
-    --outdir out/figures/fresh_qwen
-```
-
-This writes `encoding_groups_selected.pdf`. `--models` accepts exact CSV model
-IDs in display order, including new baseline names such as `ddqn_fc1_rerun`
-and `hrr_rerun`. Unknown names retain their full label and receive a stable
-color. Partial tables support `aggregate`, `rois`, and `groups`; absent ROIs
-remain empty. A single subject has no estimable across-subject SEM. Without
-`--models`, a partial table uses its available models, while a complete
-historical table retains the original figure sets and styles. Tables combining
-main-only and nuisance-adjusted fits require an explicit `--fit-condition`.
-
-This figure script summarizes encoding fits; it does not fit the model or
-align fMRI. Follow the curated analysis pipeline for those stages and retain
-its train/test folds, nuisance regressors, feature variant, layer, and subject
-metadata when producing the table. Best-layer selection in the figure script
-is preserved from the historical code and is not an independent validation
-step.
-
-A bounded CPU integration test exercises synthetic NIfTI preprocessing,
-BSON/DDQN base alignment, multi-turn PT alignment, main/nuisance ridge fitting,
-and ROI aggregation:
-
-```bash
-python -m pytest analysis/tomov23/tests -q
-```
-
-The [verification record](../analysis/tomov23/docs/verification-2026-09-27.json)
-captures the test environment. A separate
-[real EfficientZero trace check](../analysis/tomov23/docs/efficientzero-contract-check.json)
-checks the recovered extractor's output against the base aligner. These checks
-do not constitute a full human fMRIPrep or paper-statistics rerun.
+The [neural workflow](guides/dataset-analysis.md#neural-encoding-from-processed-inputs)
+documents explicit processed inputs, seeded fresh fits, the shared spatial
+mask, ROI aggregation and model/cohort selection. Use the supplied atlas and
+pinned mask when rebuilding the study's ROI table. Fresh baseline result labels
+require an explicit [layer map](../experiments/neurips2026/baseline-layer-map.example.json).
+The unresolved historical EfficientZero layer mapping is not inferred.
 
 ## Validation and release boundaries
 
 ```bash
-pip install -r requirements-dev.txt
-ruff check src/ tests/ scripts/analysis/
-ruff format --check src/ tests/ scripts/analysis/
-python -m pytest tests/ -x -q
+python -m pip install -r requirements-dev.txt
+ruff check src/ tests/ tools/
+ruff format --check src/ tests/ tools/
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q
 ```
 
-The extraction unit tests skip when optional PyTorch is absent; install it
-to exercise those contracts. Tokenizer integration checks skip when the model
-tokenizer is unavailable. CPU tests validate
-conversation/window contracts, replay codecs, advancement, BSON outcomes,
-and episode export. They do not establish that the full paper's fMRI fits or
-large-model activations have been recomputed. The release inventory and
-publication plan record the remaining data, licensing, and provenance gates.
-The [dated validation summary](release/validation-2026-09-27.json) records the
-completed source-tree checks and representative CPU runs without embedding
-participant tables, scientific payloads or detailed storage metadata.
+Set `REASON_TO_PLAY_HUMAN_DATA` to a downloaded human JSON file or human-data
+directory to run the optional recorded-trajectory checks. These checks use a
+Bait play; choose a file containing that game when providing a single file.
+
+Tests cover canonical/source equivalence, timing and nuisance alignment,
+synthetic NIfTI through ridge fitting, result identities, ROI masks, replay
+clocks and behavioral exports. Optional tokenizer tests skip without cached
+model files. Read the [dataset validation limits](guides/dataset-analysis.md#verification-boundary)
+before equating these checks with a complete historical paper rerun.

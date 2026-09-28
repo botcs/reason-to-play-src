@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build a typed, per-attempt human-play catalogue from staged BSON sources.
+"""Build a typed human-play catalogue from self-contained human replay JSON.
 
-Keep every original play, including practice and levels outside the common 0–8
-comparison. Outcome classification delegates to the behavioral analysis exporter.
-Engine frames and non-idle keypress frames are separate measurements. No raw game
-states, participant timestamps or credentials are copied into the catalogue.
+Select one prompt condition so repeated observations are counted once. Keep every
+play present in those files and expose practice, cohort and level flags rather
+than silently filtering them. Frame clocks and nullable outcomes follow the
+shared scientific reader. Paths and hashes identify the exact compressed replay.
 """
 
 from __future__ import annotations
@@ -12,29 +12,28 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
-import gzip
 import hashlib
 import json
 from multiprocessing import get_context
 from pathlib import Path
-import re
 import sys
-import zlib
+import tempfile
 
-import bson
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from scripts.analysis.build_episodes import (  # noqa: E402
-    GAMES,
-    game_identity,
-    human_outcome,
+from reason_to_play.data.behavior import GAMES, behavior_root, game_identity  # noqa: E402
+from reason_to_play.data.replay_behavior import (  # noqa: E402
+    CONDITIONS,
+    read_record,
+    record_plays,
+    recording_path,
+    replay_paths,
 )
 
 
-PLAY_PATH = re.compile(r"behavior/human/plays/(sub-\d{2})/run-(\d{2})\.bson")
 SCHEMA = pa.schema(
     [
         pa.field("original_id", pa.string(), nullable=False),
@@ -58,20 +57,27 @@ SCHEMA = pa.schema(
         pa.field("source_artifact_id", pa.string(), nullable=False),
         pa.field("source_release_path", pa.string(), nullable=False),
         pa.field("source_payload_sha256", pa.string(), nullable=False),
+        pa.field("prompt_condition", pa.string(), nullable=False),
     ],
     metadata={
-        b"catalogue_schema_version": b"1",
-        b"original_win": b"Original play document win: true, false or null; never terminal zstate win",
+        b"catalogue_schema_version": b"3",
+        b"input_format": b"human-replay-json",
+        b"artifact_id_scheme": b"payload-sha256",
+        b"original_win": b"Original play win: true, false or null; never the terminal frame win",
         b"outcome": b"win, avatar_died, loss, incomplete; avatar death checked before null/incomplete",
-        b"engine_frames": b"Number of contiguous engine updates: len(states)-1; states[i].gt must equal i",
-        b"keypress_frames": b"Count of states with keyPressType not null; not a decision count or elapsed time",
+        b"engine_frames": b"Contiguous engine updates: state_count-1; frame time must equal its play-relative index",
+        b"keypress_frames": b"States with keyPressType not null; not decisions or elapsed time",
         b"is_practice": b"run=0 or game=sokoban",
         b"is_common_level": b"0<=level<=8; independent of practice flag",
         b"is_primary_encoding_cohort": b"Participants sub-12 through sub-32",
         b"in_common_comparison": b"Common level, non-practice, and game in the seven study games",
-        b"source_document_index": b"Zero-based ordinal within the source BSON file; original play_id is kept separately",
+        b"source_document_index": b"Original zero-based play ordinal within its scanner run; not the per-game file position or play_id",
+        b"source_release_path": b"Self-contained replay path relative to dataset root",
+        b"source_payload_sha256": b"SHA256 of the exact compressed replay used to build this row",
+        b"prompt_condition": b"One selected prompt condition; trajectories are not counted again for other conditions",
     },
 )
+SCIENTIFIC_FIELDS = SCHEMA.names[: SCHEMA.names.index("source_artifact_id")]
 
 
 def sha256_file(path: Path) -> str:
@@ -79,194 +85,201 @@ def sha256_file(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def human_sources(manifest: Path) -> list[dict]:
-    """Use verified staged evidence; do not infer an S3 identity from a filename."""
-    opener = gzip.open if manifest.suffix == ".gz" else open
-    sources = {}
-    with opener(manifest, "rt", encoding="utf-8") as stream:
-        for line in stream:
-            if not line.strip():
-                continue
-            row = json.loads(line)
-            path = row["release_path"]
-            if not PLAY_PATH.fullmatch(path):
-                continue
-            if path in sources:
-                raise ValueError(f"Duplicate manifest source path: {path}")
-            if row.get("source", {}).get("verification") not in {
-                "version-pinned",
-                "head-verified-unversioned",
-            }:
-                raise ValueError(f"Source is not frozen: {path}")
-            payload = row.get("payload", {})
-            if payload.get("validation") != "bytes-verified" or not re.fullmatch(
-                r"[0-9a-f]{64}", payload.get("sha256", "")
-            ):
-                raise ValueError(f"Source payload is not verified: {path}")
-            if not re.fullmatch(r"sha256:[0-9a-f]{64}", row["artifact_id"]):
-                raise ValueError(f"Invalid source artifact ID: {path}")
-            sources[path] = row
-    if not sources:
-        raise ValueError("Manifest has no verified human play BSON sources")
-    return [sources[path] for path in sorted(sources)]
-
-
-def play_row(doc: dict, source: dict, document_index: int) -> dict:
-    match = PLAY_PATH.fullmatch(source["release_path"])
-    subject, run = match[1], int(match[2])
-    if int(doc["subj_id"]) != int(subject.removeprefix("sub-")):
-        raise ValueError(
-            f"Subject does not match source path: {source['release_path']}"
-        )
-    if int(doc["run_id"]) != run:
-        raise ValueError(f"Run does not match source path: {source['release_path']}")
-    if doc["_id"] is None:
-        raise ValueError("Missing original play ID")
-    original_id = str(doc["_id"])
-    if not original_id:
-        raise ValueError("Missing original play ID")
-    game, cohort = game_identity(doc["game_name"])
-    level = int(doc["level_id"])
-    states = bson.decode(zlib.decompress(doc["zstates"]))["states"]
-    if not states:
-        raise ValueError(f"Empty zstates in play {original_id}")
-    if any(state["gt"] != i for i, state in enumerate(states)):
-        raise ValueError(f"Non-contiguous engine clock in play {original_id}")
-    practice = run == 0 or game == "sokoban"
-    common_level = 0 <= level <= 8
-    return {
-        "original_id": original_id,
-        "subject": subject,
-        "run": run,
-        "play_id": int(doc["play_id"]),
-        "source_document_index": document_index,
-        "game": game,
-        "game_variant": doc["game_name"],
-        "cohort": cohort,
-        "level": level,
-        "original_win": doc["win"],
-        "outcome": human_outcome(doc, states),
-        "engine_frames": len(states) - 1,
-        "keypress_frames": sum(
-            state.get("keyPressType") is not None for state in states
-        ),
-        "state_count": len(states),
-        "is_practice": practice,
-        "is_common_level": common_level,
-        "is_primary_encoding_cohort": 12 <= int(doc["subj_id"]) <= 32,
-        "in_common_comparison": common_level and not practice and game in GAMES,
-        "source_artifact_id": source["artifact_id"],
-        "source_release_path": source["release_path"],
-        "source_payload_sha256": source["payload"]["sha256"],
+def read_source(arguments) -> tuple[list[dict], dict]:
+    path, expected_relative = arguments
+    digest = sha256_file(path)
+    record = read_record(path, expand=False)
+    relative = recording_path(record)
+    if expected_relative is not None and relative != expected_relative:
+        raise ValueError(f"Replay identity differs from its path: {path}")
+    source = {
+        "release_path": "behavior/human/" + relative,
+        "sha256": digest,
+        "size_bytes": path.stat().st_size,
     }
-
-
-def read_source(arguments: tuple[Path, dict]) -> list[dict]:
-    stage_root, source = arguments
-    path = stage_root / source["release_path"]
-    if sha256_file(path) != source["payload"]["sha256"]:
-        raise ValueError(f"Staged bytes differ from manifest: {source['release_path']}")
-    with path.open("rb") as stream:
-        return [
-            play_row(doc, source, index)
-            for index, doc in enumerate(bson.decode_file_iter(stream))
-        ]
+    condition = record["meta"]["suggestion_level"]
+    # Delta encoding changes only sprite dictionaries. The catalogue uses clocks,
+    # keypresses and outcome events, all stored in full for every frame. Project
+    # away sprites before using the shared reader so this metadata-only operation
+    # does not expand millions of sprite snapshots or load the game engine.
+    for frame in record["states"]:
+        frame["sprites"] = {}
+    rows = []
+    for play in record_plays(record):
+        game, cohort = game_identity(play["game_name"])
+        run, level = int(play["run_id"]), int(play["level_id"])
+        subject = int(play["subj_id"])
+        frames = play["states"]
+        practice = run == 0 or game == "sokoban"
+        common = 0 <= level <= 8
+        rows.append(
+            {
+                "original_id": play["_id"],
+                "subject": f"sub-{subject:02d}",
+                "run": run,
+                "play_id": int(play["play_id"]),
+                "source_document_index": play["_canonical"]["source_document_index"],
+                "game": game,
+                "game_variant": play["game_name"],
+                "cohort": cohort,
+                "level": level,
+                "original_win": play["win"],
+                "outcome": play["_canonical"]["outcome"],
+                "engine_frames": len(frames) - 1,
+                "keypress_frames": sum(
+                    frame.get("keyPressType") is not None for frame in frames
+                ),
+                "state_count": len(frames),
+                "is_practice": practice,
+                "is_common_level": common,
+                "is_primary_encoding_cohort": 12 <= subject <= 32,
+                "in_common_comparison": common and not practice and game in GAMES,
+                "source_artifact_id": "sha256:" + digest,
+                "source_release_path": source["release_path"],
+                "source_payload_sha256": digest,
+                "prompt_condition": condition,
+            }
+        )
+    if sha256_file(path) != digest:
+        raise ValueError(f"Replay bytes changed while cataloguing: {path}")
+    return rows, source
 
 
 def build_catalogue(
-    stage_root: Path, manifest: Path, output: Path, progress=None, workers: int = 1
+    root: Path,
+    output: Path,
+    *,
+    condition: str = "elaborate",
+    progress=None,
+    workers: int = 1,
 ) -> dict:
+    """Read a release root, human directory or standalone human replay.
+
+    Directory inputs select one condition (default: elaborate). A standalone file
+    always selects that file's own condition, which is recorded in the output.
+    Original play identities and run ordinals must be unique across the selection.
+    """
     if workers < 1:
         raise ValueError("workers must be positive")
-    sources = human_sources(manifest)
-    rows, identities = [], set()
-    arguments = [(stage_root, source) for source in sources]
+    if condition not in CONDITIONS:
+        raise ValueError(f"Unknown human prompt condition: {condition!r}")
+    root, output = behavior_root(root), Path(output)
+    if output.exists():
+        raise FileExistsError(f"Catalogue output must be a new directory: {output}")
+    paths = replay_paths(root, condition=condition)
+    if not paths:
+        raise FileNotFoundError(f"No {condition} human replay files in {root}")
+    arguments = [
+        (path, None if root.is_file() else path.relative_to(root).as_posix())
+        for path in paths
+    ]
     pool = (
         ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn"))
         if workers > 1
         else None
     )
+    rows, sources, identities, ordinals = [], [], set(), set()
     try:
         batches = (
             pool.map(read_source, arguments) if pool else map(read_source, arguments)
         )
-        for index, batch in enumerate(batches):
+        for index, (batch, source) in enumerate(batches):
             for row in batch:
                 if row["original_id"] in identities:
                     raise ValueError(
                         f"Duplicate original play ID: {row['original_id']}"
                     )
+                ordinal = row["subject"], row["run"], row["source_document_index"]
+                if ordinal in ordinals:
+                    raise ValueError(f"Duplicate original run ordinal: {ordinal}")
                 identities.add(row["original_id"])
+                ordinals.add(ordinal)
                 rows.append(row)
+            sources.append(source)
             if progress:
-                progress(index + 1, len(sources), len(rows))
+                progress(index + 1, len(paths), len(rows))
     finally:
         if pool:
             pool.shutdown(wait=True, cancel_futures=True)
-    if not rows:
-        raise ValueError("Human source files contain no plays")
-    schema = SCHEMA.with_metadata(
-        {**SCHEMA.metadata, b"input_manifest_sha256": sha256_file(manifest).encode()}
+    rows.sort(
+        key=lambda row: (row["subject"], row["run"], row["source_document_index"])
     )
-    table = pa.Table.from_pylist(rows, schema=schema)
+    table = pa.Table.from_pylist(rows, schema=SCHEMA)
     table.validate(full=True)
-    output.mkdir(parents=True, exist_ok=True)
-    target = output / "human_plays.parquet"
-    partial = output / "human_plays.parquet.partial"
-    pq.write_table(table, partial, compression="zstd")
-    partial.replace(target)
-    report = {
-        "schema_version": 1,
-        "table": "human_plays",
-        "input_manifest_sha256": sha256_file(manifest),
-        "source_file_count": len(sources),
-        "row_count": len(rows),
-        "unique_original_ids": len(identities),
-        "subject_count": len({row["subject"] for row in rows}),
-        "outcomes": dict(sorted(Counter(row["outcome"] for row in rows).items())),
-        "original_win_null_count": sum(row["original_win"] is None for row in rows),
-        "practice_count": sum(row["is_practice"] for row in rows),
-        "outside_common_levels_count": sum(not row["is_common_level"] for row in rows),
-        "common_comparison_count": sum(row["in_common_comparison"] for row in rows),
-        "cohort_counts": dict(sorted(Counter(row["cohort"] for row in rows).items())),
-        "parquet": {
-            "file": target.name,
-            "sha256": sha256_file(target),
-            "size_bytes": target.stat().st_size,
-        },
-        "fields": [
-            {"name": field.name, "type": str(field.type), "nullable": field.nullable}
-            for field in schema
-        ],
-        "definitions": {
-            key.decode(): value.decode() for key, value in schema.metadata.items()
-        },
-        "validation": "All source bytes rehashed; unique original IDs; contiguous engine clocks; full Arrow table validation",
-        "selection": "All source plays retained; no practice, cohort or level filtering",
-    }
-    (output / "metadata.json").write_text(json.dumps(report, indent=2) + "\n")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix=".human-catalogue-", dir=output.parent
+    ) as tmp:
+        target = Path(tmp) / "human_plays.parquet"
+        pq.write_table(table, target, compression="zstd")
+        report = {
+            "schema_version": 3,
+            "table": "human_plays",
+            "input_format": "human-replay-json",
+            "artifact_id_scheme": "payload-sha256",
+            "prompt_condition": rows[0]["prompt_condition"],
+            "source_file_count": len(sources),
+            "row_count": len(rows),
+            "unique_original_ids": len(identities),
+            "subject_count": len({row["subject"] for row in rows}),
+            "outcomes": dict(sorted(Counter(row["outcome"] for row in rows).items())),
+            "original_win_null_count": sum(row["original_win"] is None for row in rows),
+            "practice_count": sum(row["is_practice"] for row in rows),
+            "outside_common_levels_count": sum(
+                not row["is_common_level"] for row in rows
+            ),
+            "common_comparison_count": sum(row["in_common_comparison"] for row in rows),
+            "cohort_counts": dict(
+                sorted(Counter(row["cohort"] for row in rows).items())
+            ),
+            "canonical_inputs": sources,
+            "parquet": {
+                "file": target.name,
+                "sha256": sha256_file(target),
+                "size_bytes": target.stat().st_size,
+            },
+            "fields": [
+                {
+                    "name": field.name,
+                    "type": str(field.type),
+                    "nullable": field.nullable,
+                }
+                for field in SCHEMA
+            ],
+            "definitions": {
+                key.decode(): value.decode() for key, value in SCHEMA.metadata.items()
+            },
+            "validation": "Replays rehashed before and after reading; unique original IDs and run ordinals; original frame clocks and outcomes verified by shared reader; full Arrow table validation",
+            "selection": "Every play in one prompt condition; no practice, cohort or level filtering",
+        }
+        (Path(tmp) / "metadata.json").write_text(json.dumps(report, indent=2) + "\n")
+        Path(tmp).rename(output)
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage-root", type=Path, required=True)
-    parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--workers",
-        type=int,
-        default=4,
-        help="Parallel BSON decoders; output remains in manifest path/document order",
+        "--input",
+        type=Path,
+        required=True,
+        help="Dataset root, behavior/human directory, or standalone human replay",
     )
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--condition", choices=CONDITIONS, default="elaborate")
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
 
     def progress(done, total, rows):
         if done % 16 == 0 or done == total:
-            print(f"Read {done}/{total} source files; {rows} plays", flush=True)
+            print(f"Read {done}/{total} replay files; {rows} plays", flush=True)
 
     report = build_catalogue(
-        args.stage_root, args.manifest, args.output, progress, args.workers
+        args.input,
+        args.output,
+        condition=args.condition,
+        workers=args.workers,
+        progress=progress,
     )
     print(
         json.dumps(
@@ -276,8 +289,7 @@ def main() -> None:
                     "row_count",
                     "subject_count",
                     "outcomes",
-                    "practice_count",
-                    "outside_common_levels_count",
+                    "prompt_condition",
                     "parquet",
                 )
             },

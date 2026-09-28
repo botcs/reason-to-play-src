@@ -2,29 +2,38 @@
 
 import gzip
 import json
-import zlib
 
-import bson
 import pytest
 
-from scripts.analysis.build_episodes import human_outcome, human_rows, replay_rows
+from reason_to_play.analysis.behavioral.episodes import (
+    human_outcome,
+    human_rows,
+    replay_rows,
+)
+from test_replay_behavior import recording, write_record
 
 
 def human_doc(win=None, died=False):
     states = [
-        {"gt": 0, "keyPressType": None, "effectListByClass": []},
+        {"gt": 0, "ts": 10.0, "keyPressType": None, "effectListByClass": []},
         {
             "gt": 1,
+            "ts": 10.05,
             "keyPressType": 39,
             "effectListByClass": [["killSprite", "avatar", "enemy"]] if died else [],
         },
     ]
     return {
+        "_id": "000000000000000000000001",
+        "subj_id": 1,
+        "run_id": 1,
+        "play_id": 1,
         "game_name": "vgfmri3_bait",
         "level_id": 0,
         "win": win,
         "game_str": "SpriteSet\n    avatar > MovingAvatar",
-        "zstates": zlib.compress(bson.encode({"states": states})),
+        "level_str": "A",
+        "states": states,
     }, states
 
 
@@ -43,13 +52,35 @@ def test_avatar_death_is_not_incomplete():
 
 
 def test_human_clock_and_cohort_filters(tmp_path):
-    plays = tmp_path / "plays" / "sub-01"
-    plays.mkdir(parents=True)
-    doc, _ = human_doc(died=True)
-    (plays / "run-00.bson").write_bytes(bson.encode(doc))
-    beyond = dict(doc, level_id=9)
-    (plays / "run-01.bson").write_bytes(bson.encode(doc) + bson.encode(beyond))
-    rows = human_rows(tmp_path)
+    canonical = tmp_path / "canonical"
+    record = recording()
+    record.update(subject="sub-01", game="bait_vgfmri3", total_frames=6)
+    from copy import deepcopy
+
+    template = deepcopy(record)
+    record["plays"], record["states"] = [], []
+    for index, (run, level) in enumerate([(0, 0), (1, 0), (1, 9)]):
+        identity = f"{index + 1:024x}"
+        play = deepcopy(template["plays"][0])
+        play.update(
+            _id=identity,
+            subj_id=1,
+            run_id=run,
+            level_id=level,
+            game_name="vgfmri3_bait",
+            source_document_index=index,
+            state_start=2 * index,
+            outcome="avatar_died",
+        )
+        play["scanner"].update(subj_id=1, run_id=run, scan_start_ts=9.0)
+        record["plays"].append(play)
+        for frame in deepcopy(template["states"]):
+            frame["source_play_id"] = identity
+            if frame["time"]:
+                frame["effectListByClass"] = [["killSprite", "avatar", "enemy"]]
+            record["states"].append(frame)
+    write_record(canonical, record)
+    rows = human_rows(canonical)
     assert len(rows) == 1
     assert rows[0]["episode_steps"] == [1]
     assert rows[0]["episode_frames"] == [1]
@@ -90,3 +121,48 @@ def test_replay_synthetic_markers_and_resumed_fragments(tmp_path):
         json.dump(replay, stream)
     with pytest.raises(ValueError, match="Merge resumed"):
         replay_rows(path)
+
+
+def test_human_rows_records_actual_per_game_source_path(monkeypatch):
+    from reason_to_play.analysis.behavioral import episodes
+
+    source = "sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
+    plays = []
+    for run, ordinal, keys in [(1, 4, [None, "right"]), (5, 1, [None, None])]:
+        play, _ = human_doc()
+        play.update(
+            subj_id=13,
+            game_name="vgfmri4_bait",
+            run_id=run,
+            states=[
+                {"gt": index, "keyPressType": key, "effectListByClass": []}
+                for index, key in enumerate(keys)
+            ],
+            _canonical={"source_recording": source, "source_document_index": ordinal},
+        )
+        plays.append(play)
+    monkeypatch.setattr(episodes, "iter_plays", lambda root: iter(plays))
+    (row,) = episodes.human_rows("unused")
+    assert row["episode_steps"] == [1, 0]
+    assert row["episode_frames"] == [1, 1]
+    assert row["episode_outcomes"] == ["incomplete", "incomplete"]
+    assert row["data_source"] == [source]
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        None,
+        "plays/sub-01/run-01.json.gz",
+        "sub-12/bait_vgfmri3/elaborate.human.replay.json.gz",
+        "sub-01/helper_vgfmri3/elaborate.human.replay.json.gz",
+    ],
+)
+def test_human_rows_rejects_missing_or_fictitious_source_path(monkeypatch, path):
+    from reason_to_play.analysis.behavioral import episodes
+
+    play, _ = human_doc()
+    play["_canonical"] = {"source_document_index": 0, "source_recording": path}
+    monkeypatch.setattr(episodes, "iter_plays", lambda root: iter([play]))
+    with pytest.raises(ValueError, match="source_recording"):
+        episodes.human_rows("unused")
