@@ -6,8 +6,9 @@ Source code for **Reason to Play: Behavioral and Brain Alignment Between Frontie
 
 _Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Summerfield, Joshua B. Tenenbaum, Rui Ponte Costa, Marcelo G. Mattar, Momchil Tomov_
 
+**[Landing Page](https://botcs.github.io/reason-to-play/)** ·
 **[NeurIPS 2026 OpenReview](https://openreview.net/forum?id=Y1oX1yuaWM)** ·
-**[Landing Page](https://botcs.github.io/reason-to-play/)**
+**[Behavioral & Representational Dataset](https://huggingface.co/datasets/csbotos/reason-to-play)**
 
 The study compares 32 human participants, scanned with fMRI, with models learning
 grid-world games written in [VGDL](https://github.com/schaul/py-vgdl). 
