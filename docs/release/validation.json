@@ -296,6 +296,25 @@
         "old_mixed_inputs_raw_mri_and_bson_denied": true
       },
       "new_experiment_sample_order": "Interleaved levels preserve original ordered play rows, including missing source features."
+    },
+    "anonymous_dataset_download_and_offline_efficientzero_fit": {
+      "dataset_revision": "5f88035c379d14ee297969307c656b7b53a37567",
+      "anonymous_download_files": 7,
+      "downloaded_bytes": 1364981970,
+      "hashes_match_manifest": true,
+      "samples_per_fit": 1470,
+      "voxels_per_fit": 2,
+      "folds_per_fit": 3,
+      "fits": 2,
+      "repeated_scores_bitwise_equal": true,
+      "whole_result_files_byte_identical": true,
+      "offline_inputs_limited_to_downloads": true,
+      "network_disabled_during_fit": true,
+      "installation": "Installed public wheel; source checkout inaccessible",
+      "dataset_repository": "csbotos/reason-to-play",
+      "download_workers": 32,
+      "fit_pool_workers": 32,
+      "blas_threads_per_fit_worker": 1
     }
   },
   "not_executed": [
@@ -306,7 +325,7 @@
     "Complete multimodal dataset staging, payload hashing or Hugging Face upload."
   ],
   "data_boundary": "Participant payloads and catalogue tables belong to the separate dataset package. This Git repository contains implementations, specifications and aggregate validation evidence.",
-  "dataset_package_validation": "Separate local HF package loaded through its README configurations with datasets 4.8.5 using split=data. Both catalogue configurations loaded successfully; no remote upload was performed.",
+  "dataset_package_validation": "Local package catalogue configurations loaded with datasets 4.8.5 and split=data. Anonymous public catalogue loading also passed at dataset commit 92faed136ec60a7604499add287b83e4ff3d7c47 (files=100, planned_files=33173, human_plays=6994); this records that tested snapshot, not the current upload total. A separate anonymous download-to-fit check is recorded below.",
   "package": {
     "build": "setuptools wheel",
     "imports_checked": 23,

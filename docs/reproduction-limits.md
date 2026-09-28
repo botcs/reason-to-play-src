@@ -126,6 +126,13 @@ exactly, with network and source-service imports disabled. These checks support
 new encoding fits; the historical baseline layer/checkpoint attribution remains
 unresolved as described above.
 
+An anonymous Hugging Face download-to-fit check fetched the participant-13
+BOLD, samples, nuisance and EfficientZero files with their associations. All
+seven files matched their manifest hashes. Two offline fits using only those
+downloads, all 1,470 samples and two BOLD voxels produced byte-identical result
+files from the installed package. This tests the public download workflow;
+it does not establish historical-score reproduction.
+
 The explicit archived-table selection also generates the regional encoding
 figure from 1,169,226 main-band rows across ten model labels and 21 participants,
 using the dataset tables without source archives or network connections. The
