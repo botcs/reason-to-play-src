@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Align LLM features to an existing processed BOLD/base archive.
+Align LLM features to a participant's recorded scanner samples.
 
-The base supplies BOLD timing, AR(1) status, retained volumes and play order.
+The participant directory supplies BOLD timing, AR(1) status, retained volumes and play order.
 Canonical human recordings supply original play identities, all frame timestamps
 and scanner start times. Output files contain one aligned LLM feature source
 each. PyTorch is required only for .pt feature inputs. Human measurements are
@@ -11,10 +11,10 @@ read from the self-contained JSON dataset.
 Usage:
     python -m analysis.neural.align_llm \\
         --subject sub-13 \\
-        --aligned-data ./dataset/analysis-inputs/sub-13/bold-ddqn-theory.npz \\
+        --subject-dir ./dataset/neural/sub-13 \\
         --behavior-dir ./dataset/behavior/human \\
         --llm-source "name=dsv3,dir=/path/to/llm_dsv3" \\
-        --output-dir /path/to/out
+        --output-dir ./dataset/neural
 """
 
 import argparse
@@ -27,7 +27,12 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from analysis.neural.alignment import bind_to_base, validate_binding
+from data.neural import (
+    load_samples,
+    read_feature_binding,
+    write_feature_archive,
+    coverage_from_missing,
+)
 
 
 def _torch():
@@ -151,6 +156,19 @@ class LLMSourceConfig:
     subsample: int = 1
     layers: List[int] = None
     stream: str = "main"
+
+    model_id: Optional[str] = None
+    condition: str = "elaborate"
+    action_selection: str = "all"
+
+    def output_path(self, subject_dir: Path) -> Path:
+        model = self.model_id or self.name
+        stream = getattr(self, "stream", "main")
+        for value in (model, self.condition, self.action_selection, stream):
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value):
+                raise ValueError(f"Invalid feature path component: {value!r}")
+        filename = f"{self.condition}--{self.action_selection}--{stream}.npz"
+        return Path(subject_dir) / "model-features" / "lrm" / model / filename
 
     def __post_init__(self):
         if self.layers is not None:
@@ -1123,17 +1141,13 @@ def align_llm_features_by_timestamp(
 
 
 # =============================================================================
-# Main Processing — MODIFIED from original process_subject:
-#   - Takes aligned_data_path instead of preprocessed_dir + model_features_dir
-#   - Loads BOLD/timing metadata and play ordering from aligned_data.npz
-#   - DDQN, EZ, HRR, and behavioral blocks removed
-#   - Only writes aligned_llm_{source}.npz files
+# Align model features in the participant's recorded sample order.
 # =============================================================================
 
 
 def process_subject(
     subject: str,
-    aligned_data_path: Path,
+    subject_dir: Path,
     output_dir: Path = None,
     llm_sources: List[LLMSourceConfig] = None,
     method: str = "average",
@@ -1151,30 +1165,26 @@ def process_subject(
     subj_str = subject if subject.startswith("sub-") else f"sub-{int(subject):02d}"
     subj_num = int(subj_str.replace("sub-", ""))
 
-    if not aligned_data_path.is_file():
-        raise FileNotFoundError(aligned_data_path)
-    base = np.load(aligned_data_path, allow_pickle=True)
-    binding = bind_to_base(aligned_data_path, base)
+    subject_dir = Path(subject_dir)
+    base = load_samples(subject_dir)
+    if str(base["subject"]) != subj_str:
+        raise ValueError("Participant directory does not match --subject")
 
     # -------------------------------------------------------------------------
     # Incremental mode: filter out already-aligned LLM sources
     # -------------------------------------------------------------------------
     output_subdir = output_dir / subject
+    if llm_sources:
+        names = [source.name for source in llm_sources]
+        paths = [source.output_path(output_subdir) for source in llm_sources]
+        if len(set(names)) != len(names) or len(set(paths)) != len(paths):
+            raise ValueError("Each LLM source requires a distinct name and output path")
     if incremental and llm_sources:
         new_sources = []
         for src in llm_sources:
-            llm_file = output_subdir / f"aligned_llm_{src.name}.npz"
+            llm_file = src.output_path(output_subdir)
             if llm_file.exists():
-                with np.load(llm_file, allow_pickle=False) as existing:
-                    if not validate_binding(
-                        existing,
-                        base,
-                        aligned_data_path,
-                        base_sha256=str(binding["alignment_base_sha256"]),
-                    ):
-                        raise ValueError(
-                            f"Cannot resume unbound feature archive: {llm_file}"
-                        )
+                read_feature_binding(llm_file, subject_dir, samples=base)
                 logging.info(f"  [incremental] Skipping {src.name} — already aligned")
             else:
                 new_sources.append(src)
@@ -1192,12 +1202,10 @@ def process_subject(
         raise ValueError("Must provide at least one LLM source")
 
     # -------------------------------------------------------------------------
-    # NEW: load BOLD/timing metadata from aligned_data.npz instead of from
+    # NEW: load BOLD/timing metadata from samples.npz instead of from
     # preprocessed runs + DDQN feature files
     # -------------------------------------------------------------------------
-    if not aligned_data_path.exists():
-        raise FileNotFoundError(f"aligned_data.npz not found: {aligned_data_path}")
-    logging.info(f"  Loading base alignment: {aligned_data_path}")
+    logging.info(f"  Loading sample metadata: {subject_dir / 'samples.npz'}")
     tr = float(base["tr"])
     ar1_corrected = bool(base["ar1_corrected"])
     n_volumes_total = int(base["n_volumes"])
@@ -1230,7 +1238,7 @@ def process_subject(
 
     # -------------------------------------------------------------------------
     # Derive per-run n_volumes_whitened from the base file.
-    # aligned_data doesn't store this directly; the safe value is the maximum
+    # samples.npz does not store this directly; the safe value is the maximum
     # (vol_offset + retained n_vols) ever used in this run. Raw behavioral
     # timestamps may extend past the final scan volume: use unbounded timing
     # only for the start offset, and keep the base file's retained length.
@@ -1288,8 +1296,10 @@ def process_subject(
     # Accumulators (LLM only)
     # -------------------------------------------------------------------------
     all_llm_aligned = {key: [] for key in llm_manager.get_all_storage_keys()}
+    missing_by_layer = {key: [] for key in all_llm_aligned}
 
     global_play_idx = 0
+    processed_play_ids = []
     total_volumes = 0
     llm_stats = defaultdict(lambda: {"matched": 0, "missing": 0})
 
@@ -1359,7 +1369,7 @@ def process_subject(
                 )
                 if timing is None:
                     raise RuntimeError(
-                        f"Play {play_id} has no valid TRs — inconsistent with aligned_data.npz"
+                        f"Play {play_id} has no valid TRs — inconsistent with samples.npz"
                     )
 
                 n_vols = int(timing["n_volumes"])
@@ -1367,7 +1377,7 @@ def process_subject(
                 if n_vols != expected:
                     raise RuntimeError(
                         f"Play {play_id} n_vols mismatch: computed {n_vols}, "
-                        f"aligned_data expected {expected}. Timing reconstruction "
+                        f"samples expected {expected}. Timing reconstruction "
                         f"diverges from original."
                     )
 
@@ -1376,7 +1386,7 @@ def process_subject(
                 if not verify_state_temporal_order(timing["state_timestamps"], play_id):
                     raise RuntimeError(
                         f"Play {play_id} has temporal order violation but was included "
-                        f"in aligned_data.npz — cannot reproduce alignment safely."
+                        f"in samples.npz — cannot reproduce alignment safely."
                     )
 
                 # Original frame timestamps serve as the DDQN-timestamp
@@ -1503,6 +1513,7 @@ def process_subject(
                                         forward_fill_empty=is_multiturn_ts,
                                     )
                                 else:
+                                    missing_by_layer[key].append(play_id)
                                     llm_aligned = np.zeros(
                                         (n_vols, llm_activations.shape[1]),
                                         dtype=np.float32,
@@ -1514,6 +1525,7 @@ def process_subject(
                                 n_features = llm_manager.get_n_features(
                                     src_name, layer_name
                                 )
+                                missing_by_layer[key].append(play_id)
                                 all_llm_aligned[key].append(
                                     np.zeros((n_vols, n_features), dtype=np.float32)
                                 )
@@ -1528,11 +1540,13 @@ def process_subject(
                             n_features = llm_manager.get_n_features(
                                 src_name, layer_name
                             )
+                            missing_by_layer[key].append(play_id)
                             all_llm_aligned[key].append(
                                 np.zeros((n_vols, n_features), dtype=np.float32)
                             )
                         llm_stats[src_name]["missing"] += 1
 
+                processed_play_ids.append(play_id)
                 total_volumes += n_vols
                 global_play_idx += 1
 
@@ -1544,10 +1558,20 @@ def process_subject(
     # -------------------------------------------------------------------------
     # Concatenate LLM features
     # -------------------------------------------------------------------------
+    if len(processed_play_ids) != len(play_ids_base) or set(processed_play_ids) != set(
+        play_ids_base
+    ):
+        raise ValueError("Aligned plays differ from recorded participant samples")
+    chunk_by_play = {pid: index for index, pid in enumerate(processed_play_ids)}
+    ordered_chunks = [chunk_by_play[pid] for pid in play_ids_base]
     llm_concatenated = {}
     for key in llm_manager.get_all_storage_keys():
         if all_llm_aligned[key]:
-            llm_concatenated[key] = np.vstack(all_llm_aligned[key])
+            if len(all_llm_aligned[key]) != len(processed_play_ids):
+                raise ValueError(f"Layer {key} lacks an aligned chunk for every play")
+            llm_concatenated[key] = np.vstack(
+                [all_llm_aligned[key][index] for index in ordered_chunks]
+            )
             logging.info(f"    llm_{key}: {llm_concatenated[key].shape}")
 
     for src_name in llm_manager.get_source_names():
@@ -1598,7 +1622,7 @@ def process_subject(
     for key, arr in llm_concatenated.items():
         if arr.shape[0] != n_volumes_total:
             raise RuntimeError(
-                f"Row count for {key} is {arr.shape[0]} but aligned_data has "
+                f"Row count for {key} is {arr.shape[0]} but samples has "
                 f"{n_volumes_total} volumes"
             )
 
@@ -1607,7 +1631,7 @@ def process_subject(
     logging.info("  Alignment verification: ✓ All checks passed")
 
     # -------------------------------------------------------------------------
-    # Save per-source LLM files — LIFTED VERBATIM from original
+    # Save one feature archive per model and condition
     # -------------------------------------------------------------------------
     output_subdir.mkdir(parents=True, exist_ok=True)
     written_files = []
@@ -1616,7 +1640,7 @@ def process_subject(
         src = meta["config"]
         prefix = f"llm_{src_name}"
 
-        llm_save_dict = dict(binding)
+        llm_save_dict = {}
         for layer_name in meta["layer_names"]:
             key = f"{src_name}_{layer_name}"
             if key in llm_concatenated:
@@ -1635,8 +1659,35 @@ def process_subject(
             dtype=[("layer", "U32"), ("n_features", "i4")],
         )
 
-        llm_file = output_subdir / f"aligned_llm_{src_name}.npz"
-        np.savez_compressed(llm_file, **llm_save_dict)
+        llm_file = src.output_path(output_subdir)
+        per_layer = {
+            f"llm_{src_name}_{layer_name}": coverage_from_missing(
+                base, missing_by_layer[f"{src_name}_{layer_name}"]
+            )
+            for layer_name in meta["layer_names"]
+        }
+        missing = sorted(
+            {
+                pid
+                for coverage in per_layer.values()
+                for pid in coverage["missing_feature_play_ids"]
+            }
+        )
+        write_feature_archive(
+            llm_file,
+            llm_save_dict,
+            subject_dir,
+            coverage_from_missing(base, missing),
+            coverage_by_layer=per_layer,
+            metadata={
+                "source_name": src_name,
+                "model_id": src.model_id or src.name,
+                "condition": src.condition,
+                "action_selection": src.action_selection,
+                "stream": src.stream,
+                "subsample": src.subsample,
+            },
+        )
         logging.info(
             f"  Saved LLM: {llm_file.name} ({llm_file.stat().st_size / 1024**2:.1f} MB)"
         )
@@ -1647,7 +1698,7 @@ def process_subject(
 
 
 # =============================================================================
-# CLI Argument Parsing — verbatim from original
+# CLI arguments
 # =============================================================================
 
 
@@ -1686,6 +1737,9 @@ def parse_llm_source_arg(source_str: str) -> LLMSourceConfig:
     return LLMSourceConfig(
         name=parts["name"],
         directory=Path(parts["dir"]),
+        model_id=parts.get("model_id"),
+        condition=parts.get("condition", "elaborate"),
+        action_selection=parts.get("action_selection", "all"),
         subsample=subsample,
         layers=layers,
         stream=stream,
@@ -1703,9 +1757,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--subject", required=True, help="Subject ID")
     parser.add_argument(
-        "--aligned-data",
+        "--subject-dir",
         required=True,
-        help="Processed BOLD/base NPZ with scanner timing and original play order",
+        help="Participant directory containing bold.npz and samples.npz",
     )
     parser.add_argument(
         "--behavior-dir",
@@ -1753,7 +1807,7 @@ if __name__ == "__main__":
 
     process_subject(
         subject=args.subject,
-        aligned_data_path=Path(args.aligned_data),
+        subject_dir=Path(args.subject_dir),
         output_dir=Path(args.output_dir),
         llm_sources=llm_sources,
         method=args.method,

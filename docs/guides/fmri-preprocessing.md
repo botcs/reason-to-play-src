@@ -63,7 +63,7 @@ resampling stage to those derivatives.
 
 Set `DATASET` to the downloaded derivative dataset root, `DDQN_FEATURES` to the
 selected per-frame DDQN NPZ directory and `EMPA_REGRESSORS` to the selected
-`analysis/neural/inputs/theory-regressors.json.gz`. Choose those input paths from the release manifest.
+`features/empa/theory-regressors.json.gz`. Choose those input paths from the release manifest.
 The DDQN directory must contain `sub-XX/GAME/level-YY.npz`; the extractor writes
 that structure beneath its `model-MODEL_ID/` directory.
 
@@ -84,12 +84,13 @@ motion/CSF/white-matter regression, AR(1) pre-whitening with the first volume
 dropped, and voxel z-scoring. Available runs are discovered; sub-09 has five
 scanner runs. The worked LLM comparison uses the vgfmri4 cohort and levels 0–8.
 
-The base archive contains BOLD, DDQN/theory features, nuisance variables and
-sample boundaries. The aligner currently requires DDQN inputs even for later
-LLM fits. Select the matching per-frame DDQN inputs explicitly. The command
-writes `/data/reconstruction/analysis-inputs/sub-13/bold-ddqn-theory.npz` and any
-configured feature sidecars; that base file can be passed to the encoder as
-`--base-data`. Existing processed base archives avoid this reconstruction step.
+The aligner uses per-frame DDQN inputs to select and order plays. Select those
+inputs explicitly. It writes `bold.npz`, `samples.npz`, `nuisance.npz` and
+model-feature files under `/data/reconstruction/analysis-inputs/sub-13/`, with
+associations checked by the analysis reader. Pass this participant directory
+to the encoder with `--data-dir`. The released participant inputs already
+provide these processed arrays; LRM and EfficientZero realignment can use them
+directly without rerunning this reconstruction.
 
 To regenerate DDQN features with an explicit local checkpoint map:
 

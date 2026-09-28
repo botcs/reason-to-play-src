@@ -9,15 +9,14 @@ import types
 import numpy as np
 import pytest
 
-from analysis.neural.alignment import file_sha256, validate_binding
-from analysis.neural.encoding import load_aligned_data
+from data.neural import file_sha256, validate_binding, load_inputs
 from analysis.neural import align_efficientzero as ez
 
 REP, VALUE, DYNAMICS = ez.ALL_LAYERS[0], ez.ALL_LAYERS[4], ez.ALL_LAYERS[11]
 
 
 @pytest.fixture
-def context(tmp_path):
+def context(tmp_path, participant_writer):
     ids = [f"{index:024x}" for index in (1, 2)]
     base = {
         "subject": np.array("sub-01"),
@@ -55,8 +54,7 @@ def context(tmp_path):
         for index, (pid, times) in enumerate(zip(ids, (range(7), range(6, 11))))
     ]
     runs = {(1, 1): {"subj_id": "1", "run_id": 1, "scan_start_ts": 100.0}}
-    path = tmp_path / "base.npz"
-    np.savez(path, **base)
+    path = participant_writer(tmp_path / "sub-01", base)
     return ez.prepare_alignment(path, plays=plays, runs=runs), plays, runs
 
 
@@ -95,7 +93,7 @@ def test_frame_clock_sampling_preserves_ar1_rounding_and_scan_truncation(context
     # The last original frame extends beyond retained BOLD and stays excluded.
     np.testing.assert_array_equal(other[REP], [[1, 2], [3, 6]])
     assert other[REP].dtype == np.float32
-    assert set(ctx.base).isdisjoint({"voxel_ts", "fc1_aligned"})
+    assert set(ctx.samples).isdisjoint({"voxel_ts", "fc1_aligned"})
     assert first.sample_stop == second.sample_start
 
 
@@ -184,12 +182,12 @@ def test_base_and_human_samples_must_agree(context, defect):
     else:
         plays[0]["states"][1]["ts"] = 90
     with pytest.raises(ValueError):
-        ez.prepare_alignment(ctx.base_path, plays=plays, runs=runs)
+        ez.prepare_alignment(ctx.subject_dir, plays=plays, runs=runs)
 
 
 def test_writer_preserves_base_bytes_and_binds_missing_intervals(context, tmp_path):
     ctx, _, _ = context
-    original_sha = file_sha256(ctx.base_path)
+    original_sha = file_sha256(ctx.subject_dir / "bold.npz")
     first, second = ctx.plays.values()
     good, _ = ez.align_trace(trace(first), first, layers=(REP,))
     array = np.vstack([good[REP], np.zeros((2, 2), dtype=np.float32)])
@@ -197,17 +195,17 @@ def test_writer_preserves_base_bytes_and_binds_missing_intervals(context, tmp_pa
     evidence = ez.write_aligned_features(
         path, ctx, {REP: array}, {REP: [second.play_id]}, source_records=[]
     )
-    assert file_sha256(ctx.base_path) == original_sha
+    assert file_sha256(ctx.subject_dir / "bold.npz") == original_sha
     assert evidence["feature_sha256"] == file_sha256(path)
     assert evidence["feature_coverage"]["missing_feature_sample_count"] == 2
     with np.load(path, allow_pickle=False) as output:
-        assert validate_binding(output, ctx.base, ctx.base_path)
+        assert validate_binding(output, ctx.samples, ctx.subject_dir)
         assert "ez_layers" not in output and "has_ez_data" not in output
-    loaded = load_aligned_data(
-        [ctx.base_path, path], "sub-01", ez.feature_key(REP).removesuffix("_aligned")
+    loaded = load_inputs(
+        ctx.subject_dir, path, ez.feature_key(REP).removesuffix("_aligned")
     )
     np.testing.assert_array_equal(loaded["voxel_ts"], np.arange(10).reshape(2, 5))
-    coverage = json.loads(loaded["alignment_verification_json"])[0]["feature_coverage"]
+    coverage = json.loads(loaded["alignment_verification_json"])[-1]["feature_coverage"]
     assert coverage["missing_feature_play_ids"] == [second.play_id]
     array[-1] = 1
     with pytest.raises(ValueError, match="Missing-feature interval contains values"):
@@ -297,12 +295,12 @@ def test_per_layer_coverage_follows_requested_hook(context, tmp_path):
     path = tmp_path / "efficientzero.npz"
     ez.write_aligned_features(path, ctx, values, {REP: [], VALUE: [second.play_id]})
     for layer, expected in ((REP, True), (VALUE, False)):
-        loaded = load_aligned_data(
-            [ctx.base_path, path],
-            "sub-01",
+        loaded = load_inputs(
+            ctx.subject_dir,
+            path,
             ez.feature_key(layer).removesuffix("_aligned"),
         )
-        coverage = json.loads(loaded["alignment_verification_json"])[0][
+        coverage = json.loads(loaded["alignment_verification_json"])[-1][
             "feature_coverage"
         ]
         assert coverage["complete"] is expected
@@ -313,9 +311,9 @@ def test_per_layer_coverage_follows_requested_hook(context, tmp_path):
     ]
     association.write_text(json.dumps(document))
     with pytest.raises(ValueError, match="Requested layer lacks"):
-        load_aligned_data(
-            [ctx.base_path, path],
-            "sub-01",
+        load_inputs(
+            ctx.subject_dir,
+            path,
             ez.feature_key(REP).removesuffix("_aligned"),
         )
 
@@ -336,11 +334,11 @@ def test_embedded_scanner_clocks_avoid_second_dataset_scan(context):
     ctx, plays, runs = context
     for play in plays:
         play["scanner"] = deepcopy(runs[(1, 1)])
-    prepared = ez.prepare_alignment(ctx.base_path, plays=plays)
+    prepared = ez.prepare_alignment(ctx.subject_dir, plays=plays)
     assert list(prepared.plays) == list(ctx.plays)
     plays[1]["scanner"]["scan_start_ts"] = 0
     with pytest.raises(ValueError, match="disagree on scanner"):
-        ez.prepare_alignment(ctx.base_path, plays=plays)
+        ez.prepare_alignment(ctx.subject_dir, plays=plays)
 
 
 def test_compact_clocks_match_canonical_reader_without_sprite_expansion(
@@ -402,7 +400,7 @@ def test_compact_clocks_match_canonical_reader_without_sprite_expansion(
         assert left["states"] == [
             {key: state[key] for key in ("gt", "ts")} for state in right["states"]
         ]
-    prepared = ez.prepare_alignment(ctx.base_path, path)
+    prepared = ez.prepare_alignment(ctx.subject_dir, path)
     assert list(prepared.plays) == list(ctx.plays)
     frames[0]["source_play_id"] = plays[1]["_id"]
     with gzip.open(path, "wt") as stream:
@@ -456,15 +454,25 @@ def test_last_frame_sampling_records_method_and_hook_mapping(context, tmp_path):
 def test_canonical_efficientzero_discovery(tmp_path):
     from analysis.neural.encoding import encoding_input_paths
 
-    root = tmp_path / "analysis/neural/inputs"
-    base = root / "sub-01/bold-ddqn-theory.npz"
-    features = root / "model-features/efficientzero/sub-01.npz"
-    for path in (base, features):
-        path.parent.mkdir(parents=True)
+    root = tmp_path / "neural/sub-01"
+    paths = [
+        root / name
+        for name in (
+            "bold.npz",
+            "samples.npz",
+            "nuisance.npz",
+            "model-features/efficientzero.npz",
+        )
+    ]
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
-    assert encoding_input_paths(
-        "sub-01", tmp_path, ez.feature_key(REP).removesuffix("_aligned")
-    ) == [base, features]
+    assert (
+        encoding_input_paths(
+            "sub-01", tmp_path, ez.feature_key(REP).removesuffix("_aligned")
+        )
+        == paths
+    )
 
 
 @pytest.mark.parametrize("defect", ["missing-association", "missing-layer-coverage"])
@@ -487,16 +495,8 @@ def test_generated_efficientzero_requires_coverage_association(
         document = json.loads(association.read_text())
         del document["feature_coverage_by_layer"]
         association.write_text(json.dumps(document))
-    for require_binding in (True, False):
-        with pytest.raises(
-            ValueError, match=r"download efficientzero\.npz\.alignment\.json"
-        ):
-            load_aligned_data(
-                [ctx.base_path, path],
-                "sub-01",
-                ez.feature_key(REP).removesuffix("_aligned"),
-                require_binding=require_binding,
-            )
+    with pytest.raises(ValueError, match=r"[Dd]ownload|feature_coverage_by_layer"):
+        load_inputs(ctx.subject_dir, path, ez.feature_key(REP).removesuffix("_aligned"))
 
 
 @pytest.mark.parametrize(
@@ -504,27 +504,28 @@ def test_generated_efficientzero_requires_coverage_association(
 )
 def test_output_cannot_replace_base_archive(context, tmp_path, alias):
     ctx, _, _ = context
-    original = ctx.base_path.read_bytes()
+    base_path = ctx.subject_dir / "bold.npz"
+    original = base_path.read_bytes()
     if alias == "same-path":
-        output = ctx.base_path
+        output = base_path
     else:
         output = tmp_path / "efficientzero.npz"
         if alias == "symlink":
-            output.symlink_to(ctx.base_path)
+            output.symlink_to(base_path)
         elif alias == "hardlink":
-            output.hardlink_to(ctx.base_path)
+            output.hardlink_to(base_path)
         else:
-            output.with_name(output.name + ".alignment.json").symlink_to(ctx.base_path)
-    arrays = np.zeros((len(ctx.base["tr_play_idx"]), 2), dtype=np.float32)
-    with pytest.raises(ValueError, match="must not overwrite the BOLD/base archive"):
+            output.with_name(output.name + ".alignment.json").symlink_to(base_path)
+    arrays = np.zeros((len(ctx.samples["tr_play_idx"]), 2), dtype=np.float32)
+    with pytest.raises(ValueError, match="must not overwrite participant inputs"):
         ez.write_aligned_features(output, ctx, {REP: arrays}, {REP: []})
-    assert ctx.base_path.read_bytes() == original
+    assert base_path.read_bytes() == original
 
 
 def test_efficientzero_coverage_requires_mapping(context, tmp_path):
     ctx, _, _ = context
     output = tmp_path / "efficientzero.npz"
-    arrays = np.zeros((len(ctx.base["tr_play_idx"]), 2), dtype=np.float32)
+    arrays = np.zeros((len(ctx.samples["tr_play_idx"]), 2), dtype=np.float32)
     ez.write_aligned_features(output, ctx, {REP: arrays}, {REP: []})
     association = output.with_name(output.name + ".alignment.json")
     document = json.loads(association.read_text())
@@ -532,10 +533,11 @@ def test_efficientzero_coverage_requires_mapping(context, tmp_path):
         document["feature_coverage_by_layer"] = invalid
         association.write_text(json.dumps(document))
         with pytest.raises(
-            ValueError, match="Per-layer feature coverage must be a mapping"
+            ValueError,
+            match="Per-layer feature coverage must be a mapping|feature_coverage_by_layer",
         ):
-            load_aligned_data(
-                [ctx.base_path, output],
-                "sub-01",
+            load_inputs(
+                ctx.subject_dir,
+                output,
                 ez.feature_key(REP).removesuffix("_aligned"),
             )

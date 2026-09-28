@@ -126,7 +126,7 @@ def test_invalid_embedded_clock_rejects_partial_alignment(tmp_path, defect):
     # Correcting the inline measurement retains both runs and all six rows.
     write_json(recording_path, recording)
     result = align_baselines.process_subject(**arguments)
-    with np.load(result) as base:
+    with np.load(result / "samples.npz", allow_pickle=False) as base:
         np.testing.assert_array_equal(
             base["play_ids"], ["original-play-1", "original-play-2"]
         )
@@ -151,7 +151,7 @@ def test_invalid_embedded_clock_rejects_partial_alignment(tmp_path, defect):
     )
     llm_arguments = dict(
         subject="sub-13",
-        aligned_data_path=result,
+        subject_dir=result,
         behavior_dir=human,
         output_dir=tmp_path / "llm-aligned",
         llm_sources=[source],

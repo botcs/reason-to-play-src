@@ -9,12 +9,11 @@ import sys
 import numpy as np
 import pytest
 
-from analysis.neural.alignment import file_sha256, sample_order_sha256
-from analysis.neural.encoding import load_aligned_data
+from data.neural import file_sha256, load_inputs, write_feature_archive
 
 
 @pytest.fixture
-def incomplete_features(tmp_path):
+def incomplete_features(tmp_path, participant_writer):
     rng = np.random.default_rng(31)
     lengths = np.full(6, 15)
     levels = np.array([0, 1, 3, 4, 6, 7])
@@ -38,8 +37,10 @@ def incomplete_features(tmp_path):
         "mask": np.ones((2, 1, 1), dtype=bool),
         "mask_affine": np.eye(4),
     }
-    base_path, features_path = tmp_path / "base.npz", tmp_path / "features.npz"
-    np.savez(base_path, **base)
+    base_path, features_path = (
+        participant_writer(tmp_path / "sub-13", base),
+        tmp_path / "features.npz",
+    )
     features = rng.normal(size=(90, 3)).astype(np.float32)
     features[:15] = 0
     # The established numeric mask also excludes nonzero vectors summing to zero.
@@ -63,15 +64,9 @@ def incomplete_features(tmp_path):
         "missing_feature_policy": "zero-fill-original-aligned-samples",
         "absent_game_files": [],
     }
-    document = {
-        "schema": "reason-to-play/alignment-binding",
-        "schema_version": 1,
-        "feature_sha256": file_sha256(features_path),
-        "base_sha256": file_sha256(base_path),
-        "sample_order_sha256": sample_order_sha256(base),
-        "verification": {"status": "verified"},
-        "feature_coverage": coverage,
-    }
+    document = write_feature_archive(
+        features_path, {"new_aligned": features}, base_path, coverage
+    )
     association_path = Path(str(features_path) + ".alignment.json")
     association_path.write_text(json.dumps(document))
     return base_path, features_path, association_path, document
@@ -88,7 +83,7 @@ def test_coverage_survives_real_fit_and_resume_checks_association(
         "analysis.neural.encoding",
         "--subject",
         "sub-13",
-        "--base-data",
+        "--data-dir",
         str(base),
         "--feature-file",
         str(features),
@@ -111,10 +106,10 @@ def test_coverage_survives_real_fit_and_resume_checks_association(
     subprocess.run(command, cwd=tmp_path, env=env, check=True, capture_output=True)
     result_path = tmp_path / "fit/sub-13/encoding_results_new.npz"
     with np.load(result_path, allow_pickle=False) as result:
-        evidence = json.loads(result["alignment_verification_json"].item())[0]
+        evidence = json.loads(result["alignment_verification_json"].item())[-1]
         assert evidence["status"] == "verified"
         assert evidence["feature_coverage"] == document["feature_coverage"]
-        assert evidence["coverage_sample_order"] == "original-base-archive"
+        assert evidence["coverage_sample_order"] == "samples.npz"
         assert result["n_volumes"].item() == 75
         assert result["n_valid_volumes"].item() == 59
         assert result["valid_sample_policy"].item() == (
@@ -157,17 +152,25 @@ def test_inconsistent_coverage_is_rejected_before_fitting(incomplete_features, d
         coverage["missing_feature_sample_count"] = True
     association.write_text(json.dumps(document))
     with pytest.raises(ValueError, match="Feature coverage"):
-        load_aligned_data([base, features], "sub-13", "new")
+        load_inputs(base, features, "new")
 
 
 def test_absent_coverage_is_unknown_not_complete(incomplete_features):
     base, features, association, document = incomplete_features
     del document["feature_coverage"]
     association.write_text(json.dumps(document))
-    result = load_aligned_data([base, features], "sub-13", "new")
-    evidence = json.loads(result["alignment_verification_json"])[0]
+    with pytest.raises(ValueError, match="lacks coverage"):
+        load_inputs(base, features, "new")
+    document["feature_coverage"] = {
+        "status": "unknown",
+        "retained_sample_count": 90,
+        "reason": "No source availability evidence",
+    }
+    association.write_text(json.dumps(document))
+    result = load_inputs(base, features, "new")
+    evidence = json.loads(result["alignment_verification_json"])[-1]
     assert evidence["status"] == "verified"
-    assert evidence["feature_coverage"] is None
+    assert evidence["feature_coverage"]["status"] == "unknown"
 
 
 def test_absent_game_without_retained_samples_is_incomplete(incomplete_features):
@@ -180,18 +183,18 @@ def test_absent_game_without_retained_samples_is_incomplete(incomplete_features)
         absent_game_files=["game-with-no-retained-samples"],
     )
     association.write_text(json.dumps(document))
-    result = load_aligned_data([base, features], "sub-13", "new")
-    recorded = json.loads(result["alignment_verification_json"])[0]["feature_coverage"]
+    result = load_inputs(base, features, "new")
+    recorded = json.loads(result["alignment_verification_json"])[-1]["feature_coverage"]
     assert recorded["complete"] is False
     assert recorded["missing_feature_sample_count"] == 0
     coverage["complete"] = True
     association.write_text(json.dumps(document))
     with pytest.raises(ValueError, match="Feature coverage completeness"):
-        load_aligned_data([base, features], "sub-13", "new")
+        load_inputs(base, features, "new")
     # Older declarations need not contain the optional game inventory.
     del coverage["absent_game_files"]
     association.write_text(json.dumps(document))
-    load_aligned_data([base, features], "sub-13", "new")
+    load_inputs(base, features, "new")
 
 
 def test_absent_games_must_be_a_list(incomplete_features):
@@ -199,4 +202,4 @@ def test_absent_games_must_be_a_list(incomplete_features):
     document["feature_coverage"]["absent_game_files"] = "game-name"
     association.write_text(json.dumps(document))
     with pytest.raises(ValueError, match="Feature coverage absent_game_files"):
-        load_aligned_data([base, features], "sub-13", "new")
+        load_inputs(base, features, "new")

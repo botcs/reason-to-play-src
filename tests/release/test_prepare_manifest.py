@@ -703,3 +703,34 @@ def test_assembly_rejects_stale_bytes_at_reused_source_destination(tmp_path, row
     assert len(retained) == 1
     assert retained[0]["release_path"] == destination
     assert retained[0]["sha256"] == result["payload"]["sha256"]
+
+
+@pytest.mark.parametrize("anchor", ["bold", "samples"])
+def test_participant_manifest_requires_matching_anchor_bytes(tmp_path, anchor):
+    rows = []
+    for name in ("bold", "samples", "features"):
+        local = tmp_path / name
+        local.write_bytes(name.encode())
+        rows.append(
+            release.local_dataset_row(
+                {
+                    "local_path": str(local),
+                    "release_path": f"neural/sub-13/{name}.npz",
+                    "component": "neural_inputs",
+                    "selection_reason": "fixture",
+                    "license": "MIT",
+                },
+                "fixture",
+            )
+        )
+    model = rows[-1]
+    for name, row in zip(("bold", "samples"), rows[:2], strict=True):
+        model["metadata"][f"{name}_release_path"] = row["release_path"]
+        model["metadata"][f"{name}_sha256"] = row["payload"]["sha256"]
+    release.check_public_dataset_paths(rows)
+    model["metadata"][f"{anchor}_sha256"] = "0" * 64
+    with pytest.raises(ValueError, match=f"{anchor} checksum"):
+        release.check_public_dataset_paths(rows)
+    model["metadata"][f"{anchor}_release_path"] = "neural/sub-14/missing.npz"
+    with pytest.raises(ValueError, match=f"Missing {anchor}"):
+        release.check_public_dataset_paths(rows)

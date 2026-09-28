@@ -51,7 +51,8 @@ human recordings and processed neural inputs, without OpenNeuro BSON or raw MRI.
 The [data format guide](docs/data-format.md) explains self-contained per-game
 human files, conversations, frames, actions and measurement identities.
 The dataset groups gameplay under `behavior/`, frame and prompt activations
-under `features/`, and BOLD/model inputs and results under `analysis/neural/`.
+under `features/`, participant BOLD and scanner-sampled model inputs under
+`neural/sub-XX/`, and analysis outputs under `results/`.
 Agent families use the same names in each group. The
 [dataset card](docs/release/huggingface-dataset-card.md) describes the layout and
 download catalogues. Preprocessing outputs for reconstruction are optional.

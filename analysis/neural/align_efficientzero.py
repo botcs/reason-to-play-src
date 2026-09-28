@@ -1,7 +1,7 @@
 """Sample EfficientZero traces at the scanner samples in a released BOLD archive.
 
 Human JSON supplies original play IDs, frame clocks and scanner start times.
-The existing base archive fixes the retained samples; it is never rewritten.
+The participant samples archive fixes the retained rows; it is never rewritten.
 The default selects four representation and seven initial value/policy hooks,
 matching the archived job configuration. This does not establish the mapping to
 numbered layers in archived result tables. ``--include-dynamics`` additionally
@@ -10,7 +10,7 @@ samples the four sparse MCTS dynamics/reward hooks at their recorded timesteps.
 Example::
 
     python -m analysis.neural.align_efficientzero \\
-        --base-data dataset/analysis/neural/inputs/sub-13/bold-ddqn-theory.npz \\
+        --subject-dir dataset/neural/sub-13 \\
         --behavior-dir dataset/behavior/human \\
         --trace-dir dataset/features/efficientzero \\
         --output efficientzero.npz --workers 32
@@ -26,15 +26,16 @@ import json
 from pathlib import Path
 import pickle
 import re
-import tempfile
 import types
 
 import numpy as np
 
-from analysis.neural.alignment import (
-    SAMPLE_FIELDS,
-    bind_to_base,
+from data.neural import (
+    bind_to_samples,
     file_sha256,
+    load_samples,
+    write_feature_archive,
+    validate_binding,
     validate_feature_coverage,
 )
 from data.game_ids import canonical_game_id
@@ -137,8 +138,8 @@ class PlayAlignment:
 
 @dataclass
 class AlignmentContext:
-    base_path: Path
-    base: dict
+    subject_dir: Path
+    samples: dict
     binding: dict
     plays: dict[str, PlayAlignment]
 
@@ -219,18 +220,15 @@ def _human_clocks(root, subject):
             raise ValueError(f"Unassigned human frames: {path}")
 
 
-def prepare_alignment(base_path, behavior_dir=None, *, plays=None, runs=None):
-    """Verify base identities and reconstruct frame-to-sample maps once per subject.
+def prepare_alignment(subject_dir, behavior_dir=None, *, plays=None, runs=None):
+    """Verify sample identities and reconstruct frame-to-sample maps once per subject.
 
     ``plays`` and ``runs`` may supply already decoded human records. Otherwise
     ``behavior_dir`` supplies the self-contained JSON files. Only small identity
-    arrays are loaded from the BOLD archive, never its voxel/feature arrays.
+    arrays are loaded from the samples archive, never voxel/feature arrays.
     """
-    base_path = Path(base_path)
-    with np.load(base_path, allow_pickle=False) as source:
-        base = {key: source[key] for key in SAMPLE_FIELDS}
-        if "n_volumes" in source:
-            base["n_volumes"] = source["n_volumes"]
+    subject_dir = Path(subject_dir)
+    base = load_samples(subject_dir)
     subject = str(base["subject"])
     subject_number = int(subject.removeprefix("sub-"))
     if plays is None:
@@ -349,7 +347,9 @@ def prepare_alignment(base_path, behavior_dir=None, *, plays=None, runs=None):
             timing,
             int(play["play_id"]) if "play_id" in play else None,
         )
-    return AlignmentContext(base_path, base, bind_to_base(base_path, base), mapped)
+    return AlignmentContext(
+        subject_dir, base, bind_to_samples(subject_dir, base), mapped
+    )
 
 
 def _identity(value):
@@ -477,7 +477,7 @@ def _coverage(context, missing_ids):
     ]
     result = {
         "complete": not intervals,
-        "retained_sample_count": len(context.base["tr_play_idx"]),
+        "retained_sample_count": len(context.samples["tr_play_idx"]),
         "missing_feature_sample_count": sum(
             item["sample_stop"] - item["sample_start"] for item in intervals
         ),
@@ -485,7 +485,7 @@ def _coverage(context, missing_ids):
         "missing_feature_sample_intervals": intervals,
         "missing_feature_policy": "zero-fill-original-aligned-samples",
     }
-    return validate_feature_coverage(result, context.base)
+    return validate_feature_coverage(result, context.samples)
 
 
 def write_aligned_features(
@@ -504,14 +504,6 @@ def write_aligned_features(
     missing plays must be zero; no sample is dropped or reordered.
     """
     output_path = Path(output_path)
-    base_path = context.base_path.resolve()
-    for candidate in (output_path, Path(str(output_path) + ".alignment.json")):
-        if candidate.resolve() == base_path or (
-            candidate.exists() and candidate.samefile(base_path)
-        ):
-            raise ValueError(
-                "EfficientZero output must not overwrite the BOLD/base archive"
-            )
     if method not in ("average", "last"):
         raise ValueError("Alignment method must be average or last")
     layers = list(arrays)
@@ -519,7 +511,7 @@ def write_aligned_features(
         raise ValueError("Output requires named EfficientZero hook arrays")
     if set(missing_by_layer) != set(layers):
         raise ValueError("Declare missing-play coverage for every output hook")
-    n_samples = len(context.base["tr_play_idx"])
+    n_samples = len(context.samples["tr_play_idx"])
     coverage_by_layer = {}
     for layer, array in arrays.items():
         if (
@@ -538,58 +530,41 @@ def write_aligned_features(
             if np.any(array[interval["sample_start"] : interval["sample_stop"]]):
                 raise ValueError(f"Missing-feature interval contains values in {layer}")
         coverage_by_layer[feature_key(layer).removesuffix("_aligned")] = coverage
-    if file_sha256(context.base_path) != str(context.binding["alignment_base_sha256"]):
-        raise ValueError("Base archive changed during feature alignment")
+    validate_binding(context.binding, context.samples, context.subject_dir)
     aggregate = _coverage(
         context, {pid for missing in missing_by_layer.values() for pid in missing}
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     document = {
-        "schema": "reason-to-play/alignment-binding",
-        "schema_version": 1,
-        "base_sha256": str(context.binding["alignment_base_sha256"]),
-        "sample_order_sha256": str(context.binding["alignment_samples_sha256"]),
         "verification": {
             "status": "verified",
             "method": "original-play-identities-and-recorded-frame-clocks",
             "retained_samples": n_samples,
         },
-        "feature_coverage": aggregate,
-        "feature_coverage_by_layer": coverage_by_layer,
         "layers": layers,
         "hook_to_array": {layer: feature_key(layer) for layer in layers},
         "sampling": {
             "method": method,
             "scanner_volume": "round((recorded_timestamp - scanner_start) / TR)",
-            "ar1_volume_offset": -1 if bool(context.base["ar1_corrected"]) else 0,
+            "ar1_volume_offset": -1 if bool(context.samples["ar1_corrected"]) else 0,
             "empty_sample_policy": "zero",
             "dynamics_reward_frame_policy": "mean-recorded-calls-per-frame-zero-when-absent",
         },
     }
     if source_records is not None:
         document["sources"] = source_records
-    with tempfile.NamedTemporaryFile(
-        dir=output_path.parent, suffix=".npz", delete=False
-    ) as handle:
-        np.savez_compressed(
-            handle,
+    return write_feature_archive(
+        output_path,
+        {
             **{feature_key(layer): value for layer, value in arrays.items()},
-            **context.binding,
-            efficientzero_layer_names=np.asarray(layers),
-            efficientzero_alignment_method=np.array(method),
-        )
-        handle.flush()
-        document["feature_sha256"] = file_sha256(handle.name)
-        Path(handle.name).replace(output_path)
-    association_path = Path(str(output_path) + ".alignment.json")
-    with tempfile.NamedTemporaryFile(
-        mode="w", dir=output_path.parent, suffix=".json", delete=False
-    ) as handle:
-        json.dump(document, handle, indent=2)
-        handle.write("\n")
-        temporary = Path(handle.name)
-    temporary.replace(association_path)
-    return document
+            "efficientzero_layer_names": np.asarray(layers),
+            "efficientzero_alignment_method": np.array(method),
+        },
+        context.subject_dir,
+        aggregate,
+        coverage_by_layer=coverage_by_layer,
+        metadata=document,
+    )
 
 
 def discover_traces(root):
@@ -639,7 +614,7 @@ def _worker_init():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base-data", type=Path, required=True)
+    parser.add_argument("--subject-dir", type=Path, required=True)
     parser.add_argument("--behavior-dir", type=Path, required=True)
     parser.add_argument("--trace-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -649,7 +624,7 @@ def main():
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be positive")
-    context = prepare_alignment(args.base_data, args.behavior_dir)
+    context = prepare_alignment(args.subject_dir, args.behavior_dir)
     paths = discover_traces(args.trace_dir)
     layers = ALL_LAYERS if args.include_dynamics else STUDY_LAYERS
     absent = set(context.plays) - paths.keys()
@@ -674,7 +649,10 @@ def main():
                 values_for_layer = values[layer]
                 if layer not in arrays:
                     arrays[layer] = np.zeros(
-                        (len(context.base["tr_play_idx"]), values_for_layer.shape[1]),
+                        (
+                            len(context.samples["tr_play_idx"]),
+                            values_for_layer.shape[1],
+                        ),
                         dtype=np.float32,
                     )
                 if arrays[layer].shape[1] != values_for_layer.shape[1]:

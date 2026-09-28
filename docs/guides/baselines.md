@@ -144,10 +144,10 @@ and that participant's BOLD archive:
 
 ```bash
 python -m analysis.neural.align_efficientzero \
-  --base-data /absolute/data/analysis/neural/inputs/sub-13/bold-ddqn-theory.npz \
+  --subject-dir /absolute/data/neural/sub-13 \
   --behavior-dir /absolute/data/behavior/human \
   --trace-dir /absolute/data/features/efficientzero \
-  --output /absolute/data/analysis/neural/inputs/model-features/efficientzero/sub-13.npz \
+  --output /absolute/data/neural/sub-13/model-features/efficientzero.npz \
   --workers 32
 ```
 

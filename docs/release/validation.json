@@ -4,16 +4,16 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 500,
+      "passed": 540,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across agents/, human/, data/, analysis/, environments/, reconstruction/, tests/ and scripts/ (117 scoped files; preserved upstream engines and kernels have explicit exclusions).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across agents/, human/, data/, analysis/, environments/, reconstruction/, tests/ and scripts/ (118 scoped files; preserved upstream engines and kernels have explicit exclusions).",
     "documentation": {
       "focused_markdown_files_checked": 15,
-      "local_links_and_anchors_checked": 149,
+      "local_links_and_anchors_checked": 150,
       "failures": 0,
       "original_behavior_reference_unchanged": true,
       "translator_rules_ast_identical": true
@@ -251,6 +251,51 @@
     "empa_hrr": {
       "real_theories": 5,
       "full_and_three_decomposed_outputs_bitwise_equal": true
+    },
+    "participant_neural_inputs": {
+      "subjects": 32,
+      "retained_plays": 6642,
+      "retained_samples": 46581,
+      "npz_pickle_required": false,
+      "original_npy_members_accounted_exactly": 2219,
+      "public_arrays_preserve_dtype_shape_order_and_element_bits": true,
+      "bold_sample_feature_associations": 592,
+      "efficientzero_feature_arrays_exact": 352,
+      "feature_coverage_declarations": {
+        "complete": 66,
+        "incomplete": 423,
+        "unknown": 71
+      },
+      "validation_rejects": [
+        "swapped BOLD or samples",
+        "conflicting or absent associations",
+        "core input overwrite including aliases",
+        "inconsistent missing-play intervals"
+      ],
+      "feature_loading": "Only the selected model layer is decoded; full file bytes are hash-checked.",
+      "producer_fixture": {
+        "plays": 4,
+        "samples": 80,
+        "bold_voxels": 27,
+        "arrays_and_metadata_byte_exact": 63
+      },
+      "encoding_fixture": {
+        "layers": [
+          "DDQN fc1",
+          "LRM layer1"
+        ],
+        "seed": 23,
+        "output_arrays_and_metadata_byte_exact": 44
+      },
+      "real_efficientzero_fit": {
+        "subject": "sub-13",
+        "samples": 1470,
+        "voxels": 2,
+        "folds": 3,
+        "finite_scores": true,
+        "old_mixed_inputs_raw_mri_and_bson_denied": true
+      },
+      "new_experiment_sample_order": "Interleaved levels preserve original ordered play rows, including missing source features."
     }
   },
   "not_executed": [
@@ -290,7 +335,9 @@
     "feature_binding_module_in_wheel": true,
     "required_source_notices_in_wheel": true,
     "baseline_provenance_files_hash_checked": 966,
-    "human_reader_standard_library_only": true
+    "human_reader_standard_library_only": true,
+    "neural_input_layout": "neural/sub-XX/{bold,samples,nuisance}.npz and model-features/",
+    "installed_wheel_python_files_checked": 163
   },
   "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
 }

@@ -52,16 +52,22 @@ features/
   lrm/
   ddqn/
   efficientzero/
-analysis/
+  empa/theory-regressors.json.gz
+neural/
+  sub-XX/
+    bold.npz
+    samples.npz
+    nuisance.npz
+    model-features/
+      ddqn.npz
+      efficientzero.npz
+      lrm/MODEL/CONDITION--SELECTION--STREAM.npz
+      empa/hrr.npz
+      empa/hrr-decomposed.npz
+  atlas/
+results/
   behavioral/
   neural/
-    inputs/sub-XX/bold-ddqn-theory.npz
-    inputs/model-features/lrm/
-    inputs/model-features/efficientzero/sub-XX.npz
-    inputs/model-features/theory/
-    inputs/atlas/
-    inputs/theory-regressors.json.gz
-    results/
 checkpoints/
 reconstruction/tomov23/fmriprep/
 website-assets/
@@ -71,13 +77,15 @@ manifest.jsonl.gz
 
 `behavior/` holds recorded gameplay, including replay JSON files. `features/`
 holds activations associated with recorded frames or selected prompt steps.
-`analysis/neural/inputs/model-features/` holds representations sampled at
-retained scanner times. These time bases are distinct.
+`neural/sub-XX/model-features/` holds representations sampled at that
+participant's retained scanner times. These time bases are distinct.
 
-The `bold-ddqn-theory.npz` files contain joint analysis inputs: BOLD, DDQN and
-theory arrays, nuisance variables and sample identities. They are not pure BOLD
-images. Selected fMRIPrep outputs under `reconstruction/` are optional for
-earlier-stage reconstruction; ordinary analysis uses the processed inputs.
+Each participant's `bold.npz` contains processed BOLD and its voxel mask;
+`samples.npz` contains ordered sample/play identities and timing;
+`nuisance.npz` contains measured button, score and time variables.
+DDQN, EfficientZero, LRM and EMPA arrays are peers under `model-features/`.
+Selected fMRIPrep outputs under `reconstruction/` support optional
+reconstruction from raw MRI; ordinary analysis starts with these processed inputs.
 Website assets contain the browser's RDM exports and indexes. Replay links
 refer to the files under `behavior/`.
 
@@ -105,7 +113,7 @@ another extraction run; exact regeneration is not guaranteed.
 
 `behavior/ddqn/episode-history.json` contains all 170,546 recorded episodes
 from the 88 selected DDQN runs. The separate
-`analysis/behavioral/retained-episode-table.csv` contains the table used for the
+`results/behavioral/retained-episode-table.csv` contains the table used for the
 retained behavioral summaries; its DDQN rows contain 32,818 sampled episodes
 from those same runs. Use that table to render its summaries and the full
 histories when an analysis requires every episode.
@@ -214,11 +222,12 @@ remain outside the validated scope.
 
 Separate model-feature archives have an adjacent `.npz.alignment.json`
 association record. Download it with the archive: the encoding reader checks
-both the feature hash and its binding to the base BOLD/sample order before
-fitting. Input coverage is recorded separately from alignment verification;
+the feature hash and its binding to both `bold.npz` and `samples.npz`,
+including their sample order, before fitting. BOLD and nuisance files also have
+adjacent associations; download those with the participant files. Input coverage is recorded separately from alignment verification;
 zero-filled rows for unavailable source plays are not model observations.
 Encoding results preserve declared coverage in `alignment_verification_json`.
-Coverage intervals refer to the original base sample order. The documented
+Coverage intervals refer to the original ordered samples. The documented
 fitting mask remains a separate numerical rule; see the dataset analysis guide
 for its policy and the recorded sample counts.
 

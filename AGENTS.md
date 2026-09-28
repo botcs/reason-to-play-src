@@ -35,7 +35,7 @@ explicit experiment configuration. Read this guide before changing code.
 | Replay inspection and interactive play | [Webapp](https://botcs.github.io/reason-to-play/) |
 | Raw-data acquisition and fMRIPrep | `reconstruction/tomov23/download_openneuro.sh`, `reconstruction/tomov23/fmriprep.py` |
 | Human recordings, outcomes and clocks | `human/behavior.py` |
-| Replay format and tagged JSON values | `data/` |
+| Replay format, tagged JSON values and neural input associations | `data/` |
 | BOLD processing | `human/neural/process_bold.py` |
 | Features sampled at scanner times | `analysis/neural/prepare_inputs.py`, `align_llm.py`, `align_efficientzero.py` |
 | Encoding fits, ROI aggregation and neural figures | `analysis/neural/` |
@@ -74,9 +74,11 @@ moving an implementation; do not leave a second implementation at the old path.
   outcome. Preserve practice/cohort flags and comparison denominators.
 - Engine frames, model decisions and scanner TRs are distinct units. Preserve
   timestamps, play/run identifiers, lag boundaries and alignment metadata.
-  Separate model-feature archives must bind their bytes to the exact base BOLD
-  archive and ordered samples, in embedded metadata or an adjacent
-  `.npz.alignment.json`. Row counts alone do not establish correspondence.
+  Each participant has separate BOLD, samples, nuisance and model-feature files.
+  Model features and nuisance variables must bind to both exact BOLD and samples
+  bytes, plus the ordered-sample digest, through adjacent `.npz.alignment.json`
+  records. BOLD also binds to its samples file. Row counts alone do not establish
+  correspondence.
   Keep missing-feature coverage separate from a verified alignment.
 - Continued model runs may embed their preceding gameplay and restart attempt
   numbers. Use chronological frame boundaries and action `state_index` references

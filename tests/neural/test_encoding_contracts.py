@@ -1,6 +1,5 @@
 """Encoding results must preserve input identities, fits and partition labels."""
 
-import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -12,7 +11,7 @@ import nibabel as nib
 import numpy as np
 import pytest
 
-from analysis.neural.alignment import bind_to_base
+from data.neural import load_inputs, write_feature_archive, coverage_from_missing
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -34,7 +33,7 @@ roi = module("contract_roi", "load_and_parse.py")
 
 
 @pytest.fixture
-def aligned(tmp_path):
+def aligned(tmp_path, participant_writer):
     rng = np.random.RandomState(12)
     lengths = np.full(6, 15)
     features = rng.normal(size=(90, 3)).astype(np.float32)
@@ -63,8 +62,7 @@ def aligned(tmp_path):
         "mask": np.ones((3, 1, 1), dtype=bool),
         "mask_affine": np.eye(4),
     }
-    path = tmp_path / "independent-base.npz"
-    np.savez(path, **data)
+    path = participant_writer(tmp_path / "sub-13", data)
     return data, path
 
 
@@ -95,16 +93,19 @@ def test_alignment_mismatch_fails_before_fitting(aligned, defect):
 def test_sidecar_cannot_replace_alignment_identity(aligned, tmp_path):
     data, path = aligned
     sidecar = tmp_path / "chosen-features.npz"
-    np.savez(sidecar, subject="sub-14", new_aligned=data["fc1_aligned"])
-    with pytest.raises(ValueError, match="conflicts.*subject"):
-        encoder.load_aligned_data(
-            [path, sidecar], "sub-13", "new", require_binding=False
+    for subject in ("sub-14", "sub-13"):
+        write_feature_archive(
+            sidecar,
+            {"subject": subject, "new_aligned": data["fc1_aligned"]},
+            path,
+            coverage_from_missing(data, []),
         )
-    np.savez(sidecar, subject="sub-13", new_aligned=data["fc1_aligned"])
-    loaded = encoder.load_aligned_data(
-        [path, sidecar], "sub-13", "new", require_binding=False
-    )
-    np.testing.assert_array_equal(loaded["new_aligned"], data["fc1_aligned"])
+        if subject == "sub-14":
+            with pytest.raises(ValueError, match="conflicts.*subject"):
+                load_inputs(path, sidecar, "new")
+        else:
+            loaded = load_inputs(path, sidecar, "new")
+            np.testing.assert_array_equal(loaded["new_aligned"], data["fc1_aligned"])
 
 
 def test_explicit_seed_repeats_actual_ridge_fit_and_records_inputs(aligned, tmp_path):
@@ -114,9 +115,8 @@ def test_explicit_seed_repeats_actual_ridge_fit_and_records_inputs(aligned, tmp_
         directory = tmp_path / f"run-{index}"
         encoder.run_encoding_model(
             "sub-13",
-            None,
+            path,
             directory,
-            base_data=path,
             layer="fc1",
             include_nuisance_bands=True,
             seed=31,
@@ -135,12 +135,18 @@ def test_explicit_seed_repeats_actual_ridge_fit_and_records_inputs(aligned, tmp_
             assert result["n_alphas_batch"].item() == 4
             assert result["actual_backend"].item() == "numpy"
             recorded = json.loads(result["input_files_json"].item())
-            assert recorded == [
-                {
-                    "role": "base",
-                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                }
-            ]
+            assert recorded == json.loads(
+                encoder.input_fingerprints(
+                    encoder.encoding_input_paths("sub-13", path, "fc1")
+                )
+            )
+            assert {row["role"] for row in recorded} == {
+                "bold",
+                "samples",
+                "nuisance",
+                "feature",
+                "alignment-association",
+            }
     np.testing.assert_array_equal(*outputs)
 
 
@@ -297,16 +303,13 @@ for name in ['OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'NUME
 def test_explicit_input_cli_resume_checks_content_from_other_directory(
     aligned, tmp_path
 ):
-    original, _ = aligned
-    base = tmp_path / "bold-with-identities.npz"
-    np.savez(
-        base, **{key: value for key, value in original.items() if key != "fc1_aligned"}
-    )
+    original, base = aligned
     features = tmp_path / "features-with-readable-name.npz"
-    np.savez(
+    write_feature_archive(
         features,
-        llm_fixture_layer_1_aligned=original["fc1_aligned"],
-        **bind_to_base(base, original),
+        {"llm_fixture_layer_1_aligned": original["fc1_aligned"]},
+        base,
+        coverage_from_missing(original, []),
     )
     output = tmp_path / "encoded"
     command = [
@@ -314,7 +317,7 @@ def test_explicit_input_cli_resume_checks_content_from_other_directory(
         str(ROOT / "analysis/neural/encoding.py"),
         "--subject",
         "sub-13",
-        "--base-data",
+        "--data-dir",
         str(base),
         "--feature-file",
         str(features),

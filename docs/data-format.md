@@ -140,7 +140,7 @@ with expanded viewer states and unchanged conversations. Inspect files with the
 [web replay viewer](https://botcs.github.io/reason-to-play/replay.html).
 
 EMPA theory regressors are a separate model input at
-`analysis/neural/inputs/theory-regressors.json.gz`; they are not human behaviour.
+`features/empa/theory-regressors.json.gz`; they are not human behaviour.
 
 ## Replay source roles
 
@@ -153,3 +153,24 @@ EMPA theory regressors are a separate model input at
 
 The imputation code remains available for new experiments. Model-generated
 rationale is not a measurement of a participant's thoughts.
+
+## Neural inputs
+
+`neural/sub-XX/` contains `bold.npz` (voxel-by-sample values, mask and affine),
+`samples.npz` (play identities, scanner runs, timing and ordered boundaries),
+`nuisance.npz` (buttons, scores and time variables) and sample-by-feature arrays
+under `model-features/`. DDQN, EfficientZero, LRM and EMPA have separate files.
+NPZ keys describe the arrays; no pickle is needed to read these inputs.
+
+Each feature/nuisance `.npz.alignment.json` uses
+`reason-to-play/alignment-binding`, version 2. Its `feature_sha256`,
+`bold_sha256` and `samples_sha256` hash the exact compressed file bytes;
+`sample_order_sha256` hashes the recorded sample identities and timing fields.
+The BOLD association uses `reason-to-play/bold-samples`, version 1, with the
+same BOLD/sample hashes. Readers reject missing or conflicting associations.
+
+`feature_coverage` lists missing play IDs and sample intervals, or explicitly
+states unknown coverage. `feature_coverage_by_layer` preserves distinct layer
+availability where required, including EfficientZero hooks. Coverage does not
+change the fitting mask. See the [analysis guide](guides/dataset-analysis.md)
+for direct Python commands and the numerical policy.

@@ -7,6 +7,12 @@ import numpy as np
 import pytest
 
 from analysis.neural import align_llm as align
+from data.neural import (
+    write_core_inputs,
+    load_samples,
+    validate_binding,
+    read_feature_binding,
+)
 
 
 def original(identity, ordinal, start=1_600_000_000.0):
@@ -151,11 +157,17 @@ def test_subsampling_retains_matching_frame_references():
         ("vgfmri3_plaqueattack", "vgfmri3_plaqueAttack", "plaqueAttack_vgfmri3"),
     ],
 )
+@pytest.mark.parametrize("omit_second", [False, True])
+@pytest.mark.parametrize("reverse_levels", [False, True])
 def test_multiturn_file_to_aligned_rows_uses_original_identity(
-    tmp_path, monkeypatch, game, record_game, filename
+    tmp_path, monkeypatch, game, record_game, filename, omit_second, reverse_levels
 ):
     torch = pytest.importorskip("torch")
     plays = {"a": original("a", 0), "b": original("b", 1)}
+    if reverse_levels:
+        plays["a"]["level_id"] = 1
+        for state in plays["a"]["states"]:
+            state["ts"] += 20
     for play in plays.values():
         play["game_name"] = record_game
         play["_canonical"]["source_recording"] = (
@@ -170,8 +182,7 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(
             load_runs=lambda root: {(13, 1): {"scan_start_ts": 1_600_000_000.0}},
         ),
     )
-    np.savez(
-        tmp_path / "base.npz",
+    samples = dict(
         subject="sub-13",
         tr=2.0,
         ar1_corrected=False,
@@ -179,24 +190,33 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(
         play_boundaries=[0, 5, 10],
         tr_run_idx=[1] * 10,
         tr_game_idx=[0] * 10,
-        tr_level_idx=[0] * 10,
+        tr_level_idx=[plays["a"]["level_id"]] * 5 + [0] * 5,
         tr_play_idx=[0] * 5 + [1] * 5,
         game_names=[game],
         play_ids=["a", "b"],
         play_game_idx=[0, 0],
-        play_levels=[0, 0],
+        play_levels=[plays["a"]["level_id"], 0],
         play_n_volumes=[5, 5],
+    )
+    participant = tmp_path / "neural/sub-13"
+    write_core_inputs(
+        participant,
+        {"voxel_ts": np.ones((2, 10)), "mask": np.ones((2, 1, 1), dtype=bool)},
+        samples,
+        {},
     )
     metadata, values = [], []
     # Reverse extraction order while BOLD order stays a, b; times overlap exactly.
     for trial, (identity, value) in enumerate([("b", 7), ("a", 5)]):
+        if omit_second and identity == "b":
+            continue
         row = feature(plays[identity], frames=range(5))
         for frame, references in enumerate(row["metadata"]["source_references"]):
             metadata.append(
                 {
                     **references,
                     "play_id": f"sub-13_1_{plays[identity]['_canonical']['source_document_index']}",
-                    "level_id": 0,
+                    "level_id": plays[identity]["level_id"],
                     "trial_idx": trial,
                     "realworld_ts": row["timestamps"][frame],
                 }
@@ -217,17 +237,21 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(
     )
     result = align.process_subject(
         "sub-13",
-        tmp_path / "base.npz",
+        participant,
         behavior_dir=tmp_path / "canonical",
         output_dir=tmp_path / "output",
         llm_sources=[source],
     )
-    from analysis.neural.alignment import validate_binding
 
-    with np.load(result[0]) as output, np.load(tmp_path / "base.npz") as base:
-        assert validate_binding(output, base, tmp_path / "base.npz")
+    with np.load(result[0]) as output:
+        assert validate_binding(output, load_samples(participant), participant)
+        coverage = read_feature_binding(result[0], participant)["feature_coverage"]
+        assert coverage["complete"] is (not omit_second)
+        assert coverage["missing_feature_play_ids"] == (["b"] if omit_second else [])
+        assert coverage["missing_feature_sample_count"] == (5 if omit_second else 0)
         np.testing.assert_array_equal(
-            output["llm_fixture_layer_1_aligned"].ravel(), [5] * 5 + [7] * 5
+            output["llm_fixture_layer_1_aligned"].ravel(),
+            [5] * 5 + [0 if omit_second else 7] * 5,
         )
 
 

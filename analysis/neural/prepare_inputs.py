@@ -21,14 +21,14 @@ Input:
     - EfficientZero traces — Optional .pt files per play
     - LLM features — Optional, one or more model sources
     - Canonical behavior/human JSON recordings and scanner-run metadata
-    - analysis/neural/inputs/theory-regressors.json.gz — Optional EMPA theory strings for HRR
+    - features/empa/theory-regressors.json.gz — Optional EMPA theory strings for HRR
 
 Output:
     Per-subject directory containing:
-    - bold-ddqn-theory.npz: BOLD + DDQN + HRR + behavioral + metadata
-    - aligned_llm_{source}.npz: One file per LLM source
-    - aligned_ez.npz: EfficientZero features (if available)
-    - aligned_hrr_decomposed.npz: Sprite/interaction/termination sub-vectors
+    - bold.npz, samples.npz, nuisance.npz
+    - model-features/{ddqn,efficientzero}.npz
+    - model-features/lrm/MODEL/CONDITION--SELECTION--STREAM.npz
+    - model-features/empa/{hrr,hrr-decomposed}.npz
 
 Usage:
     python -m analysis.neural.prepare_inputs \\
@@ -36,10 +36,10 @@ Usage:
         --preprocessed-dir ./workdir/preprocessed \\
         --model-features-dir ./workdir/ddqn_features \\
         --behavior-dir ./dataset/behavior/human \\
-        --regressors-json ./dataset/analysis/neural/inputs/theory-regressors.json.gz \\
+        --regressors-json ./dataset/features/empa/theory-regressors.json.gz \\
         --llm-source "name=r1_qwen_7b,dir=./llm_features/7B" \\
         --llm-source "name=r1_qwen_32b,dir=./llm_features/32B" \\
-        --output-dir ./workdir/aligned_data
+        --output-dir ./dataset/neural
 """
 
 import argparse
@@ -61,10 +61,19 @@ from agents.empa.theory_features import (
     iter_regressors,
 )
 
-from analysis.neural.alignment import (
-    bind_to_base,
+from data.neural import (
+    BOLD_FIELDS,
+    SAMPLE_ARCHIVE_FIELDS,
+    NUISANCE_FIELDS,
+    DDQN_FIELDS,
+    HRR_FIELDS,
+    load_samples,
+    read_feature_binding,
     sample_order_sha256,
-    validate_binding,
+    write_core_inputs,
+    write_feature_archive,
+    coverage_from_missing,
+    unknown_coverage,
 )
 
 
@@ -204,6 +213,19 @@ class LLMSourceConfig:
     directory: Path
     subsample: int = 1
     layers: List[int] = None
+
+    model_id: Optional[str] = None
+    condition: str = "elaborate"
+    action_selection: str = "all"
+
+    def output_path(self, subject_dir: Path) -> Path:
+        model = self.model_id or self.name
+        stream = getattr(self, "stream", "main")
+        for value in (model, self.condition, self.action_selection, stream):
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value):
+                raise ValueError(f"Invalid feature path component: {value!r}")
+        filename = f"{self.condition}--{self.action_selection}--{stream}.npz"
+        return Path(subject_dir) / "model-features" / "lrm" / model / filename
 
     def __post_init__(self):
         """Initialize derived attributes after dataclass creation."""
@@ -1709,27 +1731,23 @@ def process_subject(
 
     # Incremental mode: skip base file + filter out already-aligned LLM sources
     output_subdir = output_dir / subject
-    base_file = output_subdir / "bold-ddqn-theory.npz"
+    if llm_sources:
+        names = [source.name for source in llm_sources]
+        paths = [source.output_path(output_subdir) for source in llm_sources]
+        if len(set(names)) != len(names) or len(set(paths)) != len(paths):
+            raise ValueError("Each LLM source requires a distinct name and output path")
+    base_file = output_subdir / "bold.npz"
     skip_base_save = False
     skip_hrr_decomp_save = False
     skip_ez_save = False
 
     if incremental and base_file.is_file():
-        with np.load(base_file, allow_pickle=True) as existing_base:
-            identity = bind_to_base(base_file, existing_base)
-            for existing_path in output_subdir.glob("aligned_*.npz"):
-                if existing_path == base_file:
-                    continue
-                with np.load(existing_path, allow_pickle=True) as existing_features:
-                    if not validate_binding(
-                        existing_features,
-                        existing_base,
-                        base_file,
-                        base_sha256=str(identity["alignment_base_sha256"]),
-                    ):
-                        raise ValueError(
-                            f"Cannot resume unbound feature archive: {existing_path}"
-                        )
+        existing_samples = load_samples(output_subdir)
+        read_feature_binding(
+            output_subdir / "nuisance.npz", output_subdir, samples=existing_samples
+        )
+        for existing_path in (output_subdir / "model-features").rglob("*.npz"):
+            read_feature_binding(existing_path, output_subdir, samples=existing_samples)
 
     if incremental:
         # Skip base file if it already exists
@@ -1738,7 +1756,7 @@ def process_subject(
             logging.info("  [incremental] Base file exists, will skip re-saving")
 
         # Skip HRR decomposed file if it already exists
-        hrr_decomp_file = output_subdir / "aligned_hrr_decomposed.npz"
+        hrr_decomp_file = output_subdir / "model-features/empa/hrr-decomposed.npz"
         if hrr_decomp_file.exists():
             skip_hrr_decomp_save = True
             logging.info(
@@ -1746,7 +1764,7 @@ def process_subject(
             )
 
         # Skip EZ file if it already exists
-        ez_out_file = output_subdir / "aligned_ez.npz"
+        ez_out_file = output_subdir / "model-features/efficientzero.npz"
         if ez_out_file.exists():
             skip_ez_save = True
             logging.info("  [incremental] EZ file exists, will skip re-saving")
@@ -1755,7 +1773,7 @@ def process_subject(
         if llm_sources:
             new_sources = []
             for src in llm_sources:
-                llm_file = output_subdir / f"aligned_llm_{src.name}.npz"
+                llm_file = src.output_path(output_subdir)
                 if llm_file.exists():
                     logging.info(
                         f"  [incremental] Skipping {src.name} — already aligned"
@@ -1775,7 +1793,7 @@ def process_subject(
         needs_ez = ez_features_dir is not None and not skip_ez_save
         if skip_base_save and skip_hrr_decomp_save and not llm_sources and not needs_ez:
             logging.info(f"  [incremental] Everything up to date — skipping {subject}")
-            return base_file
+            return output_subdir
     runs = find_all_runs(preprocessed_dir, subject)
     if not runs:
         raise ValueError(f"No preprocessed runs found for {subject}")
@@ -2277,6 +2295,7 @@ def process_subject(
                                 )
                             llm_stats[src_name]["missing"] += 1
 
+                hrr_matched_before = hrr_stats["matched"]
                 if has_hrr and play_id in regressors_by_play:
                     theory_strs, reg_timestamps = extract_theory_strings(
                         regressors_by_play[play_id]
@@ -2439,6 +2458,9 @@ def process_subject(
                         "n_volumes": n_vols,
                         "n_states": n_model_states,
                         "has_ez": has_ez_for_play,
+                        "has_hrr": hrr_stats["matched"] > hrr_matched_before,
+                        "has_nuisance": bool(beh_features)
+                        and beh_features["n_states"] == n_model_states,
                         "has_llm": len(llm_sources_for_play) > 0,
                         "llm_sources": llm_sources_for_play,
                     }
@@ -2662,26 +2684,40 @@ def process_subject(
         else 0,
     }
 
-    # NOTE: EZ feature arrays are saved in a separate aligned_ez.npz file (not in base)
-    # EZ metadata (has_ez_data, ez_layers, play_has_ez, stats) is still in base save_dict above
-
-    # Save base file (BOLD + DDQN + HRR + EZ + behavioral + metadata, NO LLM)
-    base_file = output_subdir / "bold-ddqn-theory.npz"
+    samples = {key: save_dict[key] for key in SAMPLE_ARCHIVE_FIELDS if key in save_dict}
+    hrr_coverage = coverage_from_missing(
+        samples, [m["play_id"] for m in all_play_metadata if not m["has_hrr"]]
+    )
+    nuisance_coverage = coverage_from_missing(
+        samples, [m["play_id"] for m in all_play_metadata if not m["has_nuisance"]]
+    )
     if skip_base_save:
-        logging.info("  [incremental] Skipping base file save (already exists)")
-    else:
-        np.savez_compressed(base_file, **save_dict)
-        logging.info(
-            f"  Saved base: {base_file.name} ({base_file.stat().st_size / 1024**2:.1f} MB)"
-        )
-
-    # Features are computed in save_dict's sample order, including during resume.
-    with np.load(base_file, allow_pickle=True) as stored_base:
-        if sample_order_sha256(stored_base) != sample_order_sha256(save_dict):
+        stored_samples = load_samples(output_subdir)
+        if sample_order_sha256(stored_samples) != sample_order_sha256(samples):
             raise ValueError(
-                "Existing base has a different sample order; use a new output directory"
+                "Existing participant has a different sample order; use a new output directory"
             )
-        binding = bind_to_base(base_file, stored_base)
+    else:
+        write_core_inputs(
+            output_subdir,
+            {key: save_dict[key] for key in BOLD_FIELDS if key in save_dict},
+            samples,
+            {key: save_dict[key] for key in NUISANCE_FIELDS if key in save_dict},
+            nuisance_coverage=nuisance_coverage,
+        )
+        write_feature_archive(
+            output_subdir / "model-features/ddqn.npz",
+            {key: save_dict[key] for key in DDQN_FIELDS if key in save_dict},
+            output_subdir,
+            coverage_from_missing(samples, []),
+        )
+        if has_hrr:
+            write_feature_archive(
+                output_subdir / "model-features/empa/hrr.npz",
+                {key: save_dict[key] for key in HRR_FIELDS if key in save_dict},
+                output_subdir,
+                hrr_coverage,
+            )
 
     # Save per-source LLM files
     if llm_manager and llm_concatenated:
@@ -2690,7 +2726,7 @@ def process_subject(
             prefix = f"llm_{src_name}"
 
             # Build per-source save dict with only this source's layers
-            llm_save_dict = dict(binding)
+            llm_save_dict = {}
             for layer_name in meta["layer_names"]:
                 key = f"{src_name}_{layer_name}"
                 if key in llm_concatenated:
@@ -2712,22 +2748,37 @@ def process_subject(
                 dtype=[("layer", "U32"), ("n_features", "i4")],
             )
 
-            llm_file = output_subdir / f"aligned_llm_{src_name}.npz"
-            np.savez_compressed(llm_file, **llm_save_dict)
+            llm_file = src.output_path(output_subdir)
+            write_feature_archive(
+                llm_file,
+                llm_save_dict,
+                output_subdir,
+                unknown_coverage(
+                    samples,
+                    "Per-source match counts do not establish per-layer coverage.",
+                ),
+                metadata={
+                    "source_name": src_name,
+                    "model_id": src.model_id or src.name,
+                    "condition": src.condition,
+                    "action_selection": src.action_selection,
+                    "stream": "main",
+                    "subsample": src.subsample,
+                },
+            )
             logging.info(
                 f"  Saved LLM: {llm_file.name} ({llm_file.stat().st_size / 1024**2:.1f} MB)"
             )
 
     # Save decomposed HRR file (sprites, interactions, terminations)
     if has_hrr:
-        hrr_decomp_file = output_subdir / "aligned_hrr_decomposed.npz"
+        hrr_decomp_file = output_subdir / "model-features/empa/hrr-decomposed.npz"
         if skip_hrr_decomp_save:
             logging.info(
                 "  [incremental] Skipping HRR decomposed file save (already exists)"
             )
         else:
             hrr_decomp_dict = {
-                **binding,
                 "hrr_sprites_aligned": hrr_sprites_concat,
                 "hrr_interactions_aligned": hrr_interactions_concat,
                 "hrr_terminations_aligned": hrr_terminations_concat,
@@ -2736,18 +2787,20 @@ def process_subject(
                 "hrr_matched_plays": hrr_stats["matched"],
                 "hrr_missing_plays": hrr_stats["missing"],
             }
-            np.savez_compressed(hrr_decomp_file, **hrr_decomp_dict)
+            write_feature_archive(
+                hrr_decomp_file, hrr_decomp_dict, output_subdir, hrr_coverage
+            )
             logging.info(
                 f"  Saved HRR decomposed: {hrr_decomp_file.name} ({hrr_decomp_file.stat().st_size / 1024**2:.1f} MB)"
             )
 
     # Save EZ features as separate file (like LLM sources)
     if has_ez and ez_concatenated:
-        ez_out_path = output_subdir / "aligned_ez.npz"
+        ez_out_path = output_subdir / "model-features/efficientzero.npz"
         if skip_ez_save:
             logging.info("  [incremental] Skipping EZ file save (already exists)")
         else:
-            ez_save_dict = dict(binding)
+            ez_save_dict = {}
             for ez_layer, arr in ez_concatenated.items():
                 safe_key = f"ez_{ez_layer.replace('.', '_')}_aligned"
                 ez_save_dict[safe_key] = arr
@@ -2769,13 +2822,28 @@ def process_subject(
             ez_save_dict["ez_missing_plays"] = ez_stats["missing"]
             ez_save_dict["ez_skipped_plays"] = ez_stats["skipped"]
             ez_save_dict["ez_new_format"] = ez_new_format
-            np.savez_compressed(ez_out_path, **ez_save_dict)
+            write_feature_archive(
+                ez_out_path,
+                ez_save_dict,
+                output_subdir,
+                unknown_coverage(
+                    samples,
+                    "Per-play trace presence does not establish per-hook coverage.",
+                ),
+                coverage_by_layer={
+                    key.removesuffix("_aligned"): unknown_coverage(
+                        samples, "Per-hook source coverage was not recorded"
+                    )
+                    for key in ez_save_dict
+                    if key.endswith("_aligned")
+                },
+            )
             logging.info(
                 f"  Saved EZ: {ez_out_path.name} ({ez_out_path.stat().st_size / 1024**2:.1f} MB)"
             )
 
     logging.info(f"  All files saved to: {output_subdir}")
-    return base_file
+    return output_subdir
 
 
 # =============================================================================
@@ -2833,6 +2901,9 @@ def parse_llm_source_arg(source_str: str) -> LLMSourceConfig:
     return LLMSourceConfig(
         name=parts["name"],
         directory=Path(parts["dir"]),
+        model_id=parts.get("model_id"),
+        condition=parts.get("condition", "elaborate"),
+        action_selection=parts.get("action_selection", "all"),
         subsample=subsample,
         layers=layers,
     )
@@ -2864,7 +2935,7 @@ if __name__ == "__main__":
         "--regressors-json", type=Path, help="Canonical EMPA regressors .json.gz"
     )
     parser.add_argument(
-        "--output-dir", default="./workdir/aligned_data", help="Output directory"
+        "--output-dir", default="./dataset/neural", help="Output directory"
     )
     parser.add_argument(
         "--ez-features-dir", default=None, help="Directory with EfficientZero features"
@@ -2905,7 +2976,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--incremental",
         action="store_true",
-        help="Skip bold-ddqn-theory.npz if it exists; skip LLM sources that already have output files",
+        help="Validate existing participant inputs and skip completed model-feature files",
     )
 
     args = parser.parse_args()

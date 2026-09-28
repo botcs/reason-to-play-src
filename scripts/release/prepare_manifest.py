@@ -742,8 +742,11 @@ def catalogue(args):
                         "paper_role",
                         "seed",
                         "checkpoint_id",
-                        "base_release_path",
-                        "base_sha256",
+                        "bold_release_path",
+                        "bold_sha256",
+                        "samples_release_path",
+                        "samples_sha256",
+                        "sample_order_sha256",
                         "sample_order_status",
                         "source_model_id",
                         "source_game",
@@ -919,18 +922,20 @@ def check_public_dataset_paths(rows):
         identities[identity] = row
     by_path = {row["release_path"]: row for row in rows}
     for row in rows:
-        base_path = row.get("metadata", {}).get("base_release_path")
-        if base_path:
-            if base_path not in by_path:
-                raise ValueError(
-                    f"Missing base input referenced by {row['release_path']}"
-                )
-            expected_sha = row["metadata"].get("base_sha256")
-            actual_sha = by_path[base_path]["payload"].get("sha256")
-            if expected_sha and expected_sha != actual_sha:
-                raise ValueError(
-                    f"Base checksum does not match selected input for {row['release_path']}"
-                )
+        metadata = row.get("metadata", {})
+        for name in ("bold", "samples"):
+            path = metadata.get(f"{name}_release_path")
+            if path:
+                if path not in by_path:
+                    raise ValueError(
+                        f"Missing {name} input referenced by {row['release_path']}"
+                    )
+                expected_sha = metadata.get(f"{name}_sha256")
+                actual_sha = by_path[path]["payload"].get("sha256")
+                if not expected_sha or expected_sha != actual_sha:
+                    raise ValueError(
+                        f"{name} checksum does not match selected input for {row['release_path']}"
+                    )
 
 
 def verify_local_source(item, row):

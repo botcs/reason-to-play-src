@@ -14,6 +14,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from data.neural import (
+    load_samples,
+    coverage_from_missing,
+    write_feature_archive,
+    write_core_inputs,
+)
+
 nib = pytest.importorskip("nibabel")
 pytest.importorskip("nilearn")
 pytest.importorskip("himalaya")
@@ -226,10 +233,11 @@ def synthetic_alignment(tmp_path_factory):
         output_dir=root / "aligned",
         behavior_dir=recordings,
     )
-    with np.load(base_path, allow_pickle=True) as data:
+    with np.load(base_path / "bold.npz", allow_pickle=False) as data:
         assert data["voxel_ts"].shape == (27, 80)
-        np.testing.assert_array_equal(data["play_boundaries"], [0, 20, 40, 60, 80])
-        np.testing.assert_array_equal(data["play_levels"], [0, 3, 6, 9])
+    samples = load_samples(base_path)
+    np.testing.assert_array_equal(samples["play_boundaries"], [0, 20, 40, 60, 80])
+    np.testing.assert_array_equal(samples["play_levels"], [0, 3, 6, 9])
     llm = root / "llm" / subject
     llm.mkdir(parents=True)
     torch.save(
@@ -292,13 +300,12 @@ def test_json_records_drive_ddqn_and_theory_alignment(synthetic_alignment):
         behavior_dir=recordings,
         regressors_json_path=regressor_path,
     )
-    with np.load(
-        output / subject / "bold-ddqn-theory.npz", allow_pickle=True
-    ) as result:
-        np.testing.assert_array_equal(result["play_boundaries"], [0, 20, 40, 60, 80])
-        np.testing.assert_array_equal(result["play_levels"], [0, 3, 6, 9])
+    samples = load_samples(output / subject)
+    np.testing.assert_array_equal(samples["play_boundaries"], [0, 20, 40, 60, 80])
+    np.testing.assert_array_equal(samples["play_levels"], [0, 3, 6, 9])
+    with np.load(output / subject / "bold.npz") as result:
         assert result["voxel_ts"].shape == (27, 80)
-    with np.load(output / subject / "aligned_hrr_decomposed.npz") as result:
+    with np.load(output / subject / "model-features/empa/hrr-decomposed.npz") as result:
         assert any("sprite" in key for key in result.files)
         for key in result.files:
             if key.endswith("_aligned"):
@@ -339,31 +346,31 @@ def test_frame_timing_and_simultaneous_keypress_nuisance():
     [
         ("llm_fixture_layer_1", None, False),
         ("llm_fixture_layer_1", None, True),
-        ("ez_representation", "aligned_ez.npz", False),
-        ("hrr_sprites", "aligned_hrr_decomposed.npz", False),
+        ("ez_representation", "model-features/efficientzero.npz", False),
+        ("hrr_sprites", "model-features/empa/hrr-decomposed.npz", False),
     ],
 )
 def test_preprocess_base_llm_and_ridge(synthetic_alignment, layer, sidecar, nuisance):
     root, subject = synthetic_alignment
+    participant = root / "aligned" / subject
+    feature_file = participant / "model-features/lrm/fixture/elaborate--all--main.npz"
     if sidecar:
-        with np.load(root / "aligned" / subject / "aligned_llm_fixture.npz") as llm:
-            np.savez_compressed(
-                root / "aligned" / subject / sidecar,
-                **{f"{layer}_aligned": llm["llm_fixture_layer_1_aligned"]},
-                **{
-                    key: llm[key]
-                    for key in (
-                        "alignment_binding_version",
-                        "alignment_base_sha256",
-                        "alignment_samples_sha256",
-                    )
-                },
+        with np.load(feature_file) as llm:
+            coverage = coverage_from_missing(load_samples(participant), [])
+            write_feature_archive(
+                participant / sidecar,
+                {f"{layer}_aligned": llm["llm_fixture_layer_1_aligned"]},
+                participant,
+                coverage,
+                coverage_by_layer={layer: coverage},
             )
+        feature_file = participant / sidecar
     encoder.run_encoding_model(
         subject,
         root / "aligned",
         root / "results",
         layer=layer,
+        feature_file=feature_file,
         max_level=8,
         n_iter=1,
         n_targets_batch=32,
@@ -402,7 +409,8 @@ def test_failed_layer_cli_returns_nonzero(synthetic_alignment):
     result = subprocess.run(
         [
             sys.executable,
-            str(ROOT / "analysis/neural/encoding.py"),
+            "-m",
+            "analysis.neural.encoding",
             "--subject",
             subject,
             "--data-dir",
@@ -549,8 +557,7 @@ def test_llm_alignment_preserves_scan_truncated_play(tmp_path, ar1_corrected):
     # Base alignment clips the final play at the actual preprocessed scan end.
     timing = base.get_play_timing(play, run, 2.0, 14, ar1_corrected)
     retained = int(timing["n_volumes"])
-    np.savez(
-        tmp_path / "base.npz",
+    samples = dict(
         tr=2.0,
         ar1_corrected=ar1_corrected,
         n_volumes=retained,
@@ -565,6 +572,13 @@ def test_llm_alignment_preserves_scan_truncated_play(tmp_path, ar1_corrected):
         tr_game_idx=np.zeros(retained, dtype=int),
         tr_level_idx=np.zeros(retained, dtype=int),
         tr_play_idx=np.zeros(retained, dtype=int),
+    )
+    participant = tmp_path / "neural" / subject
+    write_core_inputs(
+        participant,
+        {"voxel_ts": np.ones((2, retained)), "mask": np.ones((2, 1, 1), dtype=bool)},
+        samples,
+        {},
     )
     recordings = write_human_replay(
         tmp_path / "recording.human.replay.json.gz", [play], run
@@ -593,7 +607,7 @@ def test_llm_alignment_preserves_scan_truncated_play(tmp_path, ar1_corrected):
     )
     paths = align.process_subject(
         subject,
-        tmp_path / "base.npz",
+        participant,
         output_dir=tmp_path / "aligned",
         llm_sources=[source],
         behavior_dir=recordings,

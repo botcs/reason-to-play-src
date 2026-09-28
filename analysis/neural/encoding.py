@@ -58,19 +58,13 @@ import hashlib
 import importlib.metadata
 import json
 import logging
-import re
 from pathlib import Path
 
 import numpy as np
 from sklearn.decomposition import PCA
 
-from analysis.neural.alignment import (
-    external_binding,
-    file_sha256,
-    released_llm_path,
-    validate_binding,
-    validate_feature_coverage,
-)
+from data.neural import file_sha256, input_paths, load_inputs
+
 
 # Himalaya imports
 from himalaya.ridge import GroupRidgeCV
@@ -215,126 +209,13 @@ def validate_aligned_data(data: dict, layer: str, subject: str | None = None) ->
         raise ValueError("BOLD target count disagrees with voxel mask")
 
 
-def merge_feature_sidecar(data: dict, sidecar: dict, path: Path) -> dict:
-    """Feature sidecars may add arrays, but may not replace alignment identities."""
-    for key in data.keys() & sidecar.keys():
-        left, right = np.asarray(data[key]), np.asarray(sidecar[key])
-        if left.shape != right.shape or not np.array_equal(left, right):
-            raise ValueError(
-                f"Feature sidecar {path} conflicts with base alignment field {key}"
-            )
-    return {**data, **sidecar}
-
-
-def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files=None):
-    """Resolve explicit paths, retaining the historical subject-directory layout."""
-    if base_data is None:
-        if data_dir is None:
-            raise ValueError("Provide --base-data or --data-dir")
-        root = Path(data_dir)
-        if (root / "analysis/neural/inputs").is_dir():
-            root = root / "analysis/neural/inputs"
-        clean_base = root / subject / "bold-ddqn-theory.npz"
-        base_data = (
-            clean_base if clean_base.is_file() else root / subject / "aligned_data.npz"
-        )
-    paths = [Path(base_data)]
-    if feature_files is not None:
-        paths.extend(Path(path) for path in feature_files)
-    else:
-        sidecar = None
-        if layer.startswith("llm_"):
-            match = re.fullmatch(r"llm_(.+)_layer_\d+", layer)
-            if match:
-                sidecar = f"aligned_llm_{match.group(1)}.npz"
-        elif layer.startswith("ez_") or layer == "ez":
-            sidecar = "aligned_ez.npz"
-        elif layer.startswith("hrr_"):
-            sidecar = "aligned_hrr_decomposed.npz"
-        if sidecar:
-            clean = released_llm_path(layer, subject)
-            if layer.startswith("hrr_"):
-                clean = Path("model-features/theory/hrr-decomposed") / f"{subject}.npz"
-            if layer.startswith("ez_") or layer == "ez":
-                clean = Path("model-features/efficientzero") / f"{subject}.npz"
-            candidate = paths[0].parent.parent / clean if clean is not None else None
-            if candidate is None or not candidate.is_file():
-                candidate = paths[0].parent / sidecar
-            if candidate.exists():
-                paths.append(candidate)
-    for path in paths:
-        if not path.is_file():
-            raise FileNotFoundError(path)
-    return paths
-
-
-def load_aligned_data(paths, subject, layer, *, require_binding=True):
-    """Load the base and its bound features without changing original base flags.
-
-    Base ``has_ez_data``/``ez_layers`` describe the original base contents only.
-    Attached EfficientZero arrays and ``efficientzero_layer_names`` identify the
-    available added hooks; their per-layer coverage comes from the association.
-    """
-    with np.load(paths[0], allow_pickle=True) as source:
-        data = dict(source)
-    base = data
-    binding_status = []
-    base_digest = file_sha256(paths[0]) if len(paths) > 1 else None
-    for path in paths[1:]:
-        with np.load(path, allow_pickle=True) as source:
-            sidecar = dict(source)
-        verified = validate_binding(sidecar, base, paths[0], base_sha256=base_digest)
-        association = external_binding(path)
-        if "efficientzero_layer_names" in sidecar and (
-            association is None or "feature_coverage_by_layer" not in association
-        ):
-            raise ValueError(
-                "EfficientZero feature coverage is required; download "
-                f"{Path(path).name}.alignment.json alongside {Path(path).name}"
-            )
-        coverage = None
-        if association is not None:
-            validate_binding(association, base, paths[0], base_sha256=base_digest)
-            if "feature_coverage" in association:
-                coverage = validate_feature_coverage(
-                    association["feature_coverage"], base
-                )
-            if "feature_coverage_by_layer" in association:
-                by_layer = association["feature_coverage_by_layer"]
-                if not isinstance(by_layer, dict) or not by_layer:
-                    raise ValueError("Per-layer feature coverage must be a mapping")
-                for name, layer_coverage in by_layer.items():
-                    if not isinstance(name, str) or f"{name}_aligned" not in sidecar:
-                        raise ValueError("Per-layer coverage names an absent feature")
-                    validate_feature_coverage(layer_coverage, base)
-                if f"{layer}_aligned" in sidecar:
-                    if layer not in by_layer:
-                        raise ValueError(
-                            "Requested layer lacks declared feature coverage"
-                        )
-                    coverage = by_layer[layer]
-            verified = True
-        if not verified:
-            if require_binding:
-                raise ValueError(
-                    f"Feature sidecar lacks a recorded base/sample-order binding: {path}"
-                )
-            logging.warning(
-                "Unbound feature archive %s: sample-order association is unverified",
-                path,
-            )
-        binding_status.append(
-            {
-                "path": str(path),
-                "status": "verified" if verified else "unverified",
-                "feature_coverage": coverage,
-                "coverage_sample_order": "original-base-archive",
-            }
-        )
-        data = merge_feature_sidecar(data, sidecar, path)
-    data["alignment_verification_json"] = json.dumps(binding_status, sort_keys=True)
-    validate_aligned_data(data, layer, subject)
-    return data
+def encoding_input_paths(subject, data_dir, layer, feature_file=None):
+    """Resolve one participant's BOLD, samples, nuisance and requested features."""
+    root = Path(data_dir)
+    if (root / "neural").is_dir():
+        root = root / "neural"
+    subject_dir = root if root.name == subject else root / subject
+    return input_paths(subject_dir, feature_file, layer)
 
 
 def input_fingerprints(paths):
@@ -346,10 +227,13 @@ def input_fingerprints(paths):
             for chunk in iter(lambda: handle.read(8 * 1024 * 1024), b""):
                 digest.update(chunk)
         identities.append(
-            {"role": "base" if index == 0 else "feature", "sha256": digest.hexdigest()}
+            {
+                "role": ("bold", "samples", "nuisance", "feature")[index],
+                "sha256": digest.hexdigest(),
+            }
         )
         association_path = Path(str(path) + ".alignment.json")
-        if index and association_path.is_file():
+        if association_path.is_file():
             identities.append(
                 {
                     "role": "alignment-association",
@@ -727,9 +611,7 @@ def run_encoding_model(
     n_iter: int = 100,
     backend: str = "numpy",
     seed: int | None = None,
-    base_data: Path | None = None,
-    feature_files: list[Path] | None = None,
-    allow_unverified_alignment: bool = False,
+    feature_file: Path | None = None,
 ) -> dict:
     """
     Run banded ridge encoding model for one subject.
@@ -744,7 +626,7 @@ def run_encoding_model(
 
     Args:
         subject: Subject ID
-        data_dir: Directory containing aligned_data.npz
+        data_dir: Dataset root, neural directory or participant directory
         output_dir: Output directory
         layer: Which model layer to use ('fc1' or 'hrr')
         max_level: Maximum level to include (e.g., 5 for levels 0-5)
@@ -775,11 +657,10 @@ def run_encoding_model(
         logging.warning(f"  Could not set backend {backend}: {e}, using numpy")
         backend_obj = set_backend("numpy")
 
-    paths = encoding_input_paths(subject, data_dir, layer, base_data, feature_files)
+    paths = encoding_input_paths(subject, data_dir, layer, feature_file)
     source_fingerprints = input_fingerprints(paths)
-    data = load_aligned_data(
-        paths, subject, layer, require_binding=not allow_unverified_alignment
-    )
+    data = load_inputs(paths[0].parent, paths[3], layer)
+    validate_aligned_data(data, layer, subject)
     if n_iter < 1 or n_targets_batch < 1 or n_alphas_batch < 1:
         raise ValueError("Iteration and batch counts must be positive")
     if seed is not None and not 0 <= seed < 2**32:
@@ -1230,7 +1111,6 @@ def run_encoding_model(
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "input_files_json": source_fingerprints,
         "alignment_verification_json": data["alignment_verification_json"],
-        "allow_unverified_alignment": allow_unverified_alignment,
         "runtime_versions_json": json.dumps(
             {
                 name: importlib.metadata.version(name)
@@ -1322,16 +1202,14 @@ if __name__ == "__main__":
     )
     parser.add_argument("--subject", required=True, help="Subject ID (e.g., sub-01)")
     parser.add_argument(
-        "--data-dir", help="Historical layout root containing subject/aligned_data.npz"
-    )
-    parser.add_argument(
-        "--base-data", type=Path, help="Explicit aligned BOLD/base NPZ path"
+        "--data-dir",
+        required=True,
+        help="Dataset root, neural directory or participant directory",
     )
     parser.add_argument(
         "--feature-file",
         type=Path,
-        action="append",
-        help="Explicit feature sidecar NPZ; repeat for additional feature files",
+        help="Explicit feature NPZ; otherwise discover the layer under model-features",
     )
     parser.add_argument(
         "--output-dir", default="./workdir/encoding_results", help="Output directory"
@@ -1411,14 +1289,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Skip existing results only if successful completion and run settings match",
     )
-    parser.add_argument(
-        "--allow-unverified-alignment",
-        action="store_true",
-        help="Permit archived sidecars without base/sample-order bindings; result metadata records unverified association",
-    )
     args = parser.parse_args()
-    if args.base_data is None and args.data_dir is None:
-        parser.error("provide --base-data or --data-dir")
 
     # Parse layer list (supports comma-separated)
     layers = [item.strip() for item in args.layer.split(",") if item.strip()]
@@ -1455,7 +1326,6 @@ if __name__ == "__main__":
                             args.subject,
                             args.data_dir,
                             layer,
-                            args.base_data,
                             args.feature_file,
                         )
                     ),
@@ -1465,7 +1335,6 @@ if __name__ == "__main__":
                         Path(__file__).read_bytes()
                     ).hexdigest(),
                     "n_iter": args.n_iter,
-                    "allow_unverified_alignment": args.allow_unverified_alignment,
                     "seed": args.seed if args.seed is not None else -1,
                     "n_targets_batch": args.n_targets_batch,
                     "n_alphas_batch": args.n_alphas_batch,
@@ -1490,9 +1359,7 @@ if __name__ == "__main__":
             run_encoding_model(
                 subject=args.subject,
                 data_dir=Path(args.data_dir) if args.data_dir is not None else None,
-                base_data=args.base_data,
-                feature_files=args.feature_file,
-                allow_unverified_alignment=args.allow_unverified_alignment,
+                feature_file=args.feature_file,
                 output_dir=Path(args.output_dir),
                 layer=layer,
                 max_level=args.max_level,
