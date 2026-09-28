@@ -136,10 +136,12 @@ The original human data are available in
 [OpenNeuro ds004323 v1.0.0](https://openneuro.org/datasets/ds004323/versions/1.0.0).
 Datasets and model weights are separate from this code checkout.
 
-The Hugging Face release is being prepared for `csbotos/reason-to-play`:
+The [Hugging Face dataset](https://huggingface.co/datasets/csbotos/reason-to-play) contains
 canonical human recordings, model prompts and gameplay, activations, processed
-fMRI inputs, ROI resources and analysis outputs. It has not been uploaded. The
-manifest records each file’s identity, contents and checksum when byte-verified. The [dataset card draft](docs/release/huggingface-dataset-card.md)
+fMRI inputs, ROI resources and analysis outputs. Uploads are in progress; its
+`files` catalogue lists verified downloads, while `planned_files` records the
+complete selection. The manifest records each file’s identity, contents and
+checksum when byte-verified. The [dataset card](docs/release/huggingface-dataset-card.md)
 describes the selection, omissions and catalogue loading interface.
 
 Dataset paths are recorded in the release manifest. They do not depend on where

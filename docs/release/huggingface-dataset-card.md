@@ -14,8 +14,9 @@ tags:
 
 # VGDL-fMRI: Reason to Play
 
-**Draft dataset card.** This describes the intended release for
-`csbotos/reason-to-play`. Dataset files have not yet been published.
+**Publication is in progress.** The `files` catalogue lists verified downloads;
+`planned_files` describes the complete selection. Use a dataset commit to pin
+your downloads.
 
 VGDL-fMRI connects human video-game learning, fMRI recordings, model gameplay
 and model representations. It accompanies
@@ -170,13 +171,12 @@ covering **1,661,744 recorded engine states**, counted once across prompt
 conditions. Practice attempts are excluded from this task dataset; upper-level
 and cohort flags remain available for choosing an analysis.
 
-During incremental publication, `planned_files` will describe the complete
-selection. `files` will appear after the first verified payload upload and
-contain only uploaded, byte-verified payloads. `human_plays` is a metadata
+During incremental publication, `planned_files` describes the complete
+selection. `files` contains only uploaded, byte-verified payloads. `human_plays` is a metadata
 table; its availability does not imply that every referenced payload is online.
 All configurations use a `data` split, which is not a train/test split.
 
-Once those catalogues are published, load them with ordinary Python calls:
+Load the catalogues with ordinary Python calls:
 
 ```python
 from datasets import load_dataset
