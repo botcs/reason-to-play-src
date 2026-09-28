@@ -1309,6 +1309,16 @@ def extract_theory_strings(regressor_doc: dict):
 
 def extract_behavioral_features(play_doc: dict) -> dict:
     states = play_states(play_doc)
+    missing_frame = next(
+        (i for i, state in enumerate(states) if "keystate" not in state), None
+    )
+    if missing_frame is not None:
+        raise ValueError(
+            f"Play {play_doc.get('_id')} frame {missing_frame} has no recorded "
+            "keystate field. "
+            "Button nuisance regressors require the complete behavior/human "
+            "recording; website replay copies omit these inputs."
+        )
     n_states = len(states)
     key_codes = [273, 274, 276, 275, 32]
     keystates = np.zeros((n_states, 5), dtype=np.float32)

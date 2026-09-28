@@ -116,6 +116,26 @@ def test_standalone_replay_restores_measured_inputs_without_source_archive(tmp_p
     assert load_runs(path)[13, 1]["scan_start_ts"] == 999.0
 
 
+def test_website_copy_cannot_supply_button_nuisance_regressors(tmp_path):
+    from analysis.neural.prepare_inputs import extract_behavioral_features
+
+    canonical = recording()
+    for frame in canonical["states"]:
+        frame["keystate"] = [False] * 277
+    canonical["states"][1]["keystate"][273] = True
+    path = write_record(tmp_path / "canonical", canonical)
+    (play,) = iter_plays(path)
+    assert extract_behavioral_features(play)["any_keypress"].tolist() == [0, 1]
+
+    compact = deepcopy(canonical)
+    for frame in compact["states"]:
+        frame.pop("keystate")
+    compact_path = write_record(tmp_path / "website-assets", compact)
+    (display_play,) = iter_plays(compact_path)
+    with pytest.raises(ValueError, match="complete behavior/human recording"):
+        extract_behavioral_features(display_play)
+
+
 def test_conditions_are_selected_once_and_original_run_order_is_preserved(tmp_path):
     for condition in ("elaborate", "minimal", "oracle"):
         write_record(tmp_path, recording("bait", 4, condition))
