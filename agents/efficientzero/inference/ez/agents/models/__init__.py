@@ -6,8 +6,8 @@
 import torch
 import numpy as np
 import torch.nn as nn
-from ez.utils.format import normalize_state
-from ez.utils.format import formalize_obs_lst, DiscreteSupport, allocate_gpu, prepare_obs_lst, symexp
+from agents.efficientzero.inference.ez.utils.format import normalize_state
+from agents.efficientzero.inference.ez.utils.format import formalize_obs_lst, DiscreteSupport, allocate_gpu, prepare_obs_lst, symexp
 
 
 class EfficientZero(nn.Module):

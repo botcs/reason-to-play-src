@@ -8,8 +8,8 @@
     "vgfmri4_lemmings": "VGDL/vgfmri4_lemmings/EZ-V2-seed=0-2026-01-14 00:54:23/models/model_180000.p",
     "vgfmri4_zelda": "VGDL/vgfmri4_zelda/EZ-V2-seed=0-2026-01-14 02:52:09/models/model_180000.p"
   },
-  "note": "Recovered selection map; preserve model run directories with sibling logs/Train.log. Mapping alone does not prove these generated the final paper feature arrays.",
-  "release_path_base": "HF staged dataset root",
+  "note": "Checkpoint selection map; preserve model run directories with sibling logs/Train.log. Mapping alone does not establish the checkpoints that generated the final paper feature arrays.",
+  "release_path_base": "Downloaded dataset root",
   "release_models": {
     "vgfmri4_avoidgeorge": {
       "checkpoint": "checkpoints/efficientzero_v2/results/VGDL/vgfmri4_avoidgeorge/EZ-V2-seed%3D0-2026-01-13%2022%3A13%3A01/models/model_120000.p",

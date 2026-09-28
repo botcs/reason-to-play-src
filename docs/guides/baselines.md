@@ -3,10 +3,12 @@
 For analysis of recorded baseline behaviour, use the
 [dataset analysis guide](dataset-analysis.md#behavioral-analysis).
 This guide covers baseline input formats, feature extraction and optional
-training. [sources.json](../../baselines/sources.json) records source commits; a source pin
-alone does not identify the run that produced an archived result.
+training. The [baseline source pins](../../baselines/sources.json) and
+[EfficientZero source pins](../../agents/efficientzero/sources.json) record source
+commits; a source pin alone does not identify the run that produced an archived
+result.
 
-Directory paths in the source table below are relative to `baselines/`.
+Directory paths in the source table below are relative to the checkout root.
 Run shell commands from the checkout root unless another directory is stated.
 
 ## Environment and included sources
@@ -23,15 +25,16 @@ credentials. Keep their engine revisions separate:
 
 | Directory | Role |
 | --- | --- |
-| `vendor/rc_rl/extraction/` | DDQN feature extraction |
-| `vendor/rc_rl/current/` | DDQN training and behavioural generation |
-| `vendor/rc_rl/ez/` | EfficientZero's environment, level transformations and warmup levels |
-| `vendor/efficientzero/` | EfficientZero model inference |
-| `extraction/efficientzero/` | Activation and trace extraction scripts |
+| `baselines/vendor/rc_rl/extraction/` | DDQN feature extraction |
+| `baselines/vendor/rc_rl/current/` | DDQN training and behavioural generation |
+| `agents/efficientzero/environment/` | EfficientZero's environment, level transformations and warmup levels |
+| `agents/efficientzero/inference/` | EfficientZero model inference |
+| `agents/efficientzero/extract_features.py`, `extract_traces.py` | Activation and trace extraction |
+| `agents/efficientzero/training/` | Optional pinned upstream training submodule |
 
 The source records include commits and per-file hashes. Upstream license and
 publication-permission limits are listed in [THIRD_PARTY.md](../../THIRD_PARTY.md)
-and [EfficientZero provenance](../../baselines/extraction/efficientzero/PROVENANCE.json).
+and [EfficientZero provenance](../../agents/efficientzero/PROVENANCE.json).
 The repository's MIT license does not replace those terms.
 
 ## Offline behavioural inputs
@@ -92,15 +95,16 @@ training check under Python 3.12 validates execution, not historical performance
 
 ## EfficientZero hidden features
 
-The runner verifies source checksums and selects the bundled baseline engine
-without Ray, MuJoCo, Atari or TorchRL. An optional `--rc-rl-dir` accepts a clean
-checkout of the locked engine revision. Human input images use recorded
-rectangles and colours; the replay's single translated game definition supplies
-draw order. This does not simulate a new human trajectory.
+Feature extraction uses the included `inference/` model and `observations.py`
+renderer without initializing the training submodule or requiring Ray, MuJoCo,
+Atari or TorchRL. Human input images use recorded rectangles and colours; the
+translated VGDL parser supplies draw order from the replay's single game
+definition. The `environment/` engine supports optional training. Extracting
+recorded frames does not simulate a new human trajectory.
 
 Each checkpoint must retain its `models/` directory and sibling
 `logs/Train.log`: the extractor reads the recorded architecture from that log.
-[checkpoint_paths.json](../../baselines/extraction/efficientzero/checkpoint_paths.json) records
+[checkpoint_paths.json](../../agents/efficientzero/checkpoint_paths.json) records
 the six-game source selection. Choose the checkpoint/log pair from the dataset
 manifest or your own run, preserving their relative layout. Its `release_models`
 entries identify the indexed source snapshot and do not establish an association
@@ -109,13 +113,13 @@ with every final paper array.
 From the checkout root:
 
 ```bash
-python baselines/run_efficientzero.py traces -- \
+python -m agents.efficientzero.extract_traces \
   --model /absolute/data/ez-run/models/model_180000.p \
   --dataset-root /absolute/data/behavior/human \
   --subj-id 12 --run-id 6 --play-id 0 --game-name vgfmri4_bait \
   --play-key 606debc9b4f366ca0cba5fda \
   --heads all --device cpu \
-  --trace-layers-json /absolute/reason-to-play-src/baselines/extraction/efficientzero/trace_layers.json \
+  --trace-layers-json /absolute/reason-to-play-src/agents/efficientzero/trace_layers.json \
   --trace-output /absolute/data/ez-features/vgfmri4_bait/subj12/run6/play0_key606debc9b4f366ca0cba5fda/traces.pt
 ```
 
@@ -132,35 +136,65 @@ aligned EZ feature sidecar. For representation activations and metrics instead
 of selected layer traces, inspect:
 
 ```bash
-python baselines/run_efficientzero.py features -- --help
+python -m agents.efficientzero.extract_features --help
 ```
 
-## Optional full training checkouts
+## EfficientZero training
 
-The source bootstrap fetches exact commits into ignored `baselines/checkouts/`
-directories. It does not install dependencies and refuses to overwrite a
-changed checkout:
+The optional `agents/efficientzero/training/` submodule is Austin Andrews's
+[EfficientZeroV2 fork](https://github.com/A-Andrews/EfficientZeroV2/tree/29157d4892afd9467b1bd0994de1355086145490),
+pinned to commit `29157d4892afd9467b1bd0994de1355086145490`. Initialize it only
+when you want to train a model:
 
 ```bash
-python baselines/setup.py --list
-python baselines/setup.py efficientzero
-# Full RC_RL repositories require authorized access:
-python baselines/setup.py rc-rl rc-rl-current rc-rl-ez --transport ssh
+git submodule update --init -- agents/efficientzero/training
 ```
 
-EfficientZero training uses its separate Python 3.8/Ray 1.0 environment.
-Omit the machine-specific `prefix:` from its original `environment.yaml`.
-The configuration helper sets the bundled game directory while preserving
-training settings. Supply that config directly, since the training CLI can
-replace standalone absolute-path overrides when merging its experiment file:
+Analysis and feature extraction use the included code and do not require this
+submodule. Training uses a separate upstream environment: follow the pinned
+[installation instructions](https://github.com/A-Andrews/EfficientZeroV2/blob/29157d4892afd9467b1bd0994de1355086145490/INSTALL.md)
+and [environment specification](https://github.com/A-Andrews/EfficientZeroV2/blob/29157d4892afd9467b1bd0994de1355086145490/environment.yaml).
+Use a local environment location rather than the source file's machine-specific
+`prefix:`, and build the upstream MCTS extensions as instructed. The
+analysis/inference environment is not a full training install.
+
+From the code checkout and its Python environment, create an experiment
+configuration using:
 
 ```bash
-python baselines/prepare_efficientzero_config.py --output data/efficientzero-training.yaml
-python baselines/run_efficientzero.py train -- exp_config=/absolute/reason-to-play-src/data/efficientzero-training.yaml
+python -m agents.efficientzero.prepare_training_config \
+  --output /absolute/work/efficientzero-training.yaml
 ```
 
-Inference and small CPU checks do not validate a full training run. The EMPA
-reference is `tsividis/vgdl` at the `empa-reference` pin; it does not establish
-the exact revision behind received EMPA1 episode summaries. Remaining
-checkpoint/layer/result associations are listed in
-[reproduction limits](../reproduction-limits.md).
+The helper reads `training/ez/config/exp/vgdl.yaml` and changes only
+`env.game_folder` to the absolute bundled `environment/all_games_recovered`
+directory. It writes a separate file and preserves the upstream training
+settings. Pass that file as `exp_config`; the upstream CLI can replace individual
+path overrides while merging its experiment configuration.
+
+In the upstream training environment, run from the submodule directory. Replace
+the absolute paths with your checkout and the configuration created above:
+
+```bash
+cd /absolute/reason-to-play-src/agents/efficientzero/training
+RC_RL_PATH=/absolute/reason-to-play-src/agents/efficientzero/environment \
+PYTHONPATH=/absolute/reason-to-play-src/agents/efficientzero/environment:/absolute/reason-to-play-src/agents/efficientzero/training \
+python -m ez.train exp_config=/absolute/work/efficientzero-training.yaml
+```
+
+These are direct upstream training commands. The source pin and configuration
+helper do not establish which revision produced each released checkpoint, and
+full retraining has not been validated. The recorded RGB inputs, warmup levels,
+checkpoint configurations and unresolved result-layer mapping are described in
+[reproduction limits](../reproduction-limits.md#baseline-checkpoints-and-layer-mappings).
+
+## Additional baseline sources
+
+Optional full RC_RL checkouts require authorized source access:
+
+```bash
+python baselines/setup.py rc-rl rc-rl-current --transport ssh
+```
+
+The EMPA reference is `tsividis/vgdl` at the `empa-reference` pin; it does not
+establish the exact revision behind received EMPA1 episode summaries.

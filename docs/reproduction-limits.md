@@ -39,7 +39,13 @@ which individual source objects are present.
 The [baseline guide](guides/baselines.md) documents the bundled DDQN and
 EfficientZero implementations, source revisions and training setup. File hashes
 and adaptation notices identify the included implementations. New baseline
-runs use these sources without requiring a private RC_RL checkout.
+runs use these sources without requiring a private RC_RL checkout. EfficientZero
+feature extraction uses the included `agents/efficientzero/inference/` and
+`environment/` code. Its optional `training/` submodule pins Austin Andrews's
+trainer to `29157d4892afd9467b1bd0994de1355086145490`. That pin identifies the
+training source, not the revision that produced every released checkpoint.
+Initializing the submodule is unnecessary for analysis or feature extraction;
+a full retraining run has not been validated.
 
 The EfficientZero extractor requests **15 named hooks**, while the
 result summary uses **11 numeric layer labels**. No verified mapping between

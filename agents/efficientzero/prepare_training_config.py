@@ -20,13 +20,19 @@ def main() -> None:
     parser.add_argument(
         "--experiment",
         type=Path,
-        default=ROOT / "checkouts/efficientzero/ez/config/exp/vgdl.yaml",
+        default=ROOT / "training/ez/config/exp/vgdl.yaml",
     )
     parser.add_argument(
-        "--games", type=Path, default=ROOT / "vendor/rc_rl/ez/all_games_recovered"
+        "--games", type=Path, default=ROOT / "environment/all_games_recovered"
     )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if not args.experiment.is_file():
+        parser.error(
+            "Missing training configuration. Initialize the optional trainer with "
+            "git submodule update --init -- agents/efficientzero/training "
+            "or supply --experiment explicitly."
+        )
     if not args.games.is_dir():
         parser.error(f"missing game directory: {args.games}")
     if args.output.resolve() == args.experiment.resolve():

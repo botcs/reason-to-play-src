@@ -4,8 +4,6 @@ import argparse
 import ast
 import inspect
 import math
-import os
-import sys
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
@@ -15,51 +13,8 @@ import pandas as pd
 import torch
 from torch import Tensor
 
-from reason_to_play.data.behavior import (
-    behavior_root,
-    iter_plays as canonical_plays,
-    play_states,
-)
-from omegaconf import OmegaConf
-
-try:
-    import cv2
-except ImportError:  # pragma: no cover - optional dependency
-    cv2 = None  # type: ignore
-
-try:
-    import pygame
-except ImportError:  # pragma: no cover - optional dependency
-    pygame = None  # type: ignore
-
-
-
-try:
-    from vgdl import colors  # type: ignore
-    from vgdl.rlenvironmentnonstatic import createRLInputGameFromStrings  # type: ignore
-except ImportError:  # pragma: no cover - optional dependency
-    colors = None  # type: ignore
-    createRLInputGameFromStrings = None  # type: ignore
-
-# Ensure dependencies in the parent workspace remain importable after moving this script.
-_CURRENT_DIR = Path(__file__).resolve().parent
-_REPO_ROOT = _CURRENT_DIR.parent.parent
-_WORKSPACE_ROOT = _REPO_ROOT.parent
-
-_DEFAULT_EZ_ROOT = Path(
-    os.environ.get("EZ_ROOT", str(_WORKSPACE_ROOT / "EfficientZeroV2"))
-).expanduser()
-if _DEFAULT_EZ_ROOT.exists() and str(_DEFAULT_EZ_ROOT) not in sys.path:
-    sys.path.append(str(_DEFAULT_EZ_ROOT))
-
-_DEFAULT_RC_RL_ROOT = Path(
-    os.environ.get("RC_RL_ROOT", str(_WORKSPACE_ROOT / "RC_RL"))
-).expanduser()
-if _DEFAULT_RC_RL_ROOT.exists() and str(_DEFAULT_RC_RL_ROOT) not in sys.path:
-    sys.path.append(str(_DEFAULT_RC_RL_ROOT))
-
-from ez.agents.models import EfficientZero  # noqa: E402  (depends on sys.path edit above)
-from ez.agents.models.base_model import (  # noqa: E402
+from agents.efficientzero.inference.ez.agents.models import EfficientZero
+from agents.efficientzero.inference.ez.agents.models.base_model import (
     DynamicsNetwork,
     ProjectionHeadNetwork,
     ProjectionNetwork,
@@ -68,13 +23,23 @@ from ez.agents.models.base_model import (  # noqa: E402
     SupportNetwork,
     ValuePolicyNetwork,
 )
-from ez.utils.format import DiscreteSupport, symexp  # noqa: E402
+from agents.efficientzero.inference.ez.utils.format import DiscreteSupport, symexp
+
+
+from reason_to_play.data.behavior import (
+    behavior_root,
+    iter_plays as canonical_plays,
+    play_states,
+)
+from omegaconf import OmegaConf
 
 
 class HiddenStateExtractor:
     """Callable wrapper that exposes hidden-state activations from EfficientZero."""
 
-    def __init__(self, model: EfficientZero, config: OmegaConf, device: torch.device) -> None:
+    def __init__(
+        self, model: EfficientZero, config: OmegaConf, device: torch.device
+    ) -> None:
         self.model = model
         self.config = config
         self.device = device
@@ -107,7 +72,9 @@ def load_hidden_state_extractor(
     run_dir = _locate_run_directory(resolved_model_path)
     config = _load_config(run_dir, override=config_override)
 
-    target_device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+    target_device = torch.device(
+        device or ("cuda" if torch.cuda.is_available() else "cpu")
+    )
 
     model = _build_model_from_config(config, target_device)
     load_kwargs = {"map_location": target_device}
@@ -143,20 +110,26 @@ def _normalize_state_dict_keys(state_dict: Mapping[str, Any]) -> Mapping[str, An
         if isinstance(new_key, str):
             for prefix in prefixes:
                 while new_key.startswith(prefix):
-                    new_key = new_key[len(prefix):]
+                    new_key = new_key[len(prefix) :]
         sanitized[new_key] = value
     return sanitized
 
 
 def _locate_run_directory(checkpoint_path: Path) -> Path:
     """Infer the EfficientZero run directory from a checkpoint path."""
-    run_dir = checkpoint_path.parent.parent if checkpoint_path.parent.name == "models" else checkpoint_path.parent
+    run_dir = (
+        checkpoint_path.parent.parent
+        if checkpoint_path.parent.name == "models"
+        else checkpoint_path.parent
+    )
     if not run_dir.exists():
         raise FileNotFoundError(f"Unable to infer run directory from {checkpoint_path}")
     return run_dir
 
 
-def _load_config(run_dir: Path, override: Optional[Union[Mapping[str, Any], OmegaConf]]) -> OmegaConf:
+def _load_config(
+    run_dir: Path, override: Optional[Union[Mapping[str, Any], OmegaConf]]
+) -> OmegaConf:
     """Read the Hydra config stored in logs/Train.log, or apply a manual override."""
     if override is not None:
         return OmegaConf.create(override)
@@ -216,7 +189,9 @@ def _build_model_from_config(config: OmegaConf, device: torch.device) -> Efficie
     state_dim = state_shape[0] * state_shape[1] * state_shape[2]
     flatten_size = reduced_channels * height * width
 
-    representation_model = RepresentationNetwork(tuple(input_shape), num_blocks, num_channels, down_sample)
+    representation_model = RepresentationNetwork(
+        tuple(input_shape), num_blocks, num_channels, down_sample
+    )
     dynamics_model = DynamicsNetwork(
         num_blocks,
         num_channels,
@@ -263,7 +238,9 @@ def _build_model_from_config(config: OmegaConf, device: torch.device) -> Efficie
 
     projection_layers = list(config.model.projection_layers)
     projection_head_layers = list(config.model.prjection_head_layers)
-    projection_model = ProjectionNetwork(state_dim, projection_layers[0], projection_layers[1])
+    projection_model = ProjectionNetwork(
+        state_dim, projection_layers[0], projection_layers[1]
+    )
     projection_head_model = ProjectionHeadNetwork(
         projection_layers[1],
         projection_head_layers[0],
@@ -297,7 +274,13 @@ def _prepare_observations(
     else:
         obs_tensor = torch.as_tensor(observations)
 
-    if obs_tensor.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+    if obs_tensor.dtype in (
+        torch.uint8,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    ):
         obs_tensor = obs_tensor.float()
         if obs_tensor.max().item() > 1.0:
             obs_tensor = obs_tensor / 255.0
@@ -343,7 +326,9 @@ def _ensure_channels_first(obs: Tensor, expected_channels: int) -> Tensor:
         elif obs.shape[0] == expected_channels:
             obs = obs.unsqueeze(0)
         else:
-            raise ValueError(f"Cannot infer channel dimension from observation with shape {tuple(obs.shape)}.")
+            raise ValueError(
+                f"Cannot infer channel dimension from observation with shape {tuple(obs.shape)}."
+            )
     elif obs.ndim == 4:
         if obs.shape[1] == expected_channels:
             pass
@@ -352,7 +337,9 @@ def _ensure_channels_first(obs: Tensor, expected_channels: int) -> Tensor:
         elif obs.shape[0] == expected_channels and obs.shape[-1] in (1, 3):
             obs = obs.permute(0, 3, 1, 2).unsqueeze(0)
         else:
-            raise ValueError(f"Cannot infer channels for tensor with shape {tuple(obs.shape)}.")
+            raise ValueError(
+                f"Cannot infer channels for tensor with shape {tuple(obs.shape)}."
+            )
     elif obs.ndim == 5:
         obs = obs.permute(0, 1, 4, 2, 3)
         batch, stack, channel, height, width = obs.shape
@@ -361,12 +348,11 @@ def _ensure_channels_first(obs: Tensor, expected_channels: int) -> Tensor:
         raise ValueError(f"Unsupported observation rank: {obs.ndim}")
 
     if obs.ndim != 4:
-        raise RuntimeError(f"Observation preprocessing failed; received tensor with shape {tuple(obs.shape)}")
+        raise RuntimeError(
+            f"Observation preprocessing failed; received tensor with shape {tuple(obs.shape)}"
+        )
 
     return obs
-
-
-_PYGAME_INITIALIZED = False
 
 
 def _require_numpy() -> None:
@@ -377,145 +363,14 @@ def _require_numpy() -> None:
         )
 
 
-def _require_cv2() -> None:
-    if cv2 is None:  # type: ignore[truthy-bool]
-        raise ImportError(
-            "opencv-python is required to render VGDL frames. "
-            "Install it with `pip install opencv-python`."
-        )
-
-
-def _require_pygame() -> None:
-    if pygame is None:  # type: ignore[truthy-bool]
-        raise ImportError(
-            "pygame is required to initialize VGDL games. "
-            "Install it with `pip install pygame`."
-        )
-
-
-
-def _require_vgdl() -> None:
-    global createRLInputGameFromStrings, colors
-    if createRLInputGameFromStrings is not None:  # type: ignore[truthy-bool]
-        return
-    try:  # pragma: no cover - optional dependency
-        from vgdl import colors as vgdl_colors  # type: ignore
-        from vgdl.rlenvironmentnonstatic import createRLInputGameFromStrings as create_fn  # type: ignore
-    except ImportError as exc:  # pragma: no cover - developer feedback
-        raise ImportError(
-            "RC_RL/vgdl is required to recreate VGDL states. "
-            "Set RC_RL_ROOT or place the RC_RL repo next to this project."
-        ) from exc
-    colors = vgdl_colors  # type: ignore[assignment]
-    createRLInputGameFromStrings = create_fn  # type: ignore[assignment]
-
-
-def _ensure_pygame_initialized() -> None:
-    global _PYGAME_INITIALIZED
-    if not _PYGAME_INITIALIZED:
-        _require_pygame()
-        os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
-        pygame.init()  # type: ignore[call-arg]
-        _PYGAME_INITIALIZED = True
-
-
-
-def _rect_to_bounds(rect: Any) -> Tuple[int, int, int, int]:
-    """Return (top, left, height, width) for pygame.Rect instances or dict-like snapshots."""
-    if hasattr(rect, "top"):
-        return int(rect.top), int(rect.left), int(rect.height), int(rect.width)
-
-    if isinstance(rect, Mapping):
-        keys = set(rect.keys())
-
-        def _as_pair(value: Any, label: str) -> Tuple[int, int]:
-            if isinstance(value, Sequence) and not isinstance(value, (str, bytes)) and len(value) >= 2:
-                return int(value[0]), int(value[1])
-            raise TypeError(f"Rect field '{label}' expected a length-2 sequence; received {value!r}")
-
-        if {"top", "left", "height", "width"}.issubset(keys):
-            return int(rect["top"]), int(rect["left"]), int(rect["height"]), int(rect["width"])
-
-        if {"y", "x", "height", "width"}.issubset(keys):
-            return int(rect["y"]), int(rect["x"]), int(rect["height"]), int(rect["width"])
-
-        if {"y", "x", "h", "w"}.issubset(keys):
-            return int(rect["y"]), int(rect["x"]), int(rect["h"]), int(rect["w"])
-
-        if "pos" in keys and "size" in keys:
-            left, top = _as_pair(rect["pos"], "pos")
-            width, height = _as_pair(rect["size"], "size")
-            return top, left, height, width
-
-        if "topleft" in keys and "size" in keys:
-            left, top = _as_pair(rect["topleft"], "topleft")
-            width, height = _as_pair(rect["size"], "size")
-            return top, left, height, width
-
-        if "center" in keys and "size" in keys:
-            cx, cy = _as_pair(rect["center"], "center")
-            width, height = _as_pair(rect["size"], "size")
-            left = cx - width // 2
-            top = cy - height // 2
-            return top, left, height, width
-
-        if {"left", "top", "right", "bottom"}.issubset(keys):
-            left = int(rect["left"])
-            top = int(rect["top"])
-            width = int(rect["right"]) - left
-            height = int(rect["bottom"]) - top
-            return top, left, height, width
-
-        raise KeyError(f"Unrecognized rect mapping keys: {sorted(keys)}")
-
-    raise TypeError(f"Unsupported rect type: {type(rect).__name__}")
-
-
-def _render_state_frame(
-    game,
-    state: Mapping[str, Any],
-    *,
-    resize: Optional[int],
-    num_channels: int = 1,
-) -> "np.ndarray":
-    _require_numpy()
-    _require_cv2()
-
-    game.setFullState(state)  # type: ignore[attr-defined]
-    background = np.array(colors.LIGHTGRAY if colors is not None else (211, 211, 211), dtype=np.uint8)  # type: ignore[arg-type]
-    width, height = game.screensize  # (w, h)
-    canvas = np.empty((height, width, 3), dtype=np.uint8)
-    canvas[:] = background
-
-    active_kill_list = set(getattr(game, "kill_list", []))
-    for sprite_class in getattr(game, "sprite_order", []):
-        group = getattr(game, "sprite_groups", {}).get(sprite_class)
-        if not group:
-            continue
-        for sprite in group:
-            if sprite in active_kill_list:
-                continue
-            rect = sprite.rect
-            top, left, height_px, width_px = _rect_to_bounds(rect)
-            canvas[top : top + height_px, left : left + width_px, :] = np.array(sprite.color, dtype=np.uint8)
-
-    if resize and (canvas.shape[0] != resize or canvas.shape[1] != resize):
-        canvas = cv2.resize(canvas, (resize, resize), interpolation=cv2.INTER_AREA)
-
-    if num_channels == 1:
-        gray = cv2.cvtColor(canvas, cv2.COLOR_RGB2GRAY)
-        return gray.astype(np.uint8)
-    if num_channels == 3:
-        return canvas.astype(np.uint8)
-    raise ValueError(f"Unsupported channel count requested: {num_channels}")
-
-
 def _stack_frame_sequence(frames: "np.ndarray", n_stack: int) -> "np.ndarray":
     if n_stack <= 1:
         return frames
 
     if frames.ndim != 4:
-        raise ValueError(f"Expected frames with shape (T, C, H, W); received {frames.shape}")
+        raise ValueError(
+            f"Expected frames with shape (T, C, H, W); received {frames.shape}"
+        )
 
     pad_count = n_stack - 1
     padding = np.repeat(frames[:1], pad_count, axis=0)
@@ -533,9 +388,6 @@ class VGDLZStateLoader:
     def __init__(
         self,
         dataset_root: Union[str, Path],
-        *,
-        rc_rl_root: Optional[Union[str, Path]] = None,
-
     ) -> None:
         self.dataset_root = Path(dataset_root).expanduser().resolve()
         from reason_to_play.data.replay_behavior import replay_paths
@@ -546,9 +398,6 @@ class VGDLZStateLoader:
                 f"Human JSON replay data is missing under {self.dataset_root}. "
                 "Use a standalone human replay, release root or behavior/human directory."
             )
-        self.rc_rl_root = Path(rc_rl_root).expanduser() if rc_rl_root else _DEFAULT_RC_RL_ROOT
-        if self.rc_rl_root and self.rc_rl_root.exists() and str(self.rc_rl_root) not in sys.path:
-            sys.path.append(str(self.rc_rl_root))
 
     def iter_plays(
         self,
@@ -565,7 +414,10 @@ class VGDLZStateLoader:
         )
         documents = canonical_plays(self.dump_root, subject=subject_number, run=run_id)
         for doc in documents:
-            if subject_number is not None and int(doc.get("subj_id", -1)) != subject_number:
+            if (
+                subject_number is not None
+                and int(doc.get("subj_id", -1)) != subject_number
+            ):
                 continue
             if run_id is not None and int(doc.get("run_id", -1)) != int(run_id):
                 continue
@@ -587,17 +439,27 @@ class VGDLZStateLoader:
         game_name: Optional[str] = None,
     ) -> Mapping[str, Any]:
         try:
-            return next(self.iter_plays(subj_id=subj_id, run_id=run_id, play_id=play_id, game_name=game_name))
+            return next(
+                self.iter_plays(
+                    subj_id=subj_id, run_id=run_id, play_id=play_id, game_name=game_name
+                )
+            )
         except StopIteration as exc:
-            filters = {k: v for k, v in {
-                "subj_id": subj_id,
-                "run_id": run_id,
-                "play_id": play_id,
-                "game_name": game_name,
-            }.items() if v is not None}
+            filters = {
+                k: v
+                for k, v in {
+                    "subj_id": subj_id,
+                    "run_id": run_id,
+                    "play_id": play_id,
+                    "game_name": game_name,
+                }.items()
+                if v is not None
+            }
             raise LookupError(f"No play matched filters {filters}") from exc
 
-    def decode_zstates(self, play_doc: Mapping[str, Any]) -> Sequence[Mapping[str, Any]]:
+    def decode_zstates(
+        self, play_doc: Mapping[str, Any]
+    ) -> Sequence[Mapping[str, Any]]:
         return play_states(play_doc)
 
     def render_frames(
@@ -607,45 +469,16 @@ class VGDLZStateLoader:
         resize: Optional[int] = 84,
         num_channels: int = 1,
     ) -> "np.ndarray":
-        _require_numpy()
-        _require_cv2()
-        _require_vgdl()
-        _ensure_pygame_initialized()
+        from agents.efficientzero.observations import render_recorded_frames
 
-        if "grid_size" in play_doc:
-            from reason_to_play.features.efficientzero import render_recorded_frames
-
-            return render_recorded_frames(
-                play_doc,
-                self.decode_zstates(play_doc),
-                resize=resize,
-                num_channels=num_channels,
-                background=colors.LIGHTGRAY if colors is not None else (211, 211, 211),
-            )
-        # The optional source-import route retains its original level text.
-        game_str = play_doc.get("game_str")
-        level_str = play_doc.get("level_str")
-        if not game_str or not level_str:
-            raise ValueError("play requires game_str and grid_size (or legacy level_str)")
-        env = createRLInputGameFromStrings(game_str, level_str)  # type: ignore[call-arg]
-        env.visualize = False  # type: ignore[attr-defined]
-        frames = []
-        for state in self.decode_zstates(play_doc):
-            frame = _render_state_frame(
-                env._game,
-                state,
-                resize=resize,
-                num_channels=num_channels,
-            )  # type: ignore[attr-defined]
-            frames.append(frame)
-        if not frames:
-            raise ValueError("No decoded frames were produced from zstates")
-        stacked = np.stack(frames, axis=0)
-        if num_channels == 1:
-            return stacked[:, np.newaxis, :, :]
-        if num_channels == 3:
-            return stacked.transpose(0, 3, 1, 2)
-        raise ValueError(f"Unsupported channel count requested: {num_channels}")
+        if "grid_size" not in play_doc:
+            raise ValueError("Recorded play is missing grid_size")
+        return render_recorded_frames(
+            play_doc,
+            self.decode_zstates(play_doc),
+            resize=resize,
+            num_channels=num_channels,
+        )
 
     def load_play_observations(
         self,
@@ -659,7 +492,9 @@ class VGDLZStateLoader:
         num_channels: int = 1,
         as_tensor: bool = True,
     ) -> Tuple[Any, Mapping[str, Any]]:
-        play_doc = self.get_play(subj_id=subj_id, run_id=run_id, play_id=play_id, game_name=game_name)
+        play_doc = self.get_play(
+            subj_id=subj_id, run_id=run_id, play_id=play_id, game_name=game_name
+        )
         frames = self.render_frames(play_doc, resize=resize, num_channels=num_channels)
         stacked = _stack_frame_sequence(frames, n_stack)
         if as_tensor:
@@ -667,7 +502,9 @@ class VGDLZStateLoader:
         return stacked, play_doc
 
 
-def _load_config_override(path_or_literal: Optional[str]) -> Optional[Union[Mapping[str, Any], OmegaConf]]:
+def _load_config_override(
+    path_or_literal: Optional[str],
+) -> Optional[Union[Mapping[str, Any], OmegaConf]]:
     if not path_or_literal:
         return None
     candidate = Path(path_or_literal)
@@ -702,7 +539,6 @@ class EfficientZeroActivationEvaluator:
         *,
         device: Optional[str] = None,
         config_override: Optional[OmegaConf] = None,
-
     ) -> None:
         extractor = load_hidden_state_extractor(
             model_path,
@@ -714,7 +550,11 @@ class EfficientZeroActivationEvaluator:
         self.device = extractor.device
         self.loader = VGDLZStateLoader(dataset_root)
         self.frame_channels = _infer_frame_channels(self.config)
-        self.obs_resize = int(self.config.env.obs_shape[1]) if len(self.config.env.obs_shape) > 1 else None
+        self.obs_resize = (
+            int(self.config.env.obs_shape[1])
+            if len(self.config.env.obs_shape) > 1
+            else None
+        )
         self.n_stack = int(self.config.env.n_stack)
         self.action_space_size = int(self.config.env.action_space_size)
         self.model.eval()
@@ -736,7 +576,9 @@ class EfficientZeroActivationEvaluator:
             limit=limit,
         )
 
-    def evaluate_play(self, play_doc: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, torch.Tensor]]:
+    def evaluate_play(
+        self, play_doc: Dict[str, Any]
+    ) -> Tuple[Dict[str, Any], Dict[str, torch.Tensor]]:
         observations = self._observations_from_play(play_doc)
         prepared = _prepare_observations(observations, self.config, self.device)
         num_states = prepared.shape[0]
@@ -772,10 +614,14 @@ class EfficientZeroActivationEvaluator:
 
                 proj = self.model.projection_model(state)
                 projections.append(proj.detach().cpu())
-                projection_heads.append(self.model.projection_head_model(proj).detach().cpu())
+                projection_heads.append(
+                    self.model.projection_head_model(proj).detach().cpu()
+                )
 
                 policy_probs = torch.softmax(policy, dim=-1)
-                policy_entropy = -(policy_probs * policy_probs.clamp_min(1e-12).log()).sum(dim=-1)
+                policy_entropy = -(
+                    policy_probs * policy_probs.clamp_min(1e-12).log()
+                ).sum(dim=-1)
                 policy_entropies.append(float(policy_entropy.squeeze(0).cpu().item()))
                 predicted_actions.append(int(policy_probs.argmax(dim=-1).item()))
 
@@ -783,12 +629,16 @@ class EfficientZeroActivationEvaluator:
                 value_scalars.append(float(scalar_value.item()))
 
                 if idx < len(human_actions):
-                    action_value = torch.tensor([[human_actions[idx]]], device=self.device, dtype=torch.float32)
-                    next_state, reward_pred, next_values, next_policy, reward_hidden = self.model.recurrent_inference(
-                        state,
-                        action_value,
-                        reward_hidden,
-                        training=True,
+                    action_value = torch.tensor(
+                        [[human_actions[idx]]], device=self.device, dtype=torch.float32
+                    )
+                    next_state, reward_pred, next_values, next_policy, reward_hidden = (
+                        self.model.recurrent_inference(
+                            state,
+                            action_value,
+                            reward_hidden,
+                            training=True,
+                        )
                     )
                     recurrent_states.append(next_state.detach().cpu())
                     reward_predictions.append(reward_pred.detach().cpu())
@@ -819,7 +669,9 @@ class EfficientZeroActivationEvaluator:
             "agreement_rate": agreement_rate,
             "mean_value": float(np.mean(value_scalars)) if value_scalars else None,
             "std_value": float(np.std(value_scalars)) if value_scalars else None,
-            "mean_policy_entropy": float(np.mean(policy_entropies)) if policy_entropies else None,
+            "mean_policy_entropy": float(np.mean(policy_entropies))
+            if policy_entropies
+            else None,
             "human_win": human_win,
             "human_score": human_score,
         }
@@ -844,7 +696,9 @@ class EfficientZeroActivationEvaluator:
 
     def _human_action_indices(self, play_doc: Dict[str, Any]) -> List[int]:
         if "_canonical" in play_doc and "actions" not in play_doc:
-            raise ValueError("Canonical play lacks the original human actions required by EfficientZero")
+            raise ValueError(
+                "Canonical play lacks the original human actions required by EfficientZero"
+            )
         raw_actions = play_doc.get("actions") or []
         converted = []
         for entry in raw_actions:
@@ -859,7 +713,9 @@ class EfficientZeroActivationEvaluator:
         if str(self.config.model.value_support.type) == "symlog":
             decoded = symexp(values)
         else:
-            decoded = DiscreteSupport.vector_to_scalar(values, **self.config.model.value_support)
+            decoded = DiscreteSupport.vector_to_scalar(
+                values, **self.config.model.value_support
+            )
         return decoded.mean(dim=0).squeeze()
 
     def _build_activation_payload(
@@ -892,17 +748,23 @@ class EfficientZeroActivationEvaluator:
             stacked = torch.cat(recurrent_values, dim=1)
             activations["recurrent_value_logits"] = stacked.permute(1, 0, 2)
         if recurrent_policies:
-            activations["recurrent_policy_logits"] = torch.cat(recurrent_policies, dim=0)
+            activations["recurrent_policy_logits"] = torch.cat(
+                recurrent_policies, dim=0
+            )
         if reward_predictions:
             activations["reward_predictions"] = torch.cat(reward_predictions, dim=0)
         return activations
 
     @staticmethod
-    def _compute_agreement(model_actions: List[int], human_actions: List[int]) -> Optional[float]:
+    def _compute_agreement(
+        model_actions: List[int], human_actions: List[int]
+    ) -> Optional[float]:
         overlap = min(len(model_actions), len(human_actions))
         if overlap == 0:
             return None
-        matches = sum(1 for idx in range(overlap) if model_actions[idx] == human_actions[idx])
+        matches = sum(
+            1 for idx in range(overlap) if model_actions[idx] == human_actions[idx]
+        )
         return matches / overlap
 
 
@@ -910,21 +772,39 @@ def _parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Evaluate EfficientZero on VGDL playthroughs and collect subnetwork activations.",
     )
-    parser.add_argument("--model", required=True, help="Path to the EfficientZero checkpoint (.pt).")
-    parser.add_argument("--dataset-root", required=True, help="Canonical release root or behavior/human directory.")
+    parser.add_argument(
+        "--model", required=True, help="Path to the EfficientZero checkpoint (.pt)."
+    )
+    parser.add_argument(
+        "--dataset-root",
+        required=True,
+        help="Canonical release root or behavior/human directory.",
+    )
     parser.add_argument("--game-name", help="Filter plays by VGDL game name.")
     parser.add_argument("--subj-id", help="Optional subject identifier.")
     parser.add_argument("--run-id", type=int, help="Optional run index.")
     parser.add_argument("--play-id", type=int, help="Specific play identifier.")
     parser.add_argument("--limit", type=int, help="Maximum number of plays to process.")
-    parser.add_argument("--device", help="Torch device string, e.g., 'cuda:0' or 'cpu'.")
+    parser.add_argument(
+        "--device", help="Torch device string, e.g., 'cuda:0' or 'cpu'."
+    )
     parser.add_argument(
         "--config-override",
         help="Optional path to a config override (YAML/JSON) or literal dict expression.",
     )
-    parser.add_argument("--save-activations", action="store_true", help="Persist captured activations to disk.")
-    parser.add_argument("--activations-dir", default="efficientzero_activations", help="Directory for saved activations.")
-    parser.add_argument("--output-csv", help="Optional CSV filepath for aggregated metrics.")
+    parser.add_argument(
+        "--save-activations",
+        action="store_true",
+        help="Persist captured activations to disk.",
+    )
+    parser.add_argument(
+        "--activations-dir",
+        default="efficientzero_activations",
+        help="Directory for saved activations.",
+    )
+    parser.add_argument(
+        "--output-csv", help="Optional CSV filepath for aggregated metrics."
+    )
     return parser.parse_args(argv)
 
 
@@ -936,7 +816,6 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
         Path(args.dataset_root),
         device=args.device,
         config_override=config_override,
-
     )
 
     if args.save_activations:
@@ -998,14 +877,18 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
     print("=" * 60)
     print(f"Total plays processed: {len(results)}")
 
-    agreement_values = [r["agreement_rate"] for r in results if r["agreement_rate"] is not None]
+    agreement_values = [
+        r["agreement_rate"] for r in results if r["agreement_rate"] is not None
+    ]
     if agreement_values:
         print(f"Average action agreement: {np.mean(agreement_values):.2%}")
     mean_values = [r["mean_value"] for r in results if r["mean_value"] is not None]
     if mean_values:
         print(f"Average predicted value: {np.mean(mean_values):.3f}")
     human_wins = sum(1 for r in results if r["human_win"])
-    print(f"Human wins: {human_wins}/{len(results)} ({100 * human_wins / len(results):.1f}%)")
+    print(
+        f"Human wins: {human_wins}/{len(results)} ({100 * human_wins / len(results):.1f}%)"
+    )
 
     if args.output_csv:
         df = pd.DataFrame(results)

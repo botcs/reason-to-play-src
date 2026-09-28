@@ -23,13 +23,37 @@ analysis = [
 ]
 download = ["huggingface_hub>=1,<2"]
 features = ["torch>=2.2"]
+# Checkpoint inference and extraction; training uses its separate upstream environment.
+efficientzero = [
+  "torch>=2.2",
+  "numpy>=1.26,<3",
+  "pandas>=2.2,<4",
+  "omegaconf>=2.3,<3",
+  "opencv-python-headless>=4.11,<5",
+  "pygame>=2.6,<3",
+  "gym==0.26.2",
+  "scikit-learn>=1.5,<2",
+  "setuptools<82",
+]
 
 [tool.setuptools.packages.find]
-where = ["src"]
-include = ["reason_to_play*"]
+where = ["src", "."]
+include = [
+  "reason_to_play*",
+  "agents",
+  "agents.efficientzero",
+  "agents.efficientzero.inference*",
+  "agents.efficientzero.environment*",
+  "src",
+  "src.vgdl*",
+]
+exclude = ["agents.efficientzero.training*"]
 
 [tool.setuptools.package-data]
 "reason_to_play.resources" = ["fmriprep/**/*"]
+"agents.efficientzero" = ["*.json"]
+"agents.efficientzero.inference" = ["LICENSE", "PROVENANCE.json"]
+"agents.efficientzero.environment" = ["PROVENANCE.json", "*.yaml", "all_games*/*.txt"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]

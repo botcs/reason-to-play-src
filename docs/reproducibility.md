@@ -72,7 +72,12 @@ is outside the bounded validation reported here.
 Dataset analysis has its own smaller [installation](guides/dataset-analysis.md#install),
 also available through `requirements-analysis.txt`. DDQN and EfficientZero use
 the [baseline environment](guides/baselines.md), including its separately
-pinned engines and hardware-appropriate Torch build. Raw-MRI reconstruction
+pinned engines and hardware-appropriate Torch build. EfficientZero feature
+extraction runs directly as `python -m agents.efficientzero.extract_features`
+or `python -m agents.efficientzero.extract_traces`. Its optional pinned
+[training submodule](guides/baselines.md#efficientzero-training) has a separate
+upstream environment and is not needed for analysis or feature extraction.
+Raw-MRI reconstruction
 requires the container and external inputs in the
 [fMRI guide](guides/fmri-preprocessing.md).
 

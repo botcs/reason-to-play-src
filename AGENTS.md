@@ -38,8 +38,11 @@ explicit experiment configuration. Read this guide before changing code.
 | Encoding fits, ROI aggregation and neural figures | `src/reason_to_play/analysis/neural/` |
 | Behavioral episode tables and figures | `src/reason_to_play/analysis/behavioral/` |
 | DDQN activation extraction | `src/reason_to_play/features/ddqn.py` |
+| EfficientZero activation and trace extraction | `agents/efficientzero/extract_features.py`, `extract_traces.py`; model inputs in `observations.py` |
+| EfficientZero runtime and environment | `agents/efficientzero/inference/`, `environment/` |
+| Optional EfficientZero training | `agents/efficientzero/training/` submodule; `prepare_training_config.py` creates its local experiment config |
 | Study settings | `experiments/neurips2026/` |
-| Baseline integration and source pins | `baselines/` |
+| Baseline integration and source pins | `baselines/`; EfficientZero pins and provenance in `agents/efficientzero/` |
 | Dataset inventory, selection and catalogue preparation | `scripts/release/` |
 
 Read the relevant module and its tests before editing. Update this map when
@@ -84,7 +87,11 @@ moving an implementation; do not leave a second implementation at the old path.
   the analysis methods before modifying those contracts.
 - Distinct baseline engine revisions and inference runtimes are intentional.
   Preserve their isolation, licenses and provenance manifests; do not deduplicate
-  snapshots based on matching filenames or merge their import paths.
+  snapshots based on matching filenames or merge their import paths. EfficientZero
+  training is an optional upstream submodule pinned to
+  `29157d4892afd9467b1bd0994de1355086145490`; analysis and feature extraction must
+  work without initializing it. Use direct Python modules for extraction and
+  upstream `python -m ez.train` for training; see the [baseline guide](docs/guides/baselines.md).
 
 ## Implementation and documentation
 
@@ -114,8 +121,8 @@ The Ruff commands below cover the existing configured lint scope; the pytest
 command includes both the main and neural suites:
 
 ```sh
-ruff check src/ tests/ tools/
-ruff format --check src/ tests/ tools/
+ruff check src/ agents/ tests/ tools/
+ruff format --check src/ agents/ tests/ tools/
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q
 ```
 

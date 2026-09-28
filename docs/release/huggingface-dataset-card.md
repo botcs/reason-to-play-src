@@ -138,6 +138,12 @@ The [dataset analysis guide](https://github.com/botcs/reason-to-play-src/blob/ma
 starts from the downloaded database: ordinary behavioral and neural analysis
 requires neither OpenNeuro BSON nor raw MRI, private AWS access or an online
 atlas download. Optional raw-data reconstruction is documented separately.
+EfficientZero feature extraction uses the included inference and environment
+code. Its optional pinned upstream training submodule is needed only for
+training; initialization and its separate environment are covered in the
+[baseline guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/baselines.md#efficientzero-training).
+Full retraining and exact producing-revision attribution for every checkpoint
+remain outside the validated scope.
 
 Use the code and dataset revisions recorded for the release when reproducing
 paper results. New experiments should state their own cohorts, models,

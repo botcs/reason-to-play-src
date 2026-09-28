@@ -6,7 +6,8 @@
     "ez/agents/__init__.py omits training-agent registry imports",
     "ez/utils/format.py imports Ray only in queue constructors and OpenCV only in image-codec functions",
     "base_model.DynamicsNetwork creates the float32 action plane on state.device instead of unconditional CUDA; enables CPU inference without changing action encoding",
-    "No model architecture, weights, forward pass, normalization, or support math changed"
+    "No model architecture, weights, forward pass, normalization, or support math changed",
+    "Use qualified agents.efficientzero.inference imports so feature extraction cannot load the optional trainer package"
   ],
   "files": [
     {
@@ -22,7 +23,7 @@
     {
       "path": "ez/agents/models/__init__.py",
       "source_sha256": "8cada372fc0c6415c1f44fc51af855ce75c301cf2a9bb57c609eea9ddfc2d8e5",
-      "adapted_sha256": "8cada372fc0c6415c1f44fc51af855ce75c301cf2a9bb57c609eea9ddfc2d8e5"
+      "adapted_sha256": "30b045b115f49c9fa07cd94084f92a7349d9468d813573bdba558f02444dd54b"
     },
     {
       "path": "ez/agents/models/base_model.py",
@@ -43,6 +44,14 @@
       "path": "LICENSE",
       "source_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
       "adapted_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "path": "__init__.py",
+      "source_sha256": null,
+      "adapted_sha256": "27962755d5f6aa481d5d7dfa6928f8e6427e3b5cbcdee45b086e792cfda8b6d9",
+      "modifications": [
+        "Define the inference package boundary"
+      ]
     }
   ]
 }

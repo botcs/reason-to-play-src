@@ -4,15 +4,15 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 424,
+      "passed": 428,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across src/, tests/ and tools/ (98 scoped files).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/ and tools/ (102 scoped files).",
     "documentation": {
-      "links_and_anchors_checked": 144,
+      "links_and_anchors_checked": 151,
       "failures": 0,
       "original_source_reference_and_translator_unchanged": true
     }
@@ -58,7 +58,20 @@
       "deliberately_invalid_session_exit_code": 1
     },
     "extraction_failure_status": "Generic, V3.2 and V4 batch tests distinguish completed, skipped and failed sessions; continuation retains successful outputs while still failing the command when any selected session fails.",
-    "efficientzero": "Bundled runtime and extractor ran a small recorded trajectory on CPU and produced all requested layer traces; no private checkout was required. Final-paper checkpoint identity remains unresolved.",
+    "efficientzero": {
+      "cpu_inference": true,
+      "analysis_and_extraction_without_training_submodule": true,
+      "optional_training_repository": "https://github.com/A-Andrews/EfficientZeroV2",
+      "optional_training_revision": "29157d4892afd9467b1bd0994de1355086145490",
+      "full_training_validated": false,
+      "recorded_trace_frames": 64,
+      "trace_tensors": 748,
+      "trace_elements": 8033696,
+      "activation_tensors": 9,
+      "activation_elements": 1286838,
+      "activation_frames": 234,
+      "checkpoint_attribution": "These checks use an available checkpoint; attribution of every final-paper feature array remains unresolved."
+    },
     "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
     "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
     "figures": "Historical behavioral and neural figure commands ran against separately held tables; partial-table neural plotting also passed a headless synthetic smoke. Those tables are not included in this code release.",
@@ -127,14 +140,21 @@
   "dataset_package_validation": "Separate local HF package loaded through its README configurations with datasets 4.8.5 using split=data. Both catalogue configurations loaded successfully; no remote upload was performed.",
   "package": {
     "build": "setuptools wheel",
-    "imports_checked": 11,
-    "module_help_checked": 10,
+    "imports_checked": 14,
+    "module_help_checked": 13,
     "import_location": "Installed wheel outside the checkout",
     "bson_or_pymongo_installed": false,
     "single_file_reader": {
-      "plays": 20,
-      "frames": 12775,
-      "scanner_runs": 3
+      "participant": "sub-13",
+      "game": "bait_vgfmri4",
+      "plays": 29,
+      "frames": 8592
+    },
+    "efficientzero": {
+      "training_submodule_present": false,
+      "training_imports_blocked": true,
+      "cpu_checkpoint_trace_frames": 64,
+      "source_manifest_files_present": true
     }
   },
   "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."

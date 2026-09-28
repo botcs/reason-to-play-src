@@ -96,10 +96,13 @@ python -m src.llm_eval.human_replay.run_replay \
 | Compare behavioral performance | [Behavioral analysis](docs/reproducibility.md#behavioural-analysis-without-cloud-credentials) |
 | Fit neural encoding models and aggregate their results | [Neural analysis](docs/guides/dataset-analysis.md#neural-encoding-from-processed-inputs) |
 | Run DDQN, EfficientZero and EMPA integrations | [Baselines](docs/guides/baselines.md) |
+| Train EfficientZero with the optional pinned upstream submodule | [EfficientZero training](docs/guides/baselines.md#efficientzero-training) |
 
 Use the documented Python modules and scripts directly. Workflow details live
 in these guides; [AGENTS.md](AGENTS.md) maps tasks to their implementations and
 tests. Keep the paper's study settings explicit when adapting an experiment.
+EfficientZero analysis and feature extraction use included code; only training
+requires initializing `agents/efficientzero/training/`.
 
 ## Data
 

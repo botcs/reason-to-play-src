@@ -1,6 +1,6 @@
 # Ruff configuration for infer-vgdl
 # VGDL engine (src/vgdl/, src/utils.py) is forked upstream code -- excluded.
-extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/extraction/"]
+extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/extraction/", "agents/efficientzero/environment/", "agents/efficientzero/inference/", "agents/efficientzero/training/", "agents/efficientzero/extract_features.py", "agents/efficientzero/extract_traces.py"]
 
 [lint.per-file-ignores]
 # These files use sys.path.insert() before imports (intentional E402)

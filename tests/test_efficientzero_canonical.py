@@ -1,6 +1,5 @@
 """EfficientZero adapters consume human JSON records."""
 
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -10,27 +9,21 @@ import sys
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = ("get_efficientzero_activations", "get_attention_matrix")
+MODULES = (
+    "agents.efficientzero.extract_features",
+    "agents.efficientzero.extract_traces",
+)
 
 
 def environment():
     env = os.environ.copy()
     env.update(
-        PYTHONPATH=os.pathsep.join(
-            str(ROOT / path)
-            for path in (
-                "baselines/vendor/rc_rl/ez",
-                "baselines/vendor/efficientzero",
-                "baselines/extraction/efficientzero",
-                "src",
-                ".",
-            )
-        ),
+        PYTHONPATH=os.pathsep.join(str(ROOT / path) for path in ("src", ".")),
         SDL_VIDEODRIVER="dummy",
         SDL_AUDIODRIVER="dummy",
         PYGAME_HIDE_SUPPORT_PROMPT="1",
-        OMP_NUM_THREADS="1",
-        OPENBLAS_NUM_THREADS="1",
+        OMP_NUM_THREADS=os.environ.get("OMP_NUM_THREADS", "32"),
+        OPENBLAS_NUM_THREADS=os.environ.get("OPENBLAS_NUM_THREADS", "32"),
     )
     return env
 
@@ -112,7 +105,7 @@ assert play['states'][1]['objects']['avatar']['original-avatar']['rect']['pos'] 
 assert play['actions'] == [['right', 1000.05], ['spacebar', 1000.1]]
 incomplete = dict(play)
 incomplete.pop('actions')
-if sys.argv[1] == 'get_attention_matrix':
+if sys.argv[1] == 'agents.efficientzero.extract_traces':
     assert loader.get_play(play_key=play['_id'])['_id'] == play['_id']
     assert module._human_action_indices(play) == [2, 5]
     action_indices = module._human_action_indices
@@ -195,65 +188,52 @@ else:
     assert completed.returncode == 0, completed.stdout + completed.stderr
 
 
-@pytest.mark.parametrize("argument", ["separate", "equals"])
-def test_wrapper_resolves_canonical_root_before_changing_cwd(
-    argument, tmp_path, monkeypatch
-):
-    spec = importlib.util.spec_from_file_location(
-        "ez_wrapper", ROOT / "baselines/run_efficientzero.py"
+@pytest.mark.parametrize("module", MODULES)
+def test_direct_extraction_command_from_outside_checkout(module, tmp_path):
+    completed = subprocess.run(
+        [sys.executable, "-m", module, "--help"],
+        cwd=tmp_path,
+        env=environment(),
+        text=True,
+        capture_output=True,
+        timeout=45,
     )
-    wrapper = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(wrapper)
-    monkeypatch.chdir(tmp_path)
-    args = (
-        ["--dataset-root", "release"]
-        if argument == "separate"
-        else ["--dataset-root=release"]
-    )
-    argv, env, _ = wrapper.command("traces", tmp_path, args)
-    expected = str(tmp_path / "release")
-    assert argv[-1] == (
-        expected if argument == "separate" else "--dataset-root=" + expected
-    )
-    assert str(ROOT / "src") in env["PYTHONPATH"].split(os.pathsep)
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "--dataset-root" in completed.stdout
 
 
 @pytest.mark.parametrize("module", MODULES)
-def test_recorded_dimensions_replace_ascii_layout_without_changing_pixels(
-    module, behavior_fixture, tmp_path
-):
+def test_recorded_frames_match_reference_pixels(module, behavior_fixture, tmp_path):
     target, _ = behavior_fixture
     script = r"""
-import importlib, numpy as np, sys
+import hashlib, importlib, numpy as np, sys
 module = importlib.import_module(sys.argv[1])
 loader = module.VGDLZStateLoader(sys.argv[2])
 recorded = loader.get_play(subj_id=13)
-original = dict(recorded, level_str="wwww\nwA.w\nwwww\n")
-original.pop('grid_size')
-# A complete recorded state includes walls as well as the moving avatar.
-# The earlier minimal source-import fixture deliberately omitted its walls;
-# without this, the old renderer keeps walls invented from the ASCII map.
-for state in original['states']:
+# Reference pixels come from RC_RL b1e33768b9f1d799d7780a7e6556d328be5174ab,
+# including its palette, 30-pixel canvas, clipping and OpenCV resize/grayscale.
+# The fixture includes walls, fractional avatar positions and an emptied group.
+for state in recorded['states']:
     state['objects']['wall'] = {
         f'{row}-{col}': {
-            'x': col * 35, 'y': row * 35, 'color': list(module.colors.BLACK),
+            'x': col * 35, 'y': row * 35, 'color': [55, 71, 79],
             'rect': {'pos': [col * 35, row * 35], 'size': [35, 35]},
         }
-        for row, line in enumerate(original['level_str'].splitlines())
+        for row, line in enumerate(['wwww', 'wA.w', 'wwww'])
         for col, character in enumerate(line) if character == 'w'
     }
-# Both paths see an explicit emptied group when the avatar disappears.
-original['states'][-1]['objects']['avatar'] = {}
-for channels in (1, 3):
-    for resize in (None, 84):
-        reference = loader.render_frames(original, resize=resize, num_channels=channels)
-        actual = loader.render_frames(recorded, resize=resize, num_channels=channels)
-        np.testing.assert_array_equal(reference, actual)
-        from reason_to_play.features.efficientzero import render_recorded_frames
-        direct = render_recorded_frames(recorded, recorded['states'], resize=resize, num_channels=channels)
-        np.testing.assert_array_equal(reference, direct)
-        if resize is None:
-            assert actual.shape[-2:] == (90, 120), actual.shape
+recorded['states'][-1]['objects']['avatar'] = {}
+expected = {
+    (1, None): '7a211e87d106a782389f81f9604620299f2fd288fd8e25b15fe07ca209bd7a89',
+    (1, 84): '8ae6a9778696c01f8d434f9a89672e308fc83d76f428eae375ac415dc3259dfe',
+    (3, None): '1fa46363db4df21fe3f25c81175add021920bd204a1225069495f0226fd7783f',
+    (3, 84): '560f38b312848f94d3cc8c86a92436a8e3af9c555000d229f688f4007490d3e7',
+}
+for (channels, resize), digest in expected.items():
+    actual = loader.render_frames(recorded, resize=resize, num_channels=channels)
+    assert actual.dtype == np.uint8
+    assert hashlib.sha256(actual.tobytes()).hexdigest() == digest
+    assert actual.shape == (3, channels, 90, 120) if resize is None else actual.shape == (3, channels, 84, 84)
 for dimensions in ([4, 0], [True, 3], [4.5, 3], [4]):
     try:
         loader.render_frames(dict(recorded, grid_size=dimensions))
@@ -261,6 +241,14 @@ for dimensions in ([4, 0], [True, 3], [4.5, 3], [4]):
         assert 'grid_size' in str(error)
     else:
         raise AssertionError('Invalid dimensions accepted: ' + str(dimensions))
+missing = dict(recorded)
+missing.pop('grid_size')
+try:
+    loader.render_frames(missing)
+except ValueError as error:
+    assert 'grid_size' in str(error)
+else:
+    raise AssertionError('Missing recorded dimensions accepted')
 """
     completed = subprocess.run(
         [sys.executable, "-c", script, module, str(target)],
