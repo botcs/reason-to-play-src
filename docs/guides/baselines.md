@@ -140,7 +140,7 @@ configuration, source and output hashes. This identifies the new extraction;
 it does not retroactively identify the checkpoint behind an archived trace.
 
 To sample existing traces at the released BOLD samples, use the human JSONs
-and that participant's BOLD archive:
+and that participant's directory containing `bold.npz` and `samples.npz`:
 
 ```bash
 python -m analysis.neural.align_efficientzero \
@@ -153,7 +153,7 @@ python -m analysis.neural.align_efficientzero \
 
 The original play ID joins each trace to its human frames. Embedded participant,
 run and game metadata must agree with the recording; a directory label alone
-does not establish identity. The BOLD archive fixes the sample order and retained
+does not establish identity. `samples.npz` fixes the sample order and retained
 play lengths. Frame timestamps are rounded to the nearest scanner TR, with the
 same AR(1) offset as BOLD, and activations are averaged within each retained
 sample. No raw MRI or source behavioural archive is needed.
@@ -162,7 +162,7 @@ The default output contains four representation and seven initial value/policy
 hooks under their full names. `--include-dynamics` additionally includes the
 four sparse dynamics/reward hooks, averaging entries at each engine timestep.
 Missing plays or hooks have explicit coverage records. The output binds to the
-BOLD archive's checksum and ordered sample identities; the adjacent
+BOLD and samples archives' checksums and ordered sample identities; the adjacent
 `.npz.alignment.json` records per-layer coverage. Keep the two files together.
 The [dataset guide](dataset-analysis.md#neural-encoding-from-processed-inputs) describes fitting
 these features. Their association with archived paper results is covered in

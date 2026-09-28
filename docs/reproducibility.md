@@ -7,8 +7,8 @@
 Start with the [dataset analysis guide](guides/dataset-analysis.md) to analyze
 canonical human recordings, processed BOLD and model features from a local
 copy of the derivative dataset. Ordinary analysis needs neither OpenNeuro BSON
-nor raw MRI, author cloud credentials or an online atlas download. The release
-is being prepared; pin the verified dataset and code revisions when published.
+nor raw MRI, author cloud credentials or an online atlas download. The dataset's
+`files` catalogue lists verified downloads. Pin the dataset and code revisions.
 
 For new gameplay or feature extraction, follow the examples below. Install the
 relevant optional dependencies, then call the Python modules from any working

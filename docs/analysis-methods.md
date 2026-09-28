@@ -46,11 +46,13 @@ retained configurations.
 
 The pipeline uses the settings above with these input and execution contracts:
 
-- Paths are explicit, bundled baseline sources are checksum-verified, and
-  optional external checkouts are supported.
-- The encoder loads the base aligner's separate EZ/HRR files and filters all
-  aligned feature families together when restricting levels.
-- LLM alignment derives run bounds from the base file's retained play lengths.
+- Paths are explicit, and baseline extraction uses the checksum-verified
+  implementations included with the package.
+- The encoder loads a participant's BOLD, samples and nuisance files and only
+  the requested model-feature layer. Level restrictions apply the same sample
+  selection to these arrays. Feature associations verify both BOLD and samples
+  checksums, plus the ordered-sample digest.
+- LLM alignment derives run bounds from the retained play lengths in `samples.npz`.
   Behavioral timestamps after the final acquired scan volume stay clipped, as
   they were in base alignment; unclipped plays keep the same timing and values.
 - ROI exports record `fit_condition` from result metadata, including shuffled

@@ -3,8 +3,8 @@
 The analysis input is a local copy of the derivative dataset. Behavioral
 analysis, encoding fits and ROI aggregation use its canonical human recordings,
 processed BOLD, features and atlas. They do not require the OpenNeuro BSON dump,
-raw MRI, AWS credentials or a model API. The dataset is still being prepared;
-use a verified dataset commit when it is published. See the
+raw MRI, AWS credentials or a model API. Select downloads from the dataset's
+`files` catalogue and pin a verified dataset commit. See the
 [workflow overview](../reproducibility.md)
 for generating new gameplay or features.
 
