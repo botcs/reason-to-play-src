@@ -14,12 +14,7 @@ tags:
 
 # VGDL-fMRI: Reason to Play
 
-**Publication is in progress.** The `files` catalogue lists verified downloads;
-`planned_files` describes the complete selection. Use a dataset commit to pin
-your downloads.
-
-VGDL-fMRI connects human video-game learning, fMRI recordings, model gameplay
-and model representations. It accompanies
+Human video-game learning, fMRI recordings, model gameplay and representations for
 [Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs and Human Game Learners](https://openreview.net/forum?id=Y1oX1yuaWM),
 accepted at **NeurIPS 2026**.
 
@@ -27,20 +22,21 @@ accepted at **NeurIPS 2026**.
 [Interactive results](https://botcs.github.io/reason-to-play/) ·
 [Original human dataset](https://doi.org/10.18112/openneuro.ds004323.v1.0.0)
 
-## Contents
+**TL;DR:** Explore the replays on the website, or download the human recordings,
+model features and processed fMRI inputs for analysis. The complete release is
+**33,557 files, 4.80 TB** (4,804,604,182,915 bytes); use the catalogues below to
+select files and pin your downloads to a dataset commit.
 
-The dataset contains self-contained human behaviour, model runs and the inputs
-for behavioural and neural analyses. The release manifest records file counts,
-sizes and checksums.
+## Contents
 
 | Component | Contents |
 | --- | --- |
-| Human behavior | One complete human JSON per participant and game, covering levels and attempts across scanner runs, with every recorded engine state, original timestamps, inputs/events, play IDs and nullable outcomes; selected task behaviour from 32 participants |
-| Neural analysis inputs | Processed BOLD, DDQN/theory arrays, nuisance variables, sample order, model features sampled at scanner times, and the atlas/common mask used for ROI analysis |
-| Model representations | Headline LLM activations, earlier-cohort comparisons and selected controls |
-| Generated behavior | Model gameplay with its system prompts, observations, actions and rationales in each replay file |
+| Human behavior | Recorded trajectories and prompts from 32 participants |
+| Neural analysis inputs | Processed BOLD, ordered samples, nuisance variables, model features sampled at scanner times, and the atlas/common mask for ROI analysis |
+| Model representations | Headline LRM activations, earlier-cohort comparisons and selected controls |
+| Generated behavior | Gameplay with system prompts, observations, actions and rationales |
 | Baselines and analyses | Candidate baseline traces, selected checkpoints and neural/behavioral results |
-| Catalogues and source records | Dataset paths and checksums, participant, model and condition IDs, source attribution and model/analysis settings |
+| Catalogues | File paths, sizes, checksums, participant/model/condition IDs, source attribution and analysis settings |
 
 ```text
 behavior/
@@ -76,44 +72,18 @@ catalog/
 manifest.jsonl.gz
 ```
 
-`behavior/` holds recorded gameplay, including replay JSON files. `features/`
-holds activations associated with recorded frames or selected prompt steps.
-`neural/sub-XX/model-features/` holds representations sampled at that
-participant's retained scanner times. These time bases are distinct.
+`behavior/` holds gameplay; `features/` holds activations at recorded frames or
+selected prompt steps; `neural/sub-XX/model-features/` holds representations at
+retained scanner times. These time bases are distinct. Optional fMRIPrep outputs
+under `reconstruction/` support processing from
+[raw OpenNeuro MRI](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).
 
-Each participant's `bold.npz` contains processed BOLD and its voxel mask;
-`samples.npz` contains ordered sample/play identities and timing;
-`nuisance.npz` contains measured button, score and time variables.
-DDQN, EfficientZero, LRM and EMPA arrays are peers under `model-features/`.
-Selected fMRIPrep outputs under `reconstruction/` support optional
-reconstruction from raw MRI; ordinary analysis starts with these processed inputs.
-Website assets contain the browser's RDM exports, indexes and compact replay
-copies under `website-assets/replays/human/` and `website-assets/replays/lrm/`.
-These copies retain the displayed frames, fractional positions, timing and
-complete conversations. They omit engine and raw-input fields unused by the
-browser; the complete `behavior/` recordings remain the analysis inputs.
-The [data format guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/data-format.md#website-replay-copies)
-describes the retained fields and the generation command.
-
-EfficientZero provides **32 scanner-sampled archives with 11 named hooks each**.
-All 6,642 plays contributing to the 46,581 retained scanner samples have source
-features for every included hook. The raw trace collection covers 6,985 of the
-6,994 task attempts; the nine unavailable traces concern attempts outside this
-retained sample selection. Per-layer coverage describes source availability,
-not whether every scanner bin has a nonzero feature vector.
-
-The adjacent alignment association records the extractor hook names and their
-coverage. These names do not establish a mapping to the numeric layer labels in
-archived paper results, or identify the exact checkpoint that produced every
-original trace. Each EfficientZero archive's manifest entry also records its human
-JSON inputs and checksums, sampling policy, and BOLD/sample association.
-
-Raw MRI is available from [OpenNeuro ds004323, version 1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).
-Historical and unreported feature extractions are excluded. The selection
-also omits **630 raw random-initialization and context-ablation tensors** used
-by paper controls. Their prompt records, selected aligned features and results
-remain included. Recomputing their alignment requires the omitted tensors or
-another extraction run; exact regeneration is not guaranteed.
+`website-assets/` contains RDM exports, indexes and **384 compact replay files**
+(147,759,422 bytes). The copies under `replays/human/` and `replays/lrm/` retain
+displayed frames, fractional positions, timing and complete conversations;
+they omit engine and raw-input fields unused by the browser. Use the complete
+`behavior/` recordings for analysis. See the
+[replay format](https://github.com/botcs/reason-to-play-src/blob/main/docs/data-format.md#website-replay-copies).
 
 ## Behavioral analysis inputs
 
@@ -130,128 +100,123 @@ within a continued run; chronological frame boundaries distinguish attempts.
 
 ## Human behaviour files and prompt records
 
-The human data contains **576 JSON files**: 192 participant/game pairs across
-32 participants, with three prompt conditions each. Together these files occupy
-**411,040,889 compressed bytes** (411 MB); one condition is approximately 137 MB.
+The **576 human JSON files** cover 192 participant/game pairs and three prompt
+conditions (`elaborate`, `minimal`, `oracle`). They occupy **411,040,889 compressed
+bytes** (411 MB); one condition is approximately 137 MB. Conditions repeat the
+same measured trajectory. Analysis readers select `elaborate` by default to
+count each observation once.
 
-Each human behaviour JSON contains one participant's plays of one game across
-levels, attempts and scanner runs. The path is
-`behavior/human/sub-XX/GAME/CONDITION.human.replay.json.gz`. The three human
-prompt conditions (`elaborate`, `minimal`, `oracle`) each embed the measured
-trajectory; analysis readers select `elaborate` by default to count each
-observation once. Every play retains its original identity, scanner-run
-association and timing. A frame is one recorded engine state, including states
-with no action. Timestamps retain the original clock; states are not invented
-in gaps between plays. Each file carries the translated game description used
-by the Colas-based Python engine and browser interpreter, its trajectory and
-scanner metadata. The file stores sprite positions rather than screenshots
-or an additional ASCII trajectory.
+Each `behavior/human/sub-XX/GAME/CONDITION.human.replay.json.gz` contains all
+plays across levels, attempts and scanner runs for that participant/game, with
+the translated game description, exact prompts and scanner metadata. It retains
+play IDs, nullable outcomes, original timestamps, inputs/events and every
+recorded engine state, including states with no action. No states are invented
+between plays. Sprite positions retain fractional rendering coordinates;
+screenshots and duplicate ASCII trajectories are not stored.
 
-Human files retain fractional positions from participants' recorded
-rendering rectangles. Inspect the trajectories with the
-[web replay viewer](https://botcs.github.io/reason-to-play/replay.html);
-Python code supplies numerical and image inputs for analysis and model runs.
-
-Each replay embeds its per-game conversation alongside its trajectory. Selected
-steps retain the original play ID and frame index for correspondence with model
-features; opening the replay does not require fetching a separate human file.
-The release includes action-only human prompts and model-generated gameplay;
-`.narration` and `.imputed` replay files are excluded because they were not used
-in the paper. Exact prompts remain model inputs. Model-generated gameplay
-rationales are never participant reports.
+Selected prompt steps retain their play ID and frame index for correspondence
+with model features. The release includes action-only human prompts and
+model-generated gameplay. `.narration` and `.imputed` files were not used in the
+paper and are excluded. Generated rationales are not participant reports.
 See the [data format guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/data-format.md)
-for schemas, observation identities and the meanings of frames and actions.
-The [game-translation history](https://github.com/botcs/reason-to-play-src/blob/main/docs/sources/README.md#game-translation)
-includes the historical translator; the
-[original behavioural schema reference](https://github.com/botcs/reason-to-play-src/blob/main/docs/sources/tomov23-behavior-notes.md)
-supports further source-data archaeology.
+for schemas and the [source references](https://github.com/botcs/reason-to-play-src/blob/main/docs/sources/README.md)
+for game translation and the original behavioral schema.
 
 ## Catalogues and downloads
 
-The publication package provides file and human-play catalogues. Each artifact
-row records its dataset path, source attribution and publication state, with a
-content checksum once the payload has been byte-verified. Planned entries can
-have a null checksum until their bytes have been read and checked. The human-play catalogue contains **6,994 task attempts**
-covering **1,661,744 recorded engine states**, counted once across prompt
-conditions. Practice attempts are excluded from this task dataset; upper-level
-and cohort flags remain available for choosing an analysis.
-
-During incremental publication, `planned_files` describes the complete
-selection. `files` contains only uploaded, byte-verified payloads. `human_plays` is a metadata
-table; its availability does not imply that every referenced payload is online.
-All configurations use a `data` split, which is not a train/test split.
-
-Load the catalogues with ordinary Python calls:
+`files` lists every released payload with its path, source attribution, verified
+byte count and SHA-256 checksum. `human_plays` links **6,994 task attempts** and
+**1,661,744 recorded engine states** to their replay files, counted once across
+prompt conditions. Practice attempts are excluded; cohort and upper-level flags
+support further selection. Both catalogues use a `data` split, not train/test
+splits.
 
 ```python
 from datasets import load_dataset
 
-revision = "REPLACE_WITH_VERIFIED_DATASET_COMMIT"
-plan = load_dataset(
-    "csbotos/reason-to-play", "planned_files", split="data", revision=revision
+revision = "0c674c3ff19b64a55f3fba6d862f5fb828292b74"
+files = load_dataset(
+    "csbotos/reason-to-play", "files", split="data", revision=revision
 )
 plays = load_dataset(
     "csbotos/reason-to-play", "human_plays", split="data", revision=revision
 )
 ```
 
-Catalogue loading fetches metadata. In the file catalogue, `release_path` and
-`sha256` identify a payload. In `human_plays`, the corresponding columns are
-`source_release_path` and `source_payload_sha256`; several attempts can point to
-the same participant/game JSON. These hashes describe the compressed bytes.
-The release manifest also records each human file's schema,
-counts, checksum and participant/model/condition IDs. Original S3 object identifiers are
-source attribution; use dataset-relative paths for Hugging Face downloads.
+This fetches metadata. In `files`, the `release_path` column identifies each
+payload and `sha256` hashes its downloaded bytes. The corresponding `human_plays`
+columns are `source_release_path` and `source_payload_sha256`; several attempts
+can share one JSON file. Use these dataset-relative paths for downloads;
+original S3 identifiers record source attribution.
+
+For example, download one participant/game file at the same revision:
+
+```python
+from huggingface_hub import hf_hub_download
+
+path = hf_hub_download(
+    repo_id="csbotos/reason-to-play",
+    repo_type="dataset",
+    filename="behavior/human/sub-01/bait_vgfmri3/elaborate.human.replay.json.gz",
+    revision=revision,
+)
+```
 
 ## Using the research code
 
-The code supports model gameplay and human-to-model neural comparisons through
-Python functions and direct module calls. The
+The
 [workflow guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/reproducibility.md)
-contains installation and execution instructions for gameplay, human replay,
-activation extraction, fMRI preprocessing and analysis. The top-level
-[AGENTS.md](https://github.com/botcs/reason-to-play-src/blob/main/AGENTS.md)
-helps coding agents navigate the repository. Commands and implementation paths
-are maintained in the code documentation.
+provides installation and direct Python commands for gameplay, replay,
+activation extraction, fMRI processing and analysis. Start with the
+[dataset analysis guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/dataset-analysis.md)
+for behavioral and neural comparisons from these downloads; raw MRI, BSON,
+private AWS access and additional atlas downloads are unnecessary.
 
-The [dataset analysis guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/dataset-analysis.md)
-starts from the downloaded database: ordinary behavioral and neural analysis
-requires neither OpenNeuro BSON nor raw MRI, private AWS access or an online
-atlas download. Optional raw-data reconstruction is documented separately.
-EfficientZero feature extraction uses the included inference and environment
-code. Its optional pinned upstream training submodule is needed only for
-training; initialization and its separate environment are covered in the
-[baseline guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/baselines.md#efficientzero-training).
-Full retraining and exact producing-revision attribution for every checkpoint
-remain outside the validated scope.
+For neural fits, download a participant's `bold.npz` (BOLD and voxel mask),
+`samples.npz` (ordered play/sample identities and timing), `nuisance.npz`
+(button, score and time variables) and selected `model-features/` archives.
+Download the adjacent `.npz.alignment.json` records for BOLD, nuisance and
+features too. Readers verify file hashes and the exact BOLD/sample order before
+fitting. ROI analysis uses the supplied atlas and common mask across all 32
+participants, including when analyzing a smaller cohort.
 
-Separate model-feature archives have an adjacent `.npz.alignment.json`
-association record. Download it with the archive: the encoding reader checks
-the feature hash and its binding to both `bold.npz` and `samples.npz`,
-including their sample order, before fitting. BOLD and nuisance files also have
-adjacent associations; download those with the participant files. Input coverage is recorded separately from alignment verification;
-zero-filled rows for unavailable source plays are not model observations.
-Encoding results preserve declared coverage in `alignment_verification_json`.
-Coverage intervals refer to the original ordered samples. The documented
-fitting mask remains a separate numerical rule; see the dataset analysis guide
-for its policy and the recorded sample counts.
-
-Use the code and dataset revisions recorded for the release when reproducing
-paper results. New experiments should state their own cohorts, models,
-conditions and analysis settings.
+Coverage is separate from alignment: zero-filled intervals for unavailable
+source plays are not model observations. Results retain coverage in
+`alignment_verification_json`, with intervals in the original sample order.
+The fitting mask is a separate numerical rule documented in the analysis guide.
 
 ## Interpretation and limitations
 
-Human outcomes are three-valued; death events distinguish avatar deaths from
-incomplete recordings. Engine frames, non-idle keypress frames and model
-decisions are separate clocks. Practice/cohort/level exclusions must remain
-explicit. Generated rationales are model outputs, not participant reports.
+Human outcomes are three-valued; check death events before classifying a null
+outcome as incomplete. Engine frames, non-idle keypress frames and model
+decisions are separate clocks. Keep cohort, level and practice exclusions
+explicit when selecting comparisons.
 
-The [reproduction limits](https://github.com/botcs/reason-to-play-src/blob/main/docs/reproduction-limits.md)
-describes missing feature/result cells, unresolved checkpoint attribution and
-the EfficientZero 15-hook versus 11-layer-label mapping. These gaps limit exact
-paper reproduction. Code smoke tests do not establish full MRI preprocessing or
-GPU-scale feature reproduction.
+EfficientZero has **32 scanner-sampled archives with 11 named hooks each**.
+All 6,642 plays contributing to 46,581 retained scanner samples have source
+features for every included hook. Raw traces cover 6,985 of 6,994 task attempts;
+the nine missing traces fall outside this retained selection. Coverage describes
+source availability, not nonzero feature vectors in every scanner bin. The
+alignment records identify hooks and coverage; manifest entries identify human
+inputs and checksums, sampling policy and BOLD/sample associations.
+
+The extractor has 15 hooks, but the exact mapping of the 11 selected hooks to
+archived numeric layer labels remains unverified, as do the producing checkpoint
+and revision for every original trace. Included EfficientZero code supports
+extraction; the optional [training submodule](https://github.com/botcs/reason-to-play-src/blob/main/docs/guides/baselines.md#efficientzero-training)
+is needed only for training. Full retraining has not been validated.
+
+Historical and unreported extractions are excluded, as are **630 raw
+random-initialization and context-ablation tensors** used by paper controls.
+Their prompts, selected aligned features and results remain included.
+Recomputing alignment requires the omitted tensors or another extraction;
+exact regeneration is not guaranteed. The
+[reproduction limits](https://github.com/botcs/reason-to-play-src/blob/main/docs/reproduction-limits.md)
+also document missing feature/result cells and checkpoint attribution gaps.
+Smoke tests do not establish full MRI preprocessing or GPU-scale reproduction.
+
+Use recorded code and dataset revisions for paper reproduction. State cohorts,
+models, conditions and analysis settings explicitly for new experiments.
 
 ## License and citation
 
@@ -263,9 +228,7 @@ it is not relicensed under MIT.
 
 Please cite the **NeurIPS 2026** paper using
 [CITATION.cff](https://github.com/botcs/reason-to-play-src/blob/main/CITATION.cff),
-the canonical citation maintained with the research code. The publication
-package carries a copy of this file; proceedings volume, pages and DOI are left
-unset until confirmed.
+the canonical citation maintained with the research code.
 
 Also cite Tomov et al., *The neural architecture of theory-based reinforcement
 learning* (2023), and [OpenNeuro ds004323 v1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).

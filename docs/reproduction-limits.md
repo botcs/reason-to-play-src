@@ -96,11 +96,11 @@ The [validation summary](release/validation.json) records test commands and
 execution limits. The human-file checks cover all 6,994 task attempts and
 1,661,744 recorded states. Measured trajectories and play and frame IDs agree
 across all three prompt conditions; the catalogue counts each observation once.
-Representative checks cover recorded human replay,
-three-stream extraction through a tiny synthetic CPU model, baseline runtime
-checks, and synthetic NIfTI-to-ROI integration. The tiny model validates the
-extraction interface and timestamps; its features are not the activations used in the paper. Figure commands also run against the corresponding result tables;
-the code repository does not embed participant-derived tables.
+Other checks cover recorded replay, baseline runtimes, synthetic NIfTI-to-ROI
+integration, and three-stream extraction through a tiny CPU model using synthetic
+activations. The extraction checks cover the interface and timestamps. Figure
+commands use the corresponding result tables, which are distributed separately
+from the code.
 
 All 411 selected LRM feature archives were realigned from their corresponding
 source generations and the human clocks: all 20,081 arrays agree exactly with
@@ -113,8 +113,7 @@ mean every retained sample has an observed model feature.
 
 Further checks reproduce 6,426 archived ROI rows with the released atlas and
 32-participant common mask, and repeat a fresh seeded fit over all 1,470 samples
-of one participant with a bounded 16-voxel target set. The two fresh fits are
-identical; they do not claim historical-score or whole-brain reproduction.
+of one participant with a bounded 16-voxel target set. The two fits are identical.
 
 EfficientZero alignment covers 11 named hooks for all 32 participants and
 46,581 retained samples. Independent frame-clock reductions agree exactly with
@@ -122,27 +121,26 @@ all 73,062 play/layer slices in the final archives. The raw inventory lacks nine
 of the 6,994 task plays; none belongs to the 6,642-play BOLD selection, so these
 aligned archives have complete source coverage. Two seeded fits using the
 participant-13 policy features, all 1,470 samples and 16 BOLD voxels also agree
-exactly, with network and source-service imports disabled. These checks support
-new encoding fits; the historical baseline layer/checkpoint attribution remains
-unresolved as described above.
+exactly, with network and source-service imports disabled.
 
 An anonymous Hugging Face download-to-fit check fetched the participant-13
 BOLD, samples, nuisance and EfficientZero files with their associations. All
 seven files matched their manifest hashes. Two offline fits using only those
 downloads, all 1,470 samples and two BOLD voxels produced byte-identical result
-files from the installed package. This tests the public download workflow;
-it does not establish historical-score reproduction.
+files from the installed package, verifying the public download workflow.
 
 The explicit archived-table selection also generates the regional encoding
 figure from 1,169,226 main-band rows across ten model labels and 21 participants,
 using the dataset tables without source archives or network connections. The
-selection pins the
-source table's checksum and acknowledges the two known absent cells. It keeps
-unrecorded fit conditions and unlabeled baseline streams unknown; figure
-generation alone does not identify those upstream settings.
+selection pins the source table's checksum and acknowledges the two known
+absent cells. Unrecorded fit conditions and unlabeled baseline streams remain
+unknown.
 
-Validation does not cover full participant fMRIPrep, whole-cohort fits,
-large-model GPU/distributed extraction, full EfficientZero training or a complete
-dataset upload. See the [manifest workflow](release/manifest-guide.md) for catalogue schemas and
-file verification, and the [dataset card](release/huggingface-dataset-card.md) for
-publication status.
+Fresh fits establish repeatability, not historical-score reproduction;
+baseline checkpoint and layer attribution remain unresolved. Validation does
+not cover full participant fMRIPrep, whole-brain or whole-cohort fits,
+large-model GPU/distributed extraction or full EfficientZero training.
+The [validation summary](release/validation.json) records dataset publication
+checks. See the [manifest workflow](release/manifest-guide.md) for catalogue
+schemas and file verification, and the [dataset card](release/huggingface-dataset-card.md)
+for published contents.

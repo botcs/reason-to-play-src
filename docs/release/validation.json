@@ -1,22 +1,26 @@
 {
   "date": "2026-09-28",
-  "scope": "Public Python workflows and self-contained dataset inputs, with offline behavioral analysis, feature/sample associations, bounded encoding and browser checks. Complete historical paper reproduction and dataset publication are not asserted.",
+  "scope": "Public Python workflows and self-contained dataset inputs, with offline behavioral analysis, feature/sample associations, bounded encoding and browser checks. Dataset publication verification is recorded separately; complete historical paper reproduction is not asserted.",
   "quality_gates": {
     "tests": {
-      "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 540,
+      "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q",
+      "passed": 555,
       "skipped": 9,
       "subtests_passed": 9,
-      "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
-      "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
+      "skip_reason": "Seven optional model-tokenizer cache cases and two separate sliding-window replay fixtures are unavailable; all seven recorded-human-data integration tests ran.",
+      "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz",
+      "warnings": 24,
+      "implementation_revision": "fd92c77e97ddc5d301fad1094cf281c158b016cd"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across agents/, human/, data/, analysis/, environments/, reconstruction/, tests/ and scripts/ (118 scoped files; preserved upstream engines and kernels have explicit exclusions).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across agents/, human/, data/, analysis/, environments/, reconstruction/, tests/ and scripts/ (121 scoped files; preserved upstream engines and kernels have explicit exclusions).",
     "documentation": {
-      "focused_markdown_files_checked": 15,
-      "local_links_and_anchors_checked": 150,
+      "focused_markdown_files_checked": 17,
+      "local_links_and_anchors_checked": 166,
       "failures": 0,
       "original_behavior_reference_unchanged": true,
-      "translator_rules_ast_identical": true
+      "translator_rules_ast_identical": true,
+      "anchor_occurrences_checked": 37,
+      "scope": "16 first-party code documents and the website README; two original-source Markdown snapshots checked separately without rewriting."
     },
     "dataset_assembly": "Tests cover stale retained payloads, frozen source identities, safe atomic replacements, content hashes, catalogue types and source-to-public path consistency."
   },
@@ -315,17 +319,105 @@
       "download_workers": 32,
       "fit_pool_workers": 32,
       "blas_threads_per_fit_worker": 1
+    },
+    "button_nuisance_inputs": {
+      "implementation_revision": "fd92c77e97ddc5d301fad1094cf281c158b016cd",
+      "participant_game_files": 192,
+      "plays": 6994,
+      "recorded_frames": 1661744,
+      "every_frame_has_keystate": true,
+      "all_nuisance_arrays_bitwise_unchanged": true,
+      "recording_bytes_unchanged": true,
+      "missing_field_rejected": true,
+      "explicit_null_empty_and_all_false_values_accepted": true,
+      "independent_review": "passed",
+      "workers": 32,
+      "blas_threads_per_worker": 1,
+      "scope": "Complete behavior/human recordings supply button nuisance inputs. Website replay copies omit button measurements and are rejected by nuisance extraction."
+    },
+    "live_website": {
+      "dataset_revision": "0c674c3ff19b64a55f3fba6d862f5fb828292b74",
+      "origin": "https://botcs.github.io/reason-to-play/",
+      "tested_website_revision": "368441911b6a6c726329c403093c21706fec5aa9",
+      "catalogue_bundle_sha256": "c9ed20d03e47577a4d48163f078749c466800655434bf60cc352e3d2490eec00",
+      "anonymous": true,
+      "live_page_cases": [
+        "human",
+        "lrm",
+        "catalogue",
+        "rdm",
+        "interactive"
+      ],
+      "compact_replay_files": 384,
+      "compact_replay_bytes": 147759422,
+      "cache_cases": [
+        {
+          "section": "human",
+          "cards": 6,
+          "return_seconds": 0.0784,
+          "no_repeat_fetch_decompression_or_parse": true,
+          "visible_frames_identical_on_return": true
+        },
+        {
+          "section": "lrm",
+          "cards": 12,
+          "return_seconds": 0.1711,
+          "no_repeat_fetch_decompression_or_parse": true,
+          "visible_frames_identical_on_return": true
+        }
+      ],
+      "page_errors": 0,
+      "failed_responses": 0,
+      "scope": "Live browser requests use the pinned public Hugging Face dataset; standard API counters verify page-lifetime caching without fixture responses or altered bundles."
+    },
+    "live_catalogue_loading": {
+      "tested_website_revision": "94196a7753d5b4a2141ab299e23c851063fd6bac",
+      "browser_source_revision": "1cb6e5c1299b828415a723419038d6dc533631f6",
+      "dataset_revision": "0c674c3ff19b64a55f3fba6d862f5fb828292b74",
+      "catalogue_bundle_sha256": "359d37541bfea8adf6a6ea6d3bdca7d563f6b709b90915f1f8d665f28007a3a5",
+      "pages_deployment_run": 36464769605,
+      "deployment_status": "success",
+      "served_bundle_bytes_match": true,
+      "anonymous": true,
+      "fixture_interception": false,
+      "initial_cards": 36,
+      "initial_compressed_bytes": 13508866,
+      "max_concurrent_replay_requests": 4,
+      "cold_initial_seconds_before": 17.7101,
+      "cold_initial_seconds_after": 5.5333,
+      "first_card_seconds_after": 1.1763,
+      "new_human_selection_seconds": 1.3621,
+      "new_lrm_selection_seconds": 1.477,
+      "replay_requests": 54,
+      "replay_parses": 54,
+      "cache_cases": [
+        {
+          "section": "human",
+          "cards": 6,
+          "return_seconds": 0.172,
+          "no_repeat_fetch_decompression_or_parse": true,
+          "visible_frames_identical_on_return": true
+        },
+        {
+          "section": "lrm",
+          "cards": 12,
+          "return_seconds": 0.1673,
+          "no_repeat_fetch_decompression_or_parse": true,
+          "visible_frames_identical_on_return": true
+        }
+      ],
+      "page_errors": 0,
+      "scope": "Fresh Chromium contexts on one London host using real anonymous HF responses. Timings are observations, not client performance guarantees. Source/bundle regression checks also cover concurrency bound, selection priority, skipped stale cards, deduplication and retry."
     }
   },
   "not_executed": [
     "Full fMRIPrep container execution on participant MRI.",
     "Whole-cohort preprocessing and complete paper encoding fits.",
     "Large-model GPU/distributed extraction or paper model-performance reproduction.",
-    "Complete historical EfficientZero training.",
-    "Complete multimodal dataset staging, payload hashing or Hugging Face upload."
+    "Complete historical EfficientZero training."
   ],
   "data_boundary": "Participant payloads and catalogue tables belong to the separate dataset package. This Git repository contains implementations, specifications and aggregate validation evidence.",
-  "dataset_package_validation": "Local package catalogue configurations loaded with datasets 4.8.5 and split=data. Anonymous public catalogue loading also passed at dataset commit 92faed136ec60a7604499add287b83e4ff3d7c47 (files=100, planned_files=33173, human_plays=6994); this records that tested snapshot, not the current upload total. A separate anonymous download-to-fit check is recorded below.",
+  "dataset_package_validation": "Local and anonymous public catalogue loading passed. The completed release is recorded in dataset_publication; anonymous download-to-fit checks are recorded under representative_checks.",
   "package": {
     "build": "setuptools wheel",
     "imports_checked": 23,
@@ -358,5 +450,33 @@
     "neural_input_layout": "neural/sub-XX/{bold,samples,nuisance}.npz and model-features/",
     "installed_wheel_python_files_checked": 163
   },
-  "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
+  "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions.",
+  "dataset_publication": {
+    "status": "verified-complete",
+    "repository": "csbotos/reason-to-play",
+    "dataset_revision": "0c674c3ff19b64a55f3fba6d862f5fb828292b74",
+    "manifest_sha256": "5332c3ea85186522003f74745a61da1f112b3634f3f0bbd2b165e5262d6373ed",
+    "selected_payloads": 33557,
+    "selected_bytes": 4804604182915,
+    "file_catalogue_rows": 33557,
+    "human_play_catalogue_rows": 6994,
+    "authentication": false,
+    "verification_started_utc": "2026-09-28T17:54:04.431236+00:00",
+    "verification_elapsed_seconds": 290.99116618186235,
+    "workers": 32,
+    "remote_payload_metadata_checked": 33557,
+    "remote_payload_identity_methods": {
+      "remote-git-blob-sha1": 6614,
+      "remote-lfs-sha256": 26943
+    },
+    "unexplained_remote_payloads": [],
+    "verification_policy": "Every selected payload checked at this commit against byte-verified receipts using remote LFS SHA256 or Git blob SHA1. Opaque Xet hashes are not treated as payload hashes. Only catalogue/card metadata downloaded during this audit; existing payload download checks are not repeated.",
+    "completion_receipt_sha256": "85f6cef1494982c04de574f6cd26cdc558677cf4f26d9e350d0cd1cfe0fea057",
+    "implementation_revision": "53c6045d84451ebe9341260f3e87f05d583f8c4d",
+    "historical_paper_reproduction_established": false,
+    "scope": "Publication checks establish catalogue completeness and payload identities at the pinned dataset commit. Remote LFS/Git identities are compared with byte-verified transfer receipts; the final audit does not download every payload again.",
+    "dataset_card_revision": "9be65bc66685deb73100e484d1fe47b1197c9093",
+    "dataset_card_sha256": "6be0000d58aaa3830ac8bd2350444f426ad4a3dac04921e5d1d550c3d1ad97df",
+    "dataset_card_update_scope": "README-only child commit; all other root file blobs and subtree IDs match the verified data revision. Anonymous README bytes checked."
+  }
 }

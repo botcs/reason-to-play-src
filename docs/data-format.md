@@ -20,9 +20,8 @@ without other human files, BSON, scanner sidecars or game-definition downloads.
 Each file declares `schema: "reason-to-play/human-replay"`, `schema_version: 1`
 and `source: "human"`. Its fields include `steps`,
 `states`, `system_prompt`, `meta`, colour mapping and a single translated
-`game_description`. The description uses the Colas interpreter's dialect shared
-with the browser interpreter. The [game translation history](sources/README.md#game-translation)
-includes the original translator and explains the source dialect.
+`game_description`. The description uses the Colas dialect shared with the browser
+interpreter; see the [game translation history](sources/README.md#game-translation).
 
 ## Plays and scanner timing
 
@@ -34,12 +33,10 @@ original scanner-run file; it is distinct from `play_id`, which can repeat.
 The original `_id` identifies a play across prompt conditions.
 
 `scanner` inside each play retains the original run identity and timing needed
-for neural alignment, including `scan_start_ts`. Repeating this small record
-makes the file independently usable. It does not embed source game rules or
-level layouts. Participant 11/run 05 has no separate source scanner record.
-Its start time is derived from the nine play records, which all agree on that time. The
-embedded scanner entry records this derivation and has `clock_only: true`.
-The other selected runs use their original scanner clocks.
+for neural alignment, including `scan_start_ts`, without source game rules or
+level layouts. Participant 11/run 05 has no separate source scanner record;
+its nine play records agree on a start time, used here with `clock_only: true`
+and the derivation recorded. Other selected runs use their original scanner clocks.
 
 Top-level `started_at` and `finished_at` describe the replay export, not the
 participant's session. Use play timestamps, frame `realworld_ts` and
@@ -112,16 +109,15 @@ Each real step also identifies its source measurement:
 | `source_recording` | This file's canonical path relative to `behavior/human/`. |
 | `realworld_ts` | Exact timestamp of that observation. |
 
-These fields let tensor metadata identify its observation. They do not require
-an external trajectory lookup to open the replay. Synthetic bookkeeping steps
-whose actions begin with `_` are not additional observations. The extraction
-pipeline preserves observation identities with the resulting activations.
+Extraction preserves these observation identities with the resulting
+activations. Synthetic bookkeeping steps whose actions begin with `_` are not
+additional observations.
 
 ## Reading a file
 
-The reader decodes recorded fields into dictionaries using the Python
-standard library; it does not import BSON or an engine. Source datetimes and
-binary values in metadata/events use explicit `$rtp` encodings in JSON.
+The reader uses only the Python standard library to decode fields into
+dictionaries. Source datetimes and binary values in metadata/events use explicit
+`$rtp` encodings in JSON.
 
 ```python
 from human.behavior import iter_plays, load_runs, play_states

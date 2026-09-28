@@ -15,14 +15,16 @@ grid-world games written in [VGDL](https://github.com/schaul/py-vgdl).
 Participants and models infer the game rules through play. 
 The analyses compare their behavior and internal representations.
 
-For agent-assisted contributions, start with [AGENTS.md](AGENTS.md).
+## TL;DR
 
-Accepted at **NeurIPS 2026**. This repository contains Python code for model
-gameplay, human replay, activation extraction, fMRI processing, and behavioral
-and neural analysis. Use these workflows to study new models and experimental
-conditions as well as the paper's experiments. The
-[reproduction guide](docs/reproducibility.md) documents inputs, configurations,
-outputs and the checks performed so far.
+- **Analyze the data:** compare human and agent behavior or fit neural encoding
+  models using the [released dataset](docs/guides/dataset-analysis.md).
+  Raw OpenNeuro downloads are not needed for these analyses.
+- **Run new experiments:** start with [Setup](#setup) and
+  [Quickstart](#quickstart) for model gameplay and human replay. The
+  [workflow guides](#workflows) cover activation extraction and analysis.
+
+For agent-assisted contributions, start with [AGENTS.md](AGENTS.md).
 
 **Acknowledgement:** This project would not have been possible without the invaluable contributions of the community.
 For projects that we heavily relied on are listed in [THIRD_PARTY.md](THIRD_PARTY.md).
@@ -111,17 +113,12 @@ humans and agents live in `analysis/`.
 
 ## Data
 
-The accompanying [Hugging Face dataset](https://huggingface.co/datasets/csbotos/reason-to-play) contains
-canonical human recordings, model prompts and gameplay, activations, processed
-fMRI inputs, ROI resources and analysis outputs. Uploads are in progress; its
-`files` catalogue lists verified downloads, while `planned_files` records the
-complete selection. The manifest records each file’s identity, contents and
-checksum when byte-verified. The [dataset card](docs/release/huggingface-dataset-card.md)
-describes the selection, omissions and catalogue loading interface.
-
-Dataset paths are recorded in the release manifest. They do not depend on where
-the Python implementation lives. The [release guide](docs/release/manifest-guide.md)
-documents the manifest and verification process.
+The accompanying [Hugging Face dataset](https://huggingface.co/datasets/csbotos/reason-to-play)
+contains human gameplay, model prompts and activations, processed fMRI, and
+analysis results. Use the
+[verified snapshot](https://huggingface.co/datasets/csbotos/reason-to-play/tree/0c674c3ff19b64a55f3fba6d862f5fb828292b74)
+for reproducible downloads. The [dataset card](docs/release/huggingface-dataset-card.md)
+describes the files and download examples.
 
 The original raw human data are available in
 [OpenNeuro ds004323 v1.0.0](https://openneuro.org/datasets/ds004323/versions/1.0.0).

@@ -163,8 +163,7 @@ follow the [dataset analysis guide](../guides/dataset-analysis.md) to select the
 inputs for a workflow. Human files use
 `behavior/human/sub-XX/GAME/CONDITION.human.replay.json.gz`.
 
-The planned Hugging Face configurations are `planned_files`, `files` and
-`human_plays`, each with
-split name **`data`**. This is an organizational split, not a train/test partition; `all` is reserved by the datasets loader. Before publishing,
-test the actual local package by configuration name, then test the uploaded
-repository at its immutable dataset commit. See the [dataset card](huggingface-dataset-card.md) for catalogue contents.
+The published Hugging Face configurations are `files` and `human_plays`, each
+with split name **`data`**, not a train/test partition. Pin downloads to a
+dataset commit. See the [dataset card](huggingface-dataset-card.md) for catalogue
+contents and loading examples.

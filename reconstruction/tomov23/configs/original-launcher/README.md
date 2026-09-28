@@ -1,16 +1,14 @@
 # Original fMRIPrep launcher
 
-This directory preserves the October 2025 RC_RL launcher and its
-[upstream README](README.upstream.md) byte for byte. Source revision and
-checksums are in [source.json](source.json).
+The October 2025 RC_RL launcher and [upstream README](README.upstream.md) are
+preserved byte for byte. [source.json](source.json) records their revision and
+checksums.
 
-For installation and execution, use the
-[current preprocessing guide](../../../../docs/guides/fmri-preprocessing.md).
-The upstream README describes an old local setup: its participant exclusions,
-29-participant total, home-directory paths and loader example are not the
-current workflow. The study includes 32 participants.
+Use the [current preprocessing guide](../../../../docs/guides/fmri-preprocessing.md)
+to run fMRIPrep. The study includes 32 participants; the upstream README's
+29-participant total, exclusions, local paths and loader example are outdated.
 
-The archived launcher invokes Docker; retained execution configurations report
-Singularity. The exact producing image digest is unknown. See
+The launcher uses Docker; execution records report Singularity. The exact
+producing image digest is unknown. See
 [preprocessing sources](../../../../docs/sources/README.md#fmri-preprocessing-sources)
-for the preprocessing settings and evidence.
+for settings and evidence.
