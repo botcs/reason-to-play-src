@@ -96,21 +96,3 @@ def register_sample_games():
             "Failed to register sample games, likely you are trying to import"
             " two versions of gym_vgdl"
         )
-
-
-if __name__ == "__main__":
-    import time
-
-    register_sample_games()
-    env = gym.make("vgdl_sokoban_features-v0")
-    env.render()
-    t_init = time.time()
-    env.reset()
-    print(f"Reset time: {time.time() - t_init}")
-    t_init = time.time()
-    for i in range(100):
-        env.step(env.action_space.sample())
-        # env.render()
-        # time.sleep(0.5)
-        if i == 99:
-            print(f"100 steps time: {time.time() - t_init}")

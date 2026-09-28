@@ -1,0 +1,3 @@
+[submodule "efficientzero-training"]
+	path = agents/efficientzero/training
+	url = https://github.com/A-Andrews/EfficientZeroV2.git

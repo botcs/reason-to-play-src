@@ -67,8 +67,8 @@ class LLMConfig:
     # the planned per-run forecast.
     api_budget: float = 0.0
     # Max number of parse-failure retries per run.  On each failure, the agent
-    # feeds the error back to the model in a repair turn and regenerates; on
-    # success the repair turns are clipped from the conversation.  0 disables
+    # feeds the error back to the model in a retry turn and requests another
+    # response. On success the retry turns are clipped. 0 disables
     # retries (first parse failure aborts the run).
     parse_retry_budget: int = 10
     # Per-step guard against the "saturate-retry-saturate" loop first seen on
@@ -108,7 +108,7 @@ class LoggingConfig:
 
 @dataclass
 class ReplayConfig:
-    data_dir: str = "./workdir/prepare_behavioral_data"
+    data_dir: str = "./data/behavior/human"
     subject: str = ""  # empty = all subjects
     game_filter: str = ""  # empty = all games
     action_frames_only: bool = True

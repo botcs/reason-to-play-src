@@ -179,6 +179,20 @@ _REPLAY_ONLY_STEP_FIELDS = (
 )
 _REPLAY_ONLY_META_FIELDS = ("subject", "num_trials", "pipeline", "completed")
 
+# Canonical source identities are optional on historical replays. Missing links
+# stay unknown; the selected text and original legacy indices remain unchanged.
+SOURCE_REFERENCE_FIELDS = (
+    "source_play_id",
+    "source_recording",
+    "source_frame_index",
+    "source_document_index",
+)
+
+
+def source_reference_metadata(step: dict) -> dict:
+    """Copy explicit original-record links without inferring historical IDs."""
+    return {field: step.get(field) for field in SOURCE_REFERENCE_FIELDS}
+
 
 def _require(d: dict, key: str, where: str):
     """Return ``d[key]`` or raise a clear error if the key is missing."""
@@ -265,6 +279,11 @@ def _load_replay_gz(path: Path) -> tuple[list[dict], dict]:
                 for f in _REPLAY_ONLY_STEP_FIELDS:
                     record[f] = None
 
+        record.update(
+            source_reference_metadata(step)
+            if is_replay_source and not is_synthetic
+            else dict.fromkeys(SOURCE_REFERENCE_FIELDS)
+        )
         prompts.append(record)
 
     # The harness prompt_name is always written at the top level by both

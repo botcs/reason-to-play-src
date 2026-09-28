@@ -1,0 +1,3 @@
+# Preserve original fMRIPrep source bytes across checkout line-ending settings.
+src/reason_to_play/resources/fmriprep/** -text
+src/reason_to_play/resources/fmriprep/logs/CITATION.md -whitespace

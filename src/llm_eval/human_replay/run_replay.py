@@ -142,7 +142,7 @@ def _behavioral_to_vgdl_game_name(name: str) -> str:
     VGDL registry uses '{game}_{version}' (e.g. 'bait_vgfmri3').  Casing
     in behavioral data is inconsistent (`avoidgeorge` vs the canonical
     `avoidGeorge`), so the swapped lowercase is looked up against the
-    games/ directory to recover the canonical casing.
+    games/ directory to find the canonical casing.
     """
     parts = name.split("_", 1)
     if len(parts) != 2:
@@ -284,7 +284,7 @@ def _build_output_snapshot(
 ) -> dict:
     """Build the .replay.json.gz output dict from current accumulated state."""
     vgdl_game_name = _behavioral_to_vgdl_game_name(game_name)
-    return {
+    snapshot = {
         "game": vgdl_game_name,
         "source": source,
         "model": f"human ({subject})",
@@ -315,9 +315,23 @@ def _build_output_snapshot(
         },
         "color_mapping": color_mapping,
         "game_description": game_description,
+        "plays": [
+            {
+                "source_play_id": play.get("source_play_id"),
+                "source_recording": play.get("source_recording"),
+                "run": play["run"],
+                "source_document_index": play["play_idx"],
+                "game_name": play["game_name"],
+                "level_id": play["level_id"],
+                "win": play.get("win"),
+                "outcome": play.get("outcome"),
+            }
+            for play in game_plays
+        ],
         "steps": all_steps,
         "states": all_viewer_states,
     }
+    return snapshot
 
 
 def process_game(
@@ -476,16 +490,9 @@ def process_game(
                 f"Empty states for {play_id} (run={run}, play_idx={play_idx})"
             )
 
-        # Fix split-brain timing AND apply the play-level outcome
-        # override in one pass.  realign_zstate_positions:
-        #   (a) patches sprite positions / ended / win / score from the
-        #       next frame so every post-action field describes the same
-        #       tick (Tomov's consecutive-frame lag), and
-        #   (b) overrides the terminal frame's `win` with `play_doc.win`
-        #       so TIMEOUT plays (~42% of the dataset) are not
-        #       mis-classified as LOSS.  See
-        #       src/llm_eval/human_replay/zstate_adapter.py and
-        #       VGFMRI_DB_README.md:174-176.
+        # Keep the established prompt alignment: next-frame positions and
+        # the play-level terminal outcome. Visual snapshots below use the
+        # original current-frame rectangles instead.
         zstates = realign_zstate_positions(raw_zstates, play_doc.get("win"))
 
         final_win_value = zstates[-1].get("win")
@@ -520,19 +527,17 @@ def process_game(
         )
         level_attempts[level_id] += 1
 
-        # Convert zstates to viewer format + compute per-frame logs.
-        # Under the clean causal model, viewer_state[fi] represents what
-        # the user saw at frame fi.  The action_log attached to
-        # viewer_state[fi] describes the transition OUT of fi
-        # (`states[fi] -> states[fi+1]`) caused by the key captured in the
-        # keystate of zstate[fi+1].  It contains only real VGDL engine
-        # events from `effectListByColor` plus score/win/lose markers --
-        # the same format the LLM sees in its prompt history.
+        # Retain each original frame's rendered positions for the viewer.
+        # Action logs continue to use the established prompt-aligned states
+        # and describe the transition out of fi, just as in prompt history.
         state_offset = len(all_viewer_states)
         frame_offset = total_frames
         frame_adapter = ZstateAdapter(block_size=block_size)
         frame_adapter.register_objects(zstates[0])
-        viewer_states = [convert_zstate_to_viewer(z, block_size) for z in zstates]
+        viewer_states = [
+            convert_zstate_to_viewer({**aligned, "objects": raw["objects"]}, block_size)
+            for raw, aligned in zip(raw_zstates, zstates, strict=True)
+        ]
         # Stamp level/attempt onto every viewer state so the JS viewer
         # can detect play boundaries even for all-idle plays (no
         # keypresses), where the step-record-driven separator would
@@ -541,12 +546,7 @@ def process_game(
             vs["level"] = play_level
             vs["attempt"] = play_attempt
         for fi in range(len(zstates) - 1):
-            # Skip transitions that START from an already-terminal frame.
-            # `realign_zstate_positions` copies `ended`/`win` backward from
-            # frame i+1 into frame i, so BOTH the winning frame and the
-            # post-terminal snapshot report `ended=True`.  Emitting a log
-            # for the post-terminal transition would re-tack a sticky
-            # `[WIN]`/`[LOSE]` marker onto what is really a no-op tick.
+            # Skip transitions that start from an already-terminal frame.
             if zstates[fi].get("ended"):
                 continue
             frame_adapted = frame_adapter.adapt_frame(zstates[fi], zstates[fi + 1])
@@ -634,6 +634,10 @@ def process_game(
                 # Replay-specific metadata
                 "frame_idx": record["frame_idx"],
                 "play_id": play_id,
+                "source_play_id": str(play_doc["_id"]),
+                "source_document_index": play_info["play_idx"],
+                "source_recording": play_info.get("source_recording"),
+                "source_frame_index": record["frame_idx"],
                 "trial_idx": trial_idx,
                 "play_idx": play_idx,
                 "run": run,
@@ -802,6 +806,18 @@ def process_game(
         system_prompt=agent._gameplay_system_prompt,
         completed=True,
     )
+    if loader.per_game and not needs_llm:
+        from reason_to_play.data.replay_behavior import read_record, replay_paths
+        from reason_to_play.data.replay_output import merge_human_prompt_output
+
+        source_paths = [
+            path
+            for path in replay_paths(loader.data_dir, subject)
+            if read_record(path, expand=False)["game"] == vgdl_game_name
+        ]
+        if len(source_paths) != 1:
+            raise ValueError("Expected one self-contained human source for this game")
+        output = merge_human_prompt_output(read_record(source_paths[0]), output)
     os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
     save_replay(output, output_file)
     print(f"    Saved {output_file} (completed)")

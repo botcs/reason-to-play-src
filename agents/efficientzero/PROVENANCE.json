@@ -1,0 +1,39 @@
+{
+  "origin": "https://github.com/A-Andrews/VGDL_FMRI_Comparisons",
+  "recorded_head": "422a4e753749569e83a6d5fdb8a42427730d6d34",
+  "git_blob_verification": "The activation helper matches recorded_head. The trace extractor differs from that revision, and trace_layers.json is absent from its tree. Per-file hashes identify the provided source snapshot.",
+  "license": "No license file accompanies this source snapshot. Preserve its attribution; these files are not covered by the root MIT grant or automatically by the EfficientZero GPL notice.",
+  "files": [
+    {
+      "file": "extract_features.py",
+      "sha256": "2ce9c2dc02cfa2032cc3a752f45027bdde52a88130e3a4f77539b56a5e84c752",
+      "adaptation": "Accepts a standalone human JSON file or dataset directory through the shared behavior reader. Draws recorded rectangles and colors with the translated game description for draw order. Uses the source canvas, resize, grayscale, frame-stacking and action-index conventions. Output metadata retains the nullable original play outcome. Uses package-qualified bundled inference imports; exposes a direct Python module entrypoint. Canonical frame rendering does not initialize the training engine or Pygame. Reads recorded grid dimensions and sprites directly; source-level simulation is not an extraction input.",
+      "recorded_head_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
+      "source_git_blob": "537b9c2560f9e9cd33a9418034556d9df8ad2e2c",
+      "matches_recorded_head": true,
+      "adapted_sha256": "33aba5f75322576d801359dca67584f7dfc166d8b6291fe784e2a99468287cf0",
+      "source_repository_path": "scripts/python/get_efficientzero_activations.py"
+    },
+    {
+      "file": "extract_traces.py",
+      "sha256": "f32dddddf529814de177f01fca6388c9abfc90953440ce29c9af6de431826ac4",
+      "adaptation": "Accepts a standalone human JSON file or dataset directory through the shared behavior reader. Draws recorded rectangles and colors with the translated game description for draw order. Uses the source canvas, resize, grayscale, frame-stacking and action-index conventions. Uses package-qualified bundled inference imports; exposes a direct Python module entrypoint. Canonical frame rendering does not initialize the training engine or Pygame. Writes checkpoint, configuration, source and output hashes beside the saved trace. Reads recorded grid dimensions and sprites directly; source-level simulation is not an extraction input.",
+      "recorded_head_git_blob": "5531d34ee136b494cac017311bfda095d3d1a665",
+      "source_git_blob": "3db5ecd6f6679bcbc671f5bcd7b4a32241d31962",
+      "matches_recorded_head": false,
+      "adapted_sha256": "93a6df72d283b3b82c11f72d4685fcf60a33586720e4221f4d5f86c7c7c39bfc",
+      "source_repository_path": "scripts/python/get_attention_matrix.py"
+    },
+    {
+      "file": "trace_layers.json",
+      "sha256": "aee9a49aea941476ab475a89c79fc04d53a8692349a56090e7a93b0e02d99bc9",
+      "adaptation": "none; original bytes",
+      "recorded_head_git_blob": null,
+      "source_git_blob": "8b409bbfe9fcc6229c7d9e58fc9e4befebf6d6cc",
+      "matches_recorded_head": false,
+      "source_repository_path": "scripts/bash/trace_layers.json",
+      "adapted_sha256": "aee9a49aea941476ab475a89c79fc04d53a8692349a56090e7a93b0e02d99bc9"
+    }
+  ],
+  "checksum_scope": "sha256 and Git blob fields identify the source snapshot; adapted_sha256 identifies the included implementation."
+}

@@ -1,14 +1,12 @@
 # Copyright (c) 2026 Botos Csaba. MIT License. See LICENSE for details.
-"""Recovered vLLM batch wrapper for the legacy observation-generation utility.
+"""vLLM batch wrapper for observation generation.
 
 Source: development llm-vgdl 0cfe0aff2ebc4efe0807cd2287a3dc1aff7166cb,
 src/llm_eval/llm_wrapper.py, Git blob 2a752657c287e323bb5b0c93f5eb497e2e73977a.
 Source-file SHA-256: f8ec5fa1f973613363f52445e23ed7c34b2a0dff30867d93e90b076953b5b030.
 
-Adaptations: separate optional module, current context_length interface,
-clear missing-dependency error, no single-call Weave telemetry, and removal
-of an incorrect FP8 log message. Batch tokenization, loader arguments,
-sampling settings and output fields preserve the recovered implementation.
+Batch tokenization, loader arguments, sampling settings and output fields
+follow the source implementation.
 Torch and vLLM are imported only when constructing or using the wrapper.
 """
 
@@ -46,8 +44,8 @@ class VLLMWrapper(LLMWrapperBase):
             from vllm import LLM, SamplingParams
         except ImportError as exc:
             raise ImportError(
-                "The legacy observation generator needs vLLM in a separate GPU "
-                "environment; see docs/legacy-observation-generation.md."
+                "Observation generation needs vLLM in a separate GPU "
+                "environment; see docs/guides/text-observations.md."
             ) from exc
         import os
         import torch

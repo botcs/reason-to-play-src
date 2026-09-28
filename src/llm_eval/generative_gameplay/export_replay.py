@@ -18,7 +18,7 @@ from src.llm_eval.shared.replay_codec import save_replay
 def capture_state(env: gym.Env) -> dict:
     """Capture the current game state as a JSON-serializable dict.
 
-    All positions are grid coordinates (col, row), not pixels.
+    Positions are fractional grid coordinates from the rendering rectangles.
     """
     game = env.unwrapped.game
     block_size = game.block_size
@@ -34,8 +34,8 @@ def capture_state(env: gym.Env) -> dict:
 
         sprite_list = []
         for sprite in all_sprites:
-            col = sprite.rect.x // block_size
-            row = sprite.rect.y // block_size
+            col = sprite.rect.x / block_size
+            row = sprite.rect.y / block_size
 
             # Convert resources from defaultdict to plain dict
             resources = dict(sprite.resources) if sprite.resources else {}

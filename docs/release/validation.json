@@ -1,0 +1,161 @@
+{
+  "date": "2026-09-28",
+  "scope": "Public Python workflows and self-contained human JSON, with bounded analysis and browser checks. Complete paper reproduction and dataset publication are not asserted.",
+  "quality_gates": {
+    "tests": {
+      "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
+      "passed": 428,
+      "skipped": 9,
+      "subtests_passed": 9,
+      "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
+      "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
+    },
+    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/ and tools/ (102 scoped files).",
+    "documentation": {
+      "links_and_anchors_checked": 151,
+      "failures": 0,
+      "original_source_reference_and_translator_unchanged": true
+    }
+  },
+  "environment": {
+    "python": "3.12.10",
+    "torch": "2.11.0+cpu",
+    "transformers": "5.6.2",
+    "accelerate": "1.13.0",
+    "safetensors": "0.7.0",
+    "tokenizers": "0.22.2"
+  },
+  "representative_checks": {
+    "human_replay": {
+      "mode": "Action-only replay through the actual Python entrypoint, followed by the feature prompt loader",
+      "input": "One complete human JSON file",
+      "plays": 20,
+      "frames": 12775,
+      "prompts": 1458,
+      "scanner_runs": 3,
+      "measured_fields_preserved": true,
+      "single_translated_game_description_preserved": true,
+      "cloud_api_required": false
+    },
+    "generic_feature_extraction": {
+      "purpose": "CPU entrypoint/interface validation using synthetic weights; does not reproduce paper activations",
+      "model": "Locally initialized tiny Llama with a fast ChatML tokenizer",
+      "parameters": 21536,
+      "recorded_turns": 6,
+      "streams": [
+        "hidden",
+        "attention",
+        "MLP"
+      ],
+      "shape_per_stream": [
+        6,
+        2,
+        32
+      ],
+      "finite": true,
+      "original_timestamps_preserved": true,
+      "positive_cli_exit_code": 0,
+      "deliberately_invalid_session_exit_code": 1
+    },
+    "extraction_failure_status": "Generic, V3.2 and V4 batch tests distinguish completed, skipped and failed sessions; continuation retains successful outputs while still failing the command when any selected session fails.",
+    "efficientzero": {
+      "cpu_inference": true,
+      "analysis_and_extraction_without_training_submodule": true,
+      "optional_training_repository": "https://github.com/A-Andrews/EfficientZeroV2",
+      "optional_training_revision": "29157d4892afd9467b1bd0994de1355086145490",
+      "full_training_validated": false,
+      "recorded_trace_frames": 64,
+      "trace_tensors": 748,
+      "trace_elements": 8033696,
+      "activation_tensors": 9,
+      "activation_elements": 1286838,
+      "activation_frames": 234,
+      "checkpoint_attribution": "These checks use an available checkpoint; attribution of every final-paper feature array remains unresolved."
+    },
+    "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
+    "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
+    "figures": "Historical behavioral and neural figure commands ran against separately held tables; partial-table neural plotting also passed a headless synthetic smoke. Those tables are not included in this code release.",
+    "generative_gameplay": {
+      "backend": "mock",
+      "frames": 25,
+      "decisions": 5,
+      "display_required": false
+    },
+    "human_dataset": {
+      "schema": "reason-to-play/human-replay",
+      "schema_version": 1,
+      "participants": 32,
+      "participant_game_pairs": 192,
+      "files": 576,
+      "conditions": [
+        "elaborate",
+        "minimal",
+        "oracle"
+      ],
+      "unique_plays": 6994,
+      "unique_frames": 1661744,
+      "unique_selected_steps": 342492,
+      "compressed_bytes": 411040889,
+      "catalogue_rows": 6994,
+      "catalogue_measurement_columns_compared": 18,
+      "catalogue_differences": 0,
+      "cross_condition_measurement_identity": true,
+      "practice_plays_excluded": 40
+    },
+    "baseline_human_inputs": "All 12,775 pilot frames produce identical DDQN grids, alignment timing, nuisance inputs and EfficientZero RGB/grayscale inputs compared with original measurements. Additional EfficientZero checks cover early-cohort and fractional-position trajectories.",
+    "browser": {
+      "engine_tests_passed": 87,
+      "human_frames_checked": 12775,
+      "sprite_positions_and_colors_checked": 1207552,
+      "level_attempt_boundaries_checked": 20,
+      "fractional_positions": true,
+      "idle_trajectory": true,
+      "invalid_input_and_recovery_cases": 6
+    },
+    "archived_roi_rows": {
+      "rows_compared": 6426,
+      "common_mask_participants": 32,
+      "fresh_seeded_fit_samples": 1470,
+      "fresh_seeded_fit_voxels": 16,
+      "repeated_fits_identical": true,
+      "whole_brain_reproduction": false
+    },
+    "archived_encoding_figure": {
+      "main_band_rows": 1169226,
+      "model_labels": 10,
+      "participants": 21,
+      "missing_result_cells_acknowledged": 2,
+      "establishes_historical_checkpoint_identity": false
+    },
+    "text_observation_generator": "Lazy imports, CLI help and fake vLLM batching across files; no real vLLM GPU generation."
+  },
+  "not_executed": [
+    "Full fMRIPrep container execution on participant MRI.",
+    "Whole-cohort preprocessing and complete paper encoding fits.",
+    "Large-model GPU/distributed extraction or paper model-performance reproduction.",
+    "Complete historical EfficientZero training.",
+    "Complete multimodal dataset staging, payload hashing or Hugging Face upload."
+  ],
+  "data_boundary": "Participant payloads and catalogue tables belong to the separate dataset package. This Git repository contains implementations, specifications and aggregate validation evidence.",
+  "dataset_package_validation": "Separate local HF package loaded through its README configurations with datasets 4.8.5 using split=data. Both catalogue configurations loaded successfully; no remote upload was performed.",
+  "package": {
+    "build": "setuptools wheel",
+    "imports_checked": 14,
+    "module_help_checked": 13,
+    "import_location": "Installed wheel outside the checkout",
+    "bson_or_pymongo_installed": false,
+    "single_file_reader": {
+      "participant": "sub-13",
+      "game": "bait_vgfmri4",
+      "plays": 29,
+      "frames": 8592
+    },
+    "efficientzero": {
+      "training_submodule_present": false,
+      "training_imports_blocked": true,
+      "cpu_checkpoint_trace_frames": 64,
+      "source_manifest_files_present": true
+    }
+  },
+  "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
+}

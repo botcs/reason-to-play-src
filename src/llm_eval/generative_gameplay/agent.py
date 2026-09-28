@@ -689,7 +689,7 @@ class GameplayAgent:
         self._prev_outcome = ""  # outcome of previous trial (for transition markers)
         self._prev_score = 0  # score at end of previous trial
         # Per-run parse-retry budget.  Decremented each time the model
-        # produces a malformed response that we repair via a follow-up
+        # produces a malformed response that triggers a follow-up
         # prompt.  Exhaustion aborts the run.
         self._parse_retry_remaining = self.cfg.llm.parse_retry_budget
 
@@ -1364,7 +1364,7 @@ class GameplayAgent:
                 "reasoning_tokens": (context_info or {}).get("reasoning_tokens"),
                 "call_cost": (context_info or {}).get("call_cost"),
                 "num_llm_calls": (context_info or {}).get("num_llm_calls", 1),
-                # Per-attempt log of parse failures that got repaired via
+                # Per-attempt log of parse failures resolved through
                 # conversational retry at this step; empty on first-shot
                 # success.  See agent._generate_with_parse_retry.
                 "parse_retries": parse_retry_log,
@@ -1447,15 +1447,15 @@ class GameplayAgent:
     def _generate_with_parse_retry(
         self, messages: list[dict]
     ) -> tuple[dict, str, dict, list[dict]]:
-        """Generate a response and repair parse failures via conversational retry.
+        """Generate a response and retry responses that fail parsing.
 
         The flow:
           1. Call ``self.llm.generate(messages)``.
           2. Try to parse via ``harness.parse_strict``.
           3. On parse failure: append the malformed assistant + a mode-specific
-             repair-prompt user message (``harness.append_repair_turn``),
-             decrement the run-level retry budget, and regenerate.
-          4. On success: clip the appended repair turns so the saved
+             retry-prompt user message (``harness.append_retry_turn``),
+             decrement the run-level retry budget, and request another response.
+          4. On success: clip the appended retry turns so the saved
              conversation contains only ``(user_obs -> valid_assistant)``,
              then commit the assistant message via
              ``harness.commit_assistant``.
@@ -1480,10 +1480,10 @@ class GameplayAgent:
             ``{"raw": ..., "error": ...}`` dicts suitable for attaching to
             the step record; empty on first-shot success.
         """
-        # Index where repair turns will start (used for clipping on success).
+        # Index where retry turns will start (used for clipping on success).
         # Captured BEFORE the first generate call, i.e. the point right after
         # the user observation was appended by harness.build_messages.
-        repair_start_idx = self.harness.conversation_length
+        retry_start_idx = self.harness.conversation_length
 
         attempts: list[dict] = []
         step_usage = {
@@ -1532,14 +1532,14 @@ class GameplayAgent:
                     ) from e
                 self._parse_retry_remaining -= 1
                 # Keep only the most recent failed attempt in the retry
-                # prompt: clip back to ``repair_start_idx`` before appending
-                # the new repair turn.  Without this, each retry would
+                # prompt: clip back to ``retry_start_idx`` before appending
+                # the new retry turn.  Without this, each retry would
                 # concatenate another malformed response + another hidden
                 # reasoning echo, blowing the context window after a few
                 # copied-reasoning retries.  A no-op on the first retry
-                # (nothing past repair_start_idx yet).
-                self.harness.clip_from(repair_start_idx)
-                self.harness.append_repair_turn(raw_response, e, context_info)
+                # (nothing past retry_start_idx yet).
+                self.harness.clip_from(retry_start_idx)
+                self.harness.append_retry_turn(raw_response, e, context_info)
                 retry_messages = list(self.harness._conversation)
                 raw_response, context_info = self.llm.generate(retry_messages)
                 self._accumulate_token_usage(context_info)
@@ -1552,10 +1552,10 @@ class GameplayAgent:
             else:
                 break
 
-        # Success: clip any repair turns so the in-memory conversation
+        # Success: clip any retry turns so the in-memory conversation
         # looks like the model responded cleanly to the original observation.
         if attempts:
-            self.harness.clip_from(repair_start_idx)
+            self.harness.clip_from(retry_start_idx)
 
         self.harness.commit_assistant(parsed, raw_response, context_info)
 

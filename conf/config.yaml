@@ -41,7 +41,7 @@ logging:
   verbose: false
 
 replay:
-  data_dir: ./workdir/prepare_behavioral_data
+  data_dir: ./data/behavior/human
   subject: ""
   game_filter: ""
   action_frames_only: true

@@ -12,7 +12,7 @@
       "release_root": "replays/human",
       "component": "example_replays",
       "disposition": "candidate",
-      "reason": "Invented replay prefix; actual scientific scope requires a separate selection policy"
+      "reason": "Example replay prefix; choose dataset contents through a separate selection policy"
     },
     "example-features": {
       "release_root": "features/example",

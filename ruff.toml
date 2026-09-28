@@ -1,6 +1,6 @@
 # Ruff configuration for infer-vgdl
 # VGDL engine (src/vgdl/, src/utils.py) is forked upstream code -- excluded.
-extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/recovered/"]
+extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/extraction/", "agents/efficientzero/environment/", "agents/efficientzero/inference/", "agents/efficientzero/training/", "agents/efficientzero/extract_features.py", "agents/efficientzero/extract_traces.py"]
 
 [lint.per-file-ignores]
 # These files use sys.path.insert() before imports (intentional E402)
@@ -12,4 +12,4 @@ extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/r
 "tests/test_interaction_ground_truth.py" = ["E402"]
 
 # Historical figure scripts configure a headless backend before pyplot.
-"scripts/analysis/plot_behavioural.py" = ["E402"]
+"src/reason_to_play/analysis/behavioral/plots.py" = ["E402"]

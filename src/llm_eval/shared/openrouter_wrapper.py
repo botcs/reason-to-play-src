@@ -204,7 +204,7 @@ class OpenRouterWrapper(LLMWrapperBase):
         #   - deepseek-v3.2: same -- reasoning escapes the top-level cap.
         #
         # Upshot: the only reliable way to bound the tokens a single
-        # call consumes is client-side guardrails (repair-turn echo
+        # call consumes is client-side guardrails (retry-turn echo
         # trimming, harness.truncate_if_needed with
         # context_usage_fraction).  Never trust the provider to respect
         # any reasoning-token cap.  See ``.claude/skills/

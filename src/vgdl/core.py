@@ -1645,9 +1645,9 @@ class Termination(PrettyClass):
 
     def is_done(self, game):
         """returns whether the game is over, with a win/lose flag"""
-        from pygame.locals import K_ESCAPE, QUIT
+        from pygame.locals import K_ESCAPE
 
-        if K_ESCAPE in game.active_keys or pygame.event.peek(QUIT):
+        if K_ESCAPE in game.active_keys:
             return True, False
         else:
             return False, None

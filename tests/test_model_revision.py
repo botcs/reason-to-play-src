@@ -52,7 +52,7 @@ def test_runtime_pins_all_components_to_one_resolved_snapshot(monkeypatch):
     assert tokenizer.pad_token == tokenizer.eos_token
 
 
-def test_pinned_revision_cannot_reuse_legacy_experiment_slots():
+def test_pinned_revision_cannot_reuse_unversioned_experiment_slots():
     cfg = ExtractionConfig(model="test/model", model_revision="a" * 40)
     cfg.exp_db.enabled = True
     with pytest.raises(ValueError, match="slot IDs do not include the model revision"):

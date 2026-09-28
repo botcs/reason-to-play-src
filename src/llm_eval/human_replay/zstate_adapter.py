@@ -2,8 +2,8 @@
 """
 ZstateAdapter: Convert Tomov 2023 zstate dicts to game engine format.
 
-Bridges the gap between human replay BSON data and the unified Harness pipeline.
-The adapter converts zstate frames (from decompressed plays.zstates) into the
+Connects measured human JSON frames to the unified Harness pipeline.
+The adapter converts the behavior reader's frame dictionaries into the
 same 2D grid + event tuples that the game engine produces via env.step().
 
 This allows ObservationFormatter and EventLogger to operate identically on both
@@ -525,14 +525,10 @@ class ZstateAdapter:
         reward = curr_score - prev_score
 
         # Terminal outcome (mutually exclusive, all False if ended=False).
-        # Per VGFMRI_DB_README.md:174-176, plays fall into three categories:
-        #   - WIN: win=True / win=1         (goal achieved in-game)
-        #   - LOSE: win=False / win=-1      (avatar died or explicit loss)
-        #   - TIMEOUT: win=None             (level's `duration` budget ran
-        #                                    out with no win or loss)
-        # Collapsing TIMEOUT into LOSE (which the old code did via the
-        # `ended and not won -> lose` fallback) misrepresents the data --
-        # ~42% of plays in the dataset are timeouts, not losses.
+        # These display flags distinguish a supplied null win from False/-1.
+        # Human outcome analysis also checks avatar-death events: a null play
+        # win alone does not establish an incomplete play or timeout. See
+        # docs/sources/tomov23-behavior-notes.md for the original measurements.
         win_value = curr_zstate.get("win")
         ended = curr_zstate.get("ended", False)
         won = ended and (win_value is True or win_value == 1)
@@ -609,20 +605,21 @@ def realign_zstate_positions(zstates: list[dict], play_win) -> list[dict]:
        terminal zstate's ``win`` field is the engine's internal signal
        ("avatar did / did not achieve the goal" -> ``True`` or ``-1``),
        but the authoritative categorization of the play is
-       ``play_doc["win"]`` per VGFMRI_DB_README.md:174-176, which
-       distinguishes WIN (``True``) / LOSS (``False``/``-1``) /
-       TIMEOUT (``None``).  ~42% of plays end in timeouts where the
-       engine still wrote ``win=-1`` on the terminal zstate, which
-       would cascade downstream as a spurious ``[LOSE]`` marker.  When
+       ``play_doc["win"]``, whose recorded values are true, false or null.
+       A terminal ``win=-1`` must not turn a null play result into an explicit
+       loss flag. Human outcome analysis separately checks avatar-death events
+       before classifying a null outcome as incomplete; see
+       ``docs/sources/tomov23-behavior-notes.md``. When
        the caller supplies ``play_win`` we overwrite the last frame's
        ``win`` so the adapter classifies the outcome correctly.
 
-    Call this once on the raw zstate list before passing frames to
-    ``ZstateAdapter.adapt_frame`` or ``convert_zstate_to_viewer``.
+    Call this once before passing frames to ``ZstateAdapter.adapt_frame``
+    for prompt generation. Replay visuals retain the original frame's
+    rendering rectangles, rather than these next-frame positions.
 
     Args:
         zstates: Raw decompressed zstate list from a single play.
-        play_win: Play-level ``win`` value from the BSON play document
+        play_win: Play-level ``win`` value from the human play record
             (``True`` / ``False`` / ``-1`` / ``None``).  Overrides the
             raw terminal-frame ``win``.  Required -- callers without a
             play document can pass ``zstates[-1].get("win")`` to opt
@@ -703,10 +700,11 @@ def _patch_sprite_positions(curr_objects: dict, next_objects: dict) -> dict:
 
 
 def convert_zstate_to_viewer(state: dict, block_size: int) -> dict:
-    """Convert a BSON zstate to vgdl-js replay viewer format.
+    """Convert a measured human frame to vgdl-js replay viewer format.
 
-    Transforms sprite objects from pixel coordinates to grid coordinates
-    and normalizes the state structure for the vgdl-js replay viewer.
+    Transforms the original rendering rectangles from pixels to fractional
+    grid coordinates. Recorded x/y can differ from rect.pos within a frame;
+    they are used only for legacy objects without a rendering rectangle.
 
     Args:
         state: Raw zstate dict from behavioral data (Tomov 2023).
@@ -734,8 +732,13 @@ def convert_zstate_to_viewer(state: dict, block_size: int) -> dict:
             numeric_id = sprite_counter[sprite_type]
             sprite_counter[sprite_type] += 1
 
-            col = obj_data["x"] // block_size
-            row = obj_data["y"] // block_size
+            rect = obj_data.get("rect")
+            if rect is not None and "pos" in rect:
+                x, y = rect["pos"]
+            else:
+                x, y = obj_data["x"], obj_data["y"]
+            col = x / block_size
+            row = y / block_size
 
             resources = obj_data.get("resources", {})
             if resources:
@@ -765,7 +768,7 @@ def convert_zstate_to_viewer(state: dict, block_size: int) -> dict:
     timeout = ended and win_value is None
     return {
         "score": state.get("score", 0),
-        "time": state.get("time", 0),
+        "time": state.get("gt", state.get("time", 0)),
         "ended": ended,
         "won": won,
         "lose": lose,

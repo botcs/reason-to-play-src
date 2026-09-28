@@ -8,3 +8,5 @@ out/
 workdir/
 wandb/
 *.log
+build/
+*.egg-info/
