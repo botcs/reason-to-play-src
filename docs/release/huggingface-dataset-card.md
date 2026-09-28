@@ -218,7 +218,7 @@ Smoke tests do not establish full MRI preprocessing or GPU-scale reproduction.
 Use recorded code and dataset revisions for paper reproduction. State cohorts,
 models, conditions and analysis settings explicitly for new experiments.
 
-## License and citation
+## License
 
 MIT covers original project code and newly created artifacts. Original
 OpenNeuro records remain CC0. Third-party source, game assets and model weights
@@ -226,9 +226,20 @@ retain their own terms; component metadata preserves these distinctions. The
 redistributed AAL SPM12 atlas retains its upstream GPL notice and source archive;
 it is not relicensed under MIT.
 
-Please cite the **NeurIPS 2026** paper using
-[CITATION.cff](https://github.com/botcs/reason-to-play-src/blob/main/CITATION.cff),
-the canonical citation maintained with the research code.
+## Citation
+
+```bibtex
+@inproceedings{botos2026reasontoplay,
+  title = {Reason to Play: Behavioral and Brain Alignment Between Frontier {LRMs} and Human Game Learners},
+  author = {Botos, Csaba and Kumar, Sreejan and Andrews, Austin Tudor David
+            and Hunt, Laurence and Summerfield, Chris and Tenenbaum, Joshua B.
+            and Ponte Costa, Rui and Mattar, Marcelo G. and Tomov, Momchil},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year = {2026},
+  note = {Accepted at NeurIPS 2026},
+  url = {https://openreview.net/forum?id=Y1oX1yuaWM}
+}
+```
 
 Also cite Tomov et al., *The neural architecture of theory-based reinforcement
 learning* (2023), and [OpenNeuro ds004323 v1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).

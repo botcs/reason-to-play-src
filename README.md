@@ -124,6 +124,21 @@ The original raw human data are available in
 [OpenNeuro ds004323 v1.0.0](https://openneuro.org/datasets/ds004323/versions/1.0.0).
 Those datasets and LRM model weights are separate from this code checkout.
 
+## Citation
+
+```bibtex
+@inproceedings{botos2026reasontoplay,
+  title = {Reason to Play: Behavioral and Brain Alignment Between Frontier {LRMs} and Human Game Learners},
+  author = {Botos, Csaba and Kumar, Sreejan and Andrews, Austin Tudor David
+            and Hunt, Laurence and Summerfield, Chris and Tenenbaum, Joshua B.
+            and Ponte Costa, Rui and Mattar, Marcelo G. and Tomov, Momchil},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year = {2026},
+  note = {Accepted at NeurIPS 2026},
+  url = {https://openreview.net/forum?id=Y1oX1yuaWM}
+}
+```
+
 ## License
 
 Original project code and newly created research artifacts are released jointly
