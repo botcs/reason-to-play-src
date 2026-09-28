@@ -16,7 +16,7 @@ outstanding artifact associations.
 | Base alignment | `reason_to_play.fmri.align_baselines` | Intersect run masks; behavioral timestamps relative to scanner start, rounded to nearest TR; subtract one TR for AR(1), then concatenate by game/level/play |
 | DDQN | `reason_to_play.features.ddqn` | 8-frame stack, original `GridDQN` architecture; SHA-256 checkpoint and exact source revision recorded for newly generated features |
 | EMPA/HRR | Base aligner | Reads theory-regressor JSON and embeds symbolic theory sequences with the historical HRR settings; no new EMPA fitting is performed here |
-| EfficientZero | Base aligner | Representation entries, initial-phase value/policy entries, timestep-averaged dynamics/reward entries; separate `aligned_ez.npz` |
+| EfficientZero | `reason_to_play.fmri.align_efficientzero` | Original play/frame identities; four representation and seven initial value/policy hooks, averaged in the existing BOLD sample bins; optional timestep-averaged dynamics/reward hooks |
 | LLM alignment | `reason_to_play.fmri.align_llm` | Original play/frame identities and wall-clock timestamps, average activations per TR, forward fill only inside a play; archived frame-indexed inputs retain their timing convention |
 | Encoder | `reason_to_play.analysis.neural.encoding` | Past lags 2–5 TR, padding with the first row within each play, training-fold scaling/PCA before lags; outer and inner level-partition CV |
 | Bands | Explicit CLI setting | Default **main only**; `--include-nuisance-bands` adds button, time, and game/level identity bands |
@@ -91,12 +91,12 @@ software connections, not reproduction of human MRI processing or paper scores.
 The ROI parser's `--baseline-map` assigns explicit metadata to named DDQN/EZ/HRR
 features, using the same atlas and mask-intersection calculation. The example
 map labels new FC1 and HRR runs; it does not identify the archived baseline CSV's
-layers. That CSV has 11 numeric EZ layer indices, but the available traces have
-15 named hooks. The original baseline parser and aligned EZ inputs remain
-unavailable. An inspected
-`sub-12/aligned_data.npz` has `has_ez_data=False`; the current aligned prefix
-contains no `aligned_ez.npz`. These are unresolved source links, not permission
-to infer a historical layer mapping.
+layers. The archived job configuration selects four representation and seven
+value/policy hooks from the 15 extracted hooks, explaining the eleven-layer
+selection. It does not establish the mapping to the CSV's numeric layer indices.
+EfficientZero alignment from the released traces uses explicit hook names and
+the existing BOLD sample order. It supports new fits without assigning those
+arrays to unverified historical result labels.
 
 ## Dataset-only analysis contract
 

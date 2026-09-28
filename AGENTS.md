@@ -39,6 +39,7 @@ explicit experiment configuration. Read this guide before changing code.
 | Behavioral episode tables and figures | `src/reason_to_play/analysis/behavioral/` |
 | DDQN activation extraction | `src/reason_to_play/features/ddqn.py` |
 | EfficientZero activation and trace extraction | `agents/efficientzero/extract_features.py`, `extract_traces.py`; model inputs in `observations.py` |
+| EfficientZero alignment to existing BOLD samples | `src/reason_to_play/fmri/align_efficientzero.py` |
 | EfficientZero runtime and environment | `agents/efficientzero/inference/`, `environment/` |
 | Optional EfficientZero training | `agents/efficientzero/training/` submodule; `prepare_training_config.py` creates its local experiment config |
 | Study settings | `experiments/neurips2026/` |

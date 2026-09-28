@@ -152,6 +152,21 @@ The result records input content hashes, source hash, dependency versions and
 fitting settings. `--resume` checks those identities. Use a separate output
 root for a different experimental condition.
 
+For EfficientZero, select the participant's archive and a named hook:
+
+```bash
+python -m reason_to_play.analysis.neural.encoding \
+  --subject sub-13 --base-data "${BASE_DATA:?Set BASE_DATA}" \
+  --feature-file "$DATASET/analysis/neural/inputs/model-features/efficientzero/sub-13.npz" \
+  --layer ez_value_policy_fc_policy_0 \
+  --max-level 8 --include-nuisance-bands --seed 23 \
+  --output-dir /results/encoding-ez
+```
+
+The archive uses full hook names and records coverage separately for each
+layer. See the [baseline guide](baselines.md#efficientzero-hidden-features) to
+align traces for a new dataset.
+
 The model/variant, layer and participant selection for the headline comparison
 is [experiments/neurips2026/encoding.json](../../experiments/neurips2026/encoding.json).
 Qwen uses `all`; DeepSeek uses `compressed`. Feature stream, performance band

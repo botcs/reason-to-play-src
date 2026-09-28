@@ -255,6 +255,8 @@ def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files
             clean = released_llm_path(layer, subject)
             if layer.startswith("hrr_"):
                 clean = Path("model-features/theory/hrr-decomposed") / f"{subject}.npz"
+            if layer.startswith("ez_") or layer == "ez":
+                clean = Path("model-features/efficientzero") / f"{subject}.npz"
             candidate = paths[0].parent.parent / clean if clean is not None else None
             if candidate is None or not candidate.is_file():
                 candidate = paths[0].parent / sidecar
@@ -267,6 +269,12 @@ def encoding_input_paths(subject, data_dir, layer, base_data=None, feature_files
 
 
 def load_aligned_data(paths, subject, layer, *, require_binding=True):
+    """Load the base and its bound features without changing original base flags.
+
+    Base ``has_ez_data``/``ez_layers`` describe the original base contents only.
+    Attached EfficientZero arrays and ``efficientzero_layer_names`` identify the
+    available added hooks; their per-layer coverage comes from the association.
+    """
     with np.load(paths[0], allow_pickle=True) as source:
         data = dict(source)
     base = data
@@ -277,6 +285,13 @@ def load_aligned_data(paths, subject, layer, *, require_binding=True):
             sidecar = dict(source)
         verified = validate_binding(sidecar, base, paths[0], base_sha256=base_digest)
         association = external_binding(path)
+        if "efficientzero_layer_names" in sidecar and (
+            association is None or "feature_coverage_by_layer" not in association
+        ):
+            raise ValueError(
+                "EfficientZero feature coverage is required; download "
+                f"{Path(path).name}.alignment.json alongside {Path(path).name}"
+            )
         coverage = None
         if association is not None:
             validate_binding(association, base, paths[0], base_sha256=base_digest)
@@ -284,6 +299,20 @@ def load_aligned_data(paths, subject, layer, *, require_binding=True):
                 coverage = validate_feature_coverage(
                     association["feature_coverage"], base
                 )
+            if "feature_coverage_by_layer" in association:
+                by_layer = association["feature_coverage_by_layer"]
+                if not isinstance(by_layer, dict) or not by_layer:
+                    raise ValueError("Per-layer feature coverage must be a mapping")
+                for name, layer_coverage in by_layer.items():
+                    if not isinstance(name, str) or f"{name}_aligned" not in sidecar:
+                        raise ValueError("Per-layer coverage names an absent feature")
+                    validate_feature_coverage(layer_coverage, base)
+                if f"{layer}_aligned" in sidecar:
+                    if layer not in by_layer:
+                        raise ValueError(
+                            "Requested layer lacks declared feature coverage"
+                        )
+                    coverage = by_layer[layer]
             verified = True
         if not verified:
             if require_binding:

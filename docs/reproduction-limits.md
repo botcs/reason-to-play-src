@@ -47,9 +47,13 @@ training source, not the revision that produced every released checkpoint.
 Initializing the submodule is unnecessary for analysis or feature extraction;
 a full retraining run has not been validated.
 
-The EfficientZero extractor requests **15 named hooks**, while the
-result summary uses **11 numeric layer labels**. No verified mapping between
-these labels and the hooks is available. Likewise, the saved DDQN channels cannot automatically be identified
+The EfficientZero extractor requests **15 named hooks**. The archived encoding
+job configuration selects **11**: four representation hooks and seven initial
+value/policy hooks. The result summary uses eleven numeric layer labels, but
+their exact mapping to the named hooks remains unverified. The released
+alignment command samples the named hooks at the existing BOLD samples;
+it does not establish which arrays produced the archived scores.
+Likewise, the saved DDQN channels cannot automatically be identified
 with every historical result-layer label. New baseline ROI rows require an
 explicit layer map; the code does not relabel candidates as final paper inputs.
 
@@ -111,6 +115,16 @@ Further checks reproduce 6,426 archived ROI rows with the released atlas and
 32-participant common mask, and repeat a fresh seeded fit over all 1,470 samples
 of one participant with a bounded 16-voxel target set. The two fresh fits are
 identical; they do not claim historical-score or whole-brain reproduction.
+
+EfficientZero alignment covers 11 named hooks for all 32 participants and
+46,581 retained samples. Independent frame-clock reductions agree exactly with
+all 73,062 play/layer slices in the final archives. The raw inventory lacks nine
+of the 6,994 task plays; none belongs to the 6,642-play BOLD selection, so these
+aligned archives have complete source coverage. Two seeded fits using the
+participant-13 policy features, all 1,470 samples and 16 BOLD voxels also agree
+exactly, with network and source-service imports disabled. These checks support
+new encoding fits; the historical baseline layer/checkpoint attribution remains
+unresolved as described above.
 
 The explicit archived-table selection also generates the regional encoding
 figure from 1,169,226 main-band rows across ten model labels and 21 participants,

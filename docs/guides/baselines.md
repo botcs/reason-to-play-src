@@ -140,10 +140,38 @@ short play. Each new trace has a `.pt.provenance.json` sidecar with checkpoint,
 configuration, source and output hashes. This identifies the new extraction;
 it does not retroactively identify the checkpoint behind an archived trace.
 
-The base aligner's `--ez-features-dir` expects
-`GAME/sub-XX/run-YY/play-ORIGINALID/traces.pt` below that directory and writes the
-aligned EZ feature sidecar. For representation activations and metrics instead
-of selected layer traces, inspect:
+To sample existing traces at the released BOLD samples, use the human JSONs
+and that participant's BOLD archive:
+
+```bash
+python -m reason_to_play.fmri.align_efficientzero \
+  --base-data /absolute/data/analysis/neural/inputs/sub-13/bold-ddqn-theory.npz \
+  --behavior-dir /absolute/data/behavior/human \
+  --trace-dir /absolute/data/features/efficientzero \
+  --output /absolute/data/analysis/neural/inputs/model-features/efficientzero/sub-13.npz \
+  --workers 32
+```
+
+The original play ID joins each trace to its human frames. Embedded participant,
+run and game metadata must agree with the recording; a directory label alone
+does not establish identity. The BOLD archive fixes the sample order and retained
+play lengths. Frame timestamps are rounded to the nearest scanner TR, with the
+same AR(1) offset as BOLD, and activations are averaged within each retained
+sample. No raw MRI or source behavioural archive is needed.
+
+The default output contains four representation and seven initial value/policy
+hooks under their full names. `--include-dynamics` additionally includes the
+four sparse dynamics/reward hooks, averaging entries at each engine timestep.
+Missing plays or hooks have explicit coverage records. The output binds to the
+BOLD archive's checksum and ordered sample identities; the adjacent
+`.npz.alignment.json` records per-layer coverage. Keep the two files together.
+The [dataset guide](dataset-analysis.md#neural-encoding-from-processed-inputs) describes fitting
+these features. Their association with archived paper results is covered in
+[reproduction limits](../reproduction-limits.md#baseline-checkpoints-and-layer-mappings).
+
+The base aligner's `--ez-features-dir` remains available when preparing new BOLD
+inputs. For representation activations and metrics instead of selected layer
+traces, inspect:
 
 ```bash
 python -m agents.efficientzero.extract_features --help

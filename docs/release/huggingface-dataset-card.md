@@ -56,7 +56,9 @@ analysis/
   behavioral/
   neural/
     inputs/sub-XX/bold-ddqn-theory.npz
-    inputs/model-features/
+    inputs/model-features/lrm/
+    inputs/model-features/efficientzero/sub-XX.npz
+    inputs/model-features/theory/
     inputs/atlas/
     inputs/theory-regressors.json.gz
     results/
@@ -78,6 +80,19 @@ images. Selected fMRIPrep outputs under `reconstruction/` are optional for
 earlier-stage reconstruction; ordinary analysis uses the processed inputs.
 Website assets contain the browser's RDM exports and indexes. Replay links
 refer to the files under `behavior/`.
+
+EfficientZero provides **32 scanner-sampled archives with 11 named hooks each**.
+All 6,642 plays contributing to the 46,581 retained scanner samples have source
+features for every included hook. The raw trace collection covers 6,985 of the
+6,994 task attempts; the nine unavailable traces concern attempts outside this
+retained sample selection. Per-layer coverage describes source availability,
+not whether every scanner bin has a nonzero feature vector.
+
+The adjacent alignment association records the extractor hook names and their
+coverage. These names do not establish a mapping to the numeric layer labels in
+archived paper results, or identify the exact checkpoint that produced every
+original trace. Each EfficientZero archive's manifest entry also records its human
+JSON inputs and checksums, sampling policy, and BOLD/sample association.
 
 Raw MRI is available from [OpenNeuro ds004323, version 1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0).
 Historical and unreported feature extractions are excluded. The selection

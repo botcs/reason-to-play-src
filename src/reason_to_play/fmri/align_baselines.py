@@ -648,7 +648,9 @@ def load_ez_traces(
         layers = EZ_LAYERS
 
     try:
-        data = torch.load(trace_path, map_location="cpu", weights_only=False)
+        from reason_to_play.fmri.align_efficientzero import load_trace_document
+
+        data = load_trace_document(trace_path)
     except Exception as e:
         logging.warning(f"Failed to load {trace_path}: {e}")
         return None

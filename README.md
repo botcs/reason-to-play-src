@@ -101,6 +101,7 @@ python -m src.llm_eval.human_replay.run_replay \
 | Compare behavioral performance | [Behavioral analysis](docs/reproducibility.md#behavioural-analysis-without-cloud-credentials) |
 | Fit neural encoding models and aggregate their results | [Neural analysis](docs/guides/dataset-analysis.md#neural-encoding-from-processed-inputs) |
 | Run DDQN, EfficientZero and EMPA integrations | [Baselines](docs/guides/baselines.md) |
+| Align EfficientZero traces to processed BOLD samples | [EfficientZero features](docs/guides/baselines.md#efficientzero-hidden-features) |
 | Train EfficientZero with the optional pinned upstream submodule | [EfficientZero training](docs/guides/baselines.md#efficientzero-training) |
 
 Use the documented Python modules and scripts directly. Workflow details live

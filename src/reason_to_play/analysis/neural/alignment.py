@@ -103,8 +103,9 @@ def external_binding(path):
         "alignment_base_sha256": document["base_sha256"],
         "alignment_samples_sha256": document["sample_order_sha256"],
     }
-    if "feature_coverage" in document:
-        binding["feature_coverage"] = document["feature_coverage"]
+    for key in ("feature_coverage", "feature_coverage_by_layer"):
+        if key in document:
+            binding[key] = document[key]
     return binding
 
 

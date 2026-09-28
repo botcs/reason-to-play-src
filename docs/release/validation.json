@@ -4,15 +4,15 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 463,
+      "passed": 499,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/, tools/ and the manifest assembler (106 scoped files).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/ and tools/ (107 scoped files).",
     "documentation": {
-      "links_and_anchors_checked": 152,
+      "links_and_anchors_checked": 145,
       "failures": 0,
       "original_source_reference_and_translator_unchanged": true
     },
@@ -71,7 +71,41 @@
       "activation_tensors": 9,
       "activation_elements": 1286838,
       "activation_frames": 234,
-      "checkpoint_attribution": "These checks use an available checkpoint; attribution of every final-paper feature array remains unresolved."
+      "checkpoint_attribution": "These checks use an available checkpoint; attribution of every final-paper feature array remains unresolved.",
+      "wheel_alignment_entrypoint_without_source_services": true,
+      "offline_encoding": {
+        "layer": "ez_value_policy_fc_policy_0",
+        "subject": "sub-13",
+        "samples": 1470,
+        "bold_voxels": 16,
+        "seed": 23,
+        "ridge_search_iterations": 1,
+        "independent_repeated_fits": 2,
+        "scores_bitwise_equal": true,
+        "network_and_source_service_imports_blocked": true,
+        "raw_mri_used": false,
+        "scope": "Fresh bounded fits from the processed BOLD and named EZ features; not historical-score reproduction."
+      },
+      "scanner_alignment": {
+        "subjects": 32,
+        "named_hooks_per_subject": 11,
+        "arrays": 352,
+        "retained_plays": 6642,
+        "retained_samples": 46581,
+        "missing_feature_samples": 0,
+        "original_source_bytes_hashed": 818134162809,
+        "raw_trace_headers_checked": 6985,
+        "retained_trace_payloads_hashed": 6642,
+        "independent_per_play_hook_comparisons": 73062,
+        "all_values_exact": true,
+        "final_written_play_slices_exact": true,
+        "existing_bold_bytes_unchanged": true,
+        "compressed_feature_bytes": 2221249340,
+        "all_raw_task_plays_have_traces": false,
+        "raw_task_plays_without_traces": 9,
+        "unavailable_raw_traces_in_retained_bold_selection": 0,
+        "historical_numeric_layer_mapping_verified": false
+      }
     },
     "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
     "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
@@ -183,6 +217,19 @@
       "retained_sample_instances_across_feature_archives": 603513,
       "coverage_count_scope": "Play and sample instances are counted per feature archive, so the same participant/play can occur under several models or conditions. Declared absent features retain the original zero-filled intervals; exact array equality is separate from feature coverage.",
       "source_generation_selection": "Raw tensor and prompt records are selected by immutable source generation; every included raw-to-aligned comparison uses the corresponding verified generation."
+    },
+    "human_scanner_bins": {
+      "subjects": 32,
+      "retained_plays": 6642,
+      "retained_samples": 46581,
+      "fields": [
+        "keystates",
+        "any_keypress",
+        "scores",
+        "score_deltas",
+        "time_in_play"
+      ],
+      "independent_clock_and_nuisance_reduction_matches_base_exactly": true
     }
   },
   "not_executed": [
