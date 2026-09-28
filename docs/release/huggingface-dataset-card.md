@@ -87,8 +87,13 @@ Each participant's `bold.npz` contains processed BOLD and its voxel mask;
 DDQN, EfficientZero, LRM and EMPA arrays are peers under `model-features/`.
 Selected fMRIPrep outputs under `reconstruction/` support optional
 reconstruction from raw MRI; ordinary analysis starts with these processed inputs.
-Website assets contain the browser's RDM exports and indexes. Replay links
-refer to the files under `behavior/`.
+Website assets contain the browser's RDM exports, indexes and compact replay
+copies under `website-assets/replays/human/` and `website-assets/replays/lrm/`.
+These copies retain the displayed frames, fractional positions, timing and
+complete conversations. They omit engine and raw-input fields unused by the
+browser; the complete `behavior/` recordings remain the analysis inputs.
+The [data format guide](https://github.com/botcs/reason-to-play-src/blob/main/docs/data-format.md#website-replay-copies)
+describes the retained fields and the generation command.
 
 EfficientZero provides **32 scanner-sampled archives with 11 named hooks each**.
 All 6,642 plays contributing to the 46,581 retained scanner samples have source

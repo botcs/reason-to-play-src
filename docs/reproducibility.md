@@ -89,7 +89,7 @@ requires the container and external inputs in the
 
 Open saved replay files in the [web viewer](https://botcs.github.io/reason-to-play/replay.html).
 The same webapp provides [interactive play](https://botcs.github.io/reason-to-play/interactive-gameplay.html)
-and the [replay catalogue](https://botcs.github.io/reason-to-play/catalogue.html).
+and the [interactive catalogue](https://botcs.github.io/reason-to-play/catalogue.html).
 Python environments run headlessly. Their `rgb_array` output supplies image
 arrays to computation; it does not open a player window.
 

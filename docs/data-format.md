@@ -174,3 +174,28 @@ states unknown coverage. `feature_coverage_by_layer` preserves distinct layer
 availability where required, including EfficientZero hooks. Coverage does not
 change the fitting mask. See the [analysis guide](guides/dataset-analysis.md)
 for direct Python commands and the numerical policy.
+
+## Website replay copies
+
+`website-assets/replays/human/` and `website-assets/replays/lrm/` contain compact
+copies for browser playback. Their paths follow the corresponding `behavior/`
+paths. The catalogue index at `website-assets/replays/manifest.json` selects these
+copies. Use the complete `behavior/` files for analysis.
+
+Website copies preserve every recorded frame, fractional drawing coordinate,
+orientation, outcome, timestamp, play record, conversation and game description.
+They omit sprite engine fields (`lastmove`, `cooldown`, `speed`, `_age`) and
+frame `keystate` and `kill_list_ID` fields, which the browser does not use.
+Sprite-group delta encoding and gzip reduce repeated state data.
+
+To generate them from a downloaded dataset with its manifest and catalogue index:
+
+```sh
+python scripts/release/build_website_replays.py \
+  --dataset-root /data/reason-to-play \
+  --output /data/website-replays --workers 32
+```
+
+The command leaves source files unchanged, checks their SHA256 hashes, and writes
+copies under the output directory's `dataset/` folder. It also writes source
+mappings and verifies all retained fields after reading the generated files.

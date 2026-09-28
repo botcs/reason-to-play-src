@@ -15,7 +15,7 @@ _Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Su
 For agent-assisted contributions, start with [AGENTS.md](AGENTS.md).
 
 Use the webapp to [inspect replay files](https://botcs.github.io/reason-to-play/replay.html),
-[browse the replay catalogue](https://botcs.github.io/reason-to-play/catalogue.html),
+[browse the interactive catalogue](https://botcs.github.io/reason-to-play/catalogue.html),
 or [play the games](https://botcs.github.io/reason-to-play/interactive-gameplay.html).
 Python runs the experiments and produces data; the webapp provides the viewer.
 
