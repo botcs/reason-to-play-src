@@ -1,5 +1,7 @@
 # Reason to Play
 
+[![Gameplay and conversation alongside human and model representational similarity matrices](figures/banner.png)](https://botcs.github.io/reason-to-play/)
+
 Source code for **Reason to Play: Behavioral and Brain Alignment Between Frontier LRMs and Human Game Learners.**
 
 _Botos Csaba, Sreejan Kumar, Austin Tudor David Andrews, Laurence Hunt, Chris Summerfield, Joshua B. Tenenbaum, Rui Ponte Costa, Marcelo G. Mattar, Momchil Tomov_
