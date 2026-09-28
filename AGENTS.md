@@ -26,24 +26,27 @@ explicit experiment configuration. Read this guide before changing code.
 
 | Task | Location |
 | --- | --- |
-| Model gameplay | `src/llm_eval/generative_gameplay/` |
-| Human replay and rationale imputation | `src/llm_eval/human_replay/run_replay.py`, `src/llm_eval/human_replay/replay_agent.py` |
-| LLM activation extraction | `src/llm_eval/human_replay/extract_features*.py` |
-| Harness, configuration, observations and model adapters | `src/llm_eval/shared/` |
-| Game engine, game definitions and prompts | `src/vgdl/`, `games/`, `prompts/` |
+| Model gameplay | `agents/lrm/gameplay/` |
+| Human replay and rationale imputation | `agents/lrm/prepare_prompts.py`, `agents/lrm/prompting/replay_agent.py` |
+| LLM activation extraction | `agents/lrm/features/extract*.py` |
+| Harness and observations | `agents/lrm/prompting/` |
+| Model adapters and inference runtimes | `agents/lrm/backends/` |
+| Game engine, game definitions and prompts | `environments/vgdl/`, `environments/definitions/`, `agents/lrm/prompts/` |
 | Replay inspection and interactive play | [Webapp](https://botcs.github.io/reason-to-play/) |
-| Raw-data acquisition and fMRIPrep | `tools/download_openneuro.sh`, `src/reason_to_play/fmri/fmriprep.py` |
-| Human replay readers and conversation output | `src/reason_to_play/data/behavior.py`, `replay_behavior.py`, `replay_output.py` |
-| BOLD processing and feature alignment | `src/reason_to_play/fmri/` |
-| Encoding fits, ROI aggregation and neural figures | `src/reason_to_play/analysis/neural/` |
-| Behavioral episode tables and figures | `src/reason_to_play/analysis/behavioral/` |
-| DDQN activation extraction | `src/reason_to_play/features/ddqn.py` |
+| Raw-data acquisition and fMRIPrep | `reconstruction/tomov23/download_openneuro.sh`, `reconstruction/tomov23/fmriprep.py` |
+| Human recordings, outcomes and clocks | `human/behavior.py` |
+| Replay format and tagged JSON values | `data/` |
+| BOLD processing | `human/neural/process_bold.py` |
+| Features sampled at scanner times | `analysis/neural/prepare_inputs.py`, `align_llm.py`, `align_efficientzero.py` |
+| Encoding fits, ROI aggregation and neural figures | `analysis/neural/` |
+| Behavioral episode tables and figures | `analysis/behavioral/` |
+| DDQN activation extraction | `agents/ddqn/extract_features.py` |
 | EfficientZero activation and trace extraction | `agents/efficientzero/extract_features.py`, `extract_traces.py`; model inputs in `observations.py` |
-| EfficientZero alignment to existing BOLD samples | `src/reason_to_play/fmri/align_efficientzero.py` |
+| EfficientZero alignment to existing BOLD samples | `analysis/neural/align_efficientzero.py` |
 | EfficientZero runtime and environment | `agents/efficientzero/inference/`, `environment/` |
 | Optional EfficientZero training | `agents/efficientzero/training/` submodule; `prepare_training_config.py` creates its local experiment config |
 | Study settings | `experiments/neurips2026/` |
-| Baseline integration and source pins | `baselines/`; EfficientZero pins and provenance in `agents/efficientzero/` |
+| Agent implementations and source pins | `agents/ddqn/`, `agents/efficientzero/`, `agents/empa/` |
 | Dataset inventory, selection and catalogue preparation | `scripts/release/` |
 
 Read the relevant module and its tests before editing. Update this map when
@@ -129,8 +132,8 @@ The Ruff commands below cover the existing configured lint scope; the pytest
 command includes both the main and neural suites:
 
 ```sh
-ruff check src/ agents/ tests/ tools/
-ruff format --check src/ agents/ tests/ tools/
+ruff check agents/ human/ data/ analysis/ environments/ reconstruction/ tests/ scripts/
+ruff format --check agents/ human/ data/ analysis/ environments/ reconstruction/ tests/ scripts/
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q
 ```
 

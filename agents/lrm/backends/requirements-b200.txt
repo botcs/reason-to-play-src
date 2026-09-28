@@ -1,0 +1,29 @@
+# HGX B200 / CUDA 12.8 backend environment (Python 3.12).
+# Install the project with its lrm/analysis/release extras first; these are
+# hardware-specific pins for local model inference and activation extraction.
+# Use --extra-index-url https://download.pytorch.org/whl/cu128.
+# Other GPUs require compatible Torch/Triton/kernel builds.
+
+# Local LRM inference
+torch==2.11.0+cu128
+triton==3.6.0
+transformers==5.6.2
+safetensors==0.7.0
+accelerate==1.13.0
+huggingface-hub==1.12.0
+tokenizers==0.22.2
+sentencepiece==0.2.1
+
+# Attention / dispatch kernels tuned for Blackwell; older-arch fallbacks
+# exist for these. Drop on hardware that does not need them.
+tilelang==0.1.9
+# Required by the bundled DeepSeek runtimes; build against the selected CUDA/Torch stack.
+fast_hadamard_transform
+torch-c-dlpack-ext==0.1.5
+flash-linear-attention==0.5.0
+causal-conv1d==1.6.1
+
+# Analysis, plotting, and S3
+matplotlib==3.10.8
+pandas==3.0.2
+boto3==1.42.94

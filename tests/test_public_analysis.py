@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from reason_to_play.analysis.behavioral.episodes import (
+from analysis.behavioral.episodes import (
     human_outcome,
     human_rows,
     replay_rows,
@@ -219,7 +219,7 @@ def test_replay_rejects_action_frame_disagreement(tmp_path):
 
 
 def test_human_rows_records_actual_per_game_source_path(monkeypatch):
-    from reason_to_play.analysis.behavioral import episodes
+    from analysis.behavioral import episodes
 
     source = "sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     plays = []
@@ -254,7 +254,7 @@ def test_human_rows_records_actual_per_game_source_path(monkeypatch):
     ],
 )
 def test_human_rows_rejects_missing_or_fictitious_source_path(monkeypatch, path):
-    from reason_to_play.analysis.behavioral import episodes
+    from analysis.behavioral import episodes
 
     play, _ = human_doc()
     play["_canonical"] = {"source_document_index": 0, "source_recording": path}

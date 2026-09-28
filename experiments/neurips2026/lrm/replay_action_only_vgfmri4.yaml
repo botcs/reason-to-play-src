@@ -1,0 +1,51 @@
+program: agents.lrm.prepare_prompts
+method: grid
+name: replay-action-only-vgfmri4
+parameters:
+  harness.rationale_mode:
+    value: action-only
+  harness.suggestion_level:
+    value: elaborate
+  replay.subject:
+    values:
+    - sub-12
+    - sub-13
+    - sub-14
+    - sub-15
+    - sub-16
+    - sub-17
+    - sub-18
+    - sub-19
+    - sub-20
+    - sub-21
+    - sub-22
+    - sub-23
+    - sub-24
+    - sub-25
+    - sub-26
+    - sub-27
+    - sub-28
+    - sub-29
+    - sub-30
+    - sub-31
+    - sub-32
+  replay.game_filter:
+    values:
+    - vgfmri4_avoidgeorge
+    - vgfmri4_bait
+    - vgfmri4_chase
+    - vgfmri4_helper
+    - vgfmri4_lemmings
+    - vgfmri4_zelda
+  replay.action_frames_only:
+    value: true
+  replay.stride:
+    value: 1
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.prepare_prompts
+- ${args_no_hyphens}

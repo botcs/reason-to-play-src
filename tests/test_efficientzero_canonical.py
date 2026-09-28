@@ -18,7 +18,7 @@ MODULES = (
 def environment():
     env = os.environ.copy()
     env.update(
-        PYTHONPATH=os.pathsep.join(str(ROOT / path) for path in ("src", ".")),
+        PYTHONPATH=str(ROOT),
         SDL_VIDEODRIVER="dummy",
         SDL_AUDIODRIVER="dummy",
         PYGAME_HIDE_SUPPORT_PROMPT="1",

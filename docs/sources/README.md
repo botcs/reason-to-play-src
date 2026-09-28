@@ -16,12 +16,12 @@ inputs, use the [workflow guide](../reproducibility.md).
 | Research component | Origin | Current implementation or reference |
 | --- | --- | --- |
 | Original human experiment and EMPA | [tsividis/vgdl, refactor_fMRI_cannon](https://github.com/tsividis/vgdl/tree/refactor_fMRI_cannon); [OpenNeuro ds004323 v1.0.0](https://doi.org/10.18112/openneuro.ds004323.v1.0.0) | [Original behavioural schema](tomov23-behavior-notes.md); [public JSON specification](../data-format.md) |
-| DDQN and baseline VGDL environments | [tomov/RC_RL](https://github.com/tomov/RC_RL), followed by [botcs/RC_RL](https://github.com/botcs/RC_RL) | [Baseline guide](../guides/baselines.md); [source pins](../../baselines/sources.json) |
+| DDQN and baseline VGDL environments | [tomov/RC_RL](https://github.com/tomov/RC_RL), followed by [botcs/RC_RL](https://github.com/botcs/RC_RL) | [Baseline guide](../guides/baselines.md); [source pins](../../agents/ddqn/sources.json) |
 | EfficientZero integration | Austin Andrews's [EfficientZeroV2 fork](https://github.com/A-Andrews/EfficientZeroV2/tree/29157d4892afd9467b1bd0994de1355086145490), based on [EfficientZeroV2](https://github.com/Shengjiewang-Jason/EfficientZeroV2) and using RC_RL environments | `agents/efficientzero/` contains extraction, inference and environment code, plus the optional pinned `training/` submodule; [source pins](../../agents/efficientzero/sources.json) and [training guide](../guides/baselines.md#efficientzero-training) |
-| Raw fMRI preprocessing | [RC_RL launcher, October 2025](https://github.com/botcs/RC_RL/blob/969141d09369ecd783965fadbbe2a1920065cf24/fmriprep_pipeline/run_fmriprep.sh) | [Launcher/configuration records](../../src/reason_to_play/resources/fmriprep); [preprocessing guide](../guides/fmri-preprocessing.md) |
+| Raw fMRI preprocessing | [RC_RL launcher, October 2025](https://github.com/botcs/RC_RL/blob/969141d09369ecd783965fadbbe2a1920065cf24/fmriprep_pipeline/run_fmriprep.sh) | [Launcher/configuration records](../../reconstruction/tomov23/configs); [preprocessing guide](../guides/fmri-preprocessing.md) |
 | Neural analysis | [botcs/tomov23-analysis](https://github.com/botcs/tomov23-analysis), with reported methodological influence from [bert-brains](https://github.com/tsumers/bert-brains) | [Per-file source map](code-origins.json); [analysis methods](../analysis-methods.md) |
-| Language-model harness and game interpreter | January 2026 fork of Colas's private `ccolas/infer-vgdl`; related public [language_and_experience](https://github.com/ccolas/language_and_experience) | `src/llm_eval/`, `src/vgdl/`, `games/`, `prompts/` |
-| DeepSeek extraction runtimes | Pinned upstream V3.2 and V4 code with local loading/feature-hook adaptations | [Runtime and license notices](../../THIRD_PARTY.md); [extraction guide](../reproducibility.md#optional-deepseek-runtimes) |
+| Language-model harness and game interpreter | January 2026 fork of Colas's private `ccolas/infer-vgdl`; related public [language_and_experience](https://github.com/ccolas/language_and_experience) | `agents/lrm/`, `environments/vgdl/`, `environments/definitions/`, `agents/lrm/prompts/` |
+| DeepSeek extraction runtimes | Upstream V3.2 and V4 code with local loading/feature-hook adaptations | [V3.2 source record](../../agents/lrm/backends/deepseek_v32/PROVENANCE.json), [V4 source record](../../agents/lrm/backends/deepseek_v4/PROVENANCE.json); [runtime and license notices](../../THIRD_PARTY.md); [extraction guide](../reproducibility.md#optional-deepseek-runtimes) |
 
 Source ancestry, methodological influence and producing-run attribution are
 different claims. A matching repository or model name does not establish the
@@ -101,7 +101,7 @@ analysis choices are documented in [analysis methods](../analysis-methods.md).
 The original raw-data launcher belongs to RC_RL. It specifies fMRIPrep 24.1.0,
 MNI152NLin2009cAsym 2 mm output, registration DOF 9, forced BBR, zero dummy
 scans, seed 23 and no FreeSurfer surface reconstruction. Its shell and README
-are retained with [source checksums](../../src/reason_to_play/resources/fmriprep/original-launcher/source.json).
+are retained with [source checksums](../../reconstruction/tomov23/configs/original-launcher/source.json).
 
 The 38 retained configurations cover all 32 participants. One early sub-02
 invocation used DOF 6; later records use DOF 9. The launcher uses Docker while
@@ -124,18 +124,19 @@ not simulate the original experiment again.
 [`convert_tomov23_games.py`](convert_tomov23_games.py) preserves the historical
 Tomov-to-Colas translation script. Its last recorded edit is
 [6dfe6576, 22 March 2026](https://github.com/botcs/llm-vgdl/commit/6dfe65760f3934eb1eae6a5765e14a67ad1297c7).
-SHA-256: `2a09720843c5b665c43b92671cd19e54421a17955c46623582ae3d9228fc9696`.
+Source snapshot SHA-256: `2a09720843c5b665c43b92671cd19e54421a17955c46623582ae3d9228fc9696`.
+The included entrypoint takes explicit input/output directories and validates
+with the current packaged interpreter; its translation rules follow that source.
 
 The script history includes January conversion/indentation/interaction fixes,
 a February Zelda indentation correction, and the March scoring-effect change.
 It translates sprite hierarchies, colours, level mappings, scoring effects,
 boundary interactions and termination parameters. Manual game-specific changes
 also followed, including plaqueAttack scoring; the script alone does not fully
-specify every maintained game definition. The [`games/`](../../games) files
+specify every maintained game definition. The [`environments/definitions/`](../../environments/definitions) files
 and their history are authoritative for current experiments.
 
-To inspect the historical conversion, supply explicit directories because the
-preserved script retains its original machine-specific defaults:
+To inspect the conversion, supply explicit input and output directories:
 
 ```sh
 mkdir -p /tmp/translated-vgdl-inspection

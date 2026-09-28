@@ -4,10 +4,10 @@ from copy import deepcopy
 
 import pytest
 
-from reason_to_play.data.behavior import iter_plays, load_runs
-from reason_to_play.data.replay_codec import save_replay
-from reason_to_play.data.replay_output import DISPLAY_FIELDS, merge_human_prompt_output
-from src.llm_eval.human_replay.prompt_utils import load_prompts
+from human.behavior import iter_plays, load_runs
+from data.replay_codec import save_replay
+from agents.lrm.prompting.output import DISPLAY_FIELDS, merge_human_prompt_output
+from agents.lrm.prompting.conversation import load_prompts
 from test_replay_behavior import recording
 
 

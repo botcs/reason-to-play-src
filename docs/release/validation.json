@@ -4,17 +4,19 @@
   "quality_gates": {
     "tests": {
       "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q -ra",
-      "passed": 499,
+      "passed": 500,
       "skipped": 9,
       "subtests_passed": 9,
       "skip_reason": "Optional model-tokenizer caches and separate sliding-window replay fixtures are unavailable; all six recorded-human-data integration tests ran.",
       "human_data": "REASON_TO_PLAY_HUMAN_DATA points to sub-13/bait_vgfmri4/elaborate.human.replay.json.gz"
     },
-    "lint_and_format": "Ruff check and Ruff format --check pass across src/, agents/, tests/ and tools/ (107 scoped files).",
+    "lint_and_format": "Ruff check and Ruff format --check pass across agents/, human/, data/, analysis/, environments/, reconstruction/, tests/ and scripts/ (117 scoped files; preserved upstream engines and kernels have explicit exclusions).",
     "documentation": {
-      "links_and_anchors_checked": 145,
+      "focused_markdown_files_checked": 15,
+      "local_links_and_anchors_checked": 149,
       "failures": 0,
-      "original_source_reference_and_translator_unchanged": true
+      "original_behavior_reference_unchanged": true,
+      "translator_rules_ast_identical": true
     },
     "dataset_assembly": "Tests cover stale retained payloads, frozen source identities, safe atomic replacements, content hashes, catalogue types and source-to-public path consistency."
   },
@@ -30,10 +32,10 @@
     "human_replay": {
       "mode": "Action-only replay through the actual Python entrypoint, followed by the feature prompt loader",
       "input": "One complete human JSON file",
-      "plays": 20,
-      "frames": 12775,
-      "prompts": 1458,
-      "scanner_runs": 3,
+      "plays": 41,
+      "frames": 7884,
+      "prompts": 2338,
+      "scanner_runs": 4,
       "measured_fields_preserved": true,
       "single_translated_game_description_preserved": true,
       "cloud_api_required": false
@@ -107,13 +109,22 @@
         "historical_numeric_layer_mapping_verified": false
       }
     },
-    "ddqn": "Tiny CPU training/runtime check and recorded-trajectory extraction contract with explicitly synthetic weights; no performance-reproduction claim.",
+    "ddqn": {
+      "checkpoint_scope": "Available tiny CPU checkpoint; no historical paper checkpoint attribution asserted",
+      "recorded_frames": 290,
+      "feature_arrays_bitwise_equal": 4,
+      "tiny_training_frames": 5,
+      "optimizer_steps": 4,
+      "initial_and_final_checkpoint_tensors_bitwise_equal": 12,
+      "engine_revisions_isolated_in_both_import_orders": true,
+      "full_retraining_validated": false
+    },
     "neural_integration": "Synthetic NIfTI/confounds, base and LLM alignment, main/nuisance ridge fitting and ROI aggregation.",
     "figures": "Behavioral figures from complete episode histories and the retained summary table, and the archived neural figure, ran using the dataset package with network connections and source-service imports blocked.",
     "generative_gameplay": {
       "backend": "mock",
-      "frames": 25,
-      "decisions": 5,
+      "frames": 20,
+      "decisions": 4,
       "display_required": false
     },
     "human_dataset": {
@@ -170,7 +181,6 @@
       "missing_result_cells_acknowledged": 2,
       "establishes_historical_checkpoint_identity": false
     },
-    "text_observation_generator": "Lazy imports, CLI help and fake vLLM batching across files; no real vLLM GPU generation.",
     "dataset_behavior": {
       "network_and_source_services_denied": true,
       "workers": 32,
@@ -230,6 +240,17 @@
         "time_in_play"
       ],
       "independent_clock_and_nuisance_reduction_matches_base_exactly": true
+    },
+    "local_replay_resume": "Saved generative replays restore through a local path; mismatched game, replay type or prompt conditions are rejected before conversation restoration.",
+    "lrm_study_configs": {
+      "sweeps": 27,
+      "typed_configurations": 863,
+      "study_parameters_preserved": true,
+      "jobs_submitted": 0
+    },
+    "empa_hrr": {
+      "real_theories": 5,
+      "full_and_three_decomposed_outputs_bitwise_equal": true
     }
   },
   "not_executed": [
@@ -243,9 +264,9 @@
   "dataset_package_validation": "Separate local HF package loaded through its README configurations with datasets 4.8.5 using split=data. Both catalogue configurations loaded successfully; no remote upload was performed.",
   "package": {
     "build": "setuptools wheel",
-    "imports_checked": 14,
-    "module_help_checked": 10,
-    "import_location": "Installed wheel outside the checkout",
+    "imports_checked": 23,
+    "module_help_checked": 15,
+    "import_location": "Installed wheel outside the checkout; network and source-service imports blocked during reader/analysis checks",
     "bson_or_pymongo_installed": false,
     "single_file_reader": {
       "participant": "sub-13",
@@ -257,14 +278,19 @@
       "training_submodule_present": false,
       "training_imports_blocked": true,
       "cpu_checkpoint_trace_frames": 64,
-      "source_manifest_files_present": true
+      "source_manifest_files_present": true,
+      "trace_tensors_bitwise_equal_after_module_relocation": 748,
+      "trace_elements_bitwise_equal": 8033696
     },
     "baseline_dataset_readers": {
       "empa1_rows": 162,
       "ddqn_rows": 472,
       "efficientzero_rows": 67
     },
-    "feature_binding_module_in_wheel": true
+    "feature_binding_module_in_wheel": true,
+    "required_source_notices_in_wheel": true,
+    "baseline_provenance_files_hash_checked": 966,
+    "human_reader_standard_library_only": true
   },
   "reproduction_limits": "See ../reproduction-limits.md for unresolved checkpoint/layer attribution, coverage gaps and condition distinctions."
 }

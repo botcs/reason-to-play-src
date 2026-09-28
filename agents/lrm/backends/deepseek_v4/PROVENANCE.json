@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "upstream_reference": {
+    "repository": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+    "revision": "60d8d70770c6776ff598c94bb586a859a38244f1",
+    "revision_scope": "Recorded upstream comparison snapshot; not a producing-checkpoint or paper-run attribution"
+  },
+  "license": "MIT; see LICENSE. Model weights have separate terms.",
+  "reference_record": {
+    "repository": "https://github.com/botcs/reason-to-play-src",
+    "commit": "4c3cac23473c8304ae162cdc4edb049539e38828",
+    "path": "docs/source-provenance.md"
+  },
+  "comparison_scope": "Current file hashes compared with the retained source files from the recorded upstream snapshot. Files without a retained upstream comparison are identified separately. Full-model conversion and distributed inference equivalence are not established.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+      "upstream_path": "LICENSE",
+      "upstream_sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/LICENSE",
+      "comparison": "byte-identical"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "1d3ed8c72b88be98506d84bdd4af0ebca599a7cdf029ef0d8cead56c537df1ee",
+      "origin": "project",
+      "role": "Python package marker",
+      "upstream_path": null
+    },
+    {
+      "path": "config_V4_Flash.json",
+      "sha256": "a1a6d312caed7daa507a96a8119edd3c1afa40774891638c40cfaf6be3911a0b",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "config_V4_Pro.json",
+      "sha256": "d0ae26c45023ac62b66b02cb8000aa8806c767e9c020e7c8eeef6d61edd531c5",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "convert.py",
+      "sha256": "689f5ed7d5ff3091115f634b14091d15d27bff107ed5d29dba7f18da4ba0c01f",
+      "upstream_path": "inference/convert.py",
+      "upstream_sha256": "912acfc20bdd9ae4dbd5bde9dc7c8e61f6d27b6826d3ac2d052b2534c0881454",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/inference/convert.py",
+      "comparison": "modified",
+      "changes": [
+        "Local checkpoint conversion implementation supports bounded output chunks and associated CLI options.",
+        "Formatting and comments also differ; byte identity and full-model conversion equivalence are not asserted."
+      ]
+    },
+    {
+      "path": "encoding_dsv4.py",
+      "sha256": "4878b88a0c0891ccdddbe426459ba2aa9c2d74cb46d82ca8494f42a2b47d7faa",
+      "upstream_path": "encoding/encoding_dsv4.py",
+      "upstream_sha256": "bdbd57c132a1b3725042323d02b98b9d1df28e5f388f134399555d041f5055e0",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/encoding/encoding_dsv4.py",
+      "comparison": "modified",
+      "changes": [
+        "Added a lint suppression comment to a bare except clause.",
+        "Removed the unused exception binding from an except Exception clause."
+      ]
+    },
+    {
+      "path": "generate.py",
+      "sha256": "e05d5207b2dab0d53ec8ee5c567278217fee427e3da0f4f673661454244c7f36",
+      "upstream_path": "inference/generate.py",
+      "upstream_sha256": "d4d443c0be8499b20ae5eaff0a623df02f47a8309be6feeba4eb4e0eeb5342c3",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/inference/generate.py",
+      "comparison": "modified",
+      "changes": [
+        "Package-relative model, loader and encoder imports replace top-level imports and path mutation.",
+        "Checkpoint loading uses the local sharded loader.",
+        "Added a lint suppression comment."
+      ]
+    },
+    {
+      "path": "kernel.py",
+      "sha256": "2777c27c85fba6cd7033a4dffee2a4126fbd487b812121e8f47d7d57ee048e09",
+      "upstream_path": "inference/kernel.py",
+      "upstream_sha256": "59b325083d7103975cba025bd0d60ea343bb82d8fff53088afb7c04bd380c0c2",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/inference/kernel.py",
+      "comparison": "modified",
+      "changes": [
+        "Removed an unused typing import.",
+        "Retained the local out_dtype cast in activation quantization in place of the upstream FP8 cast."
+      ]
+    },
+    {
+      "path": "load_utils.py",
+      "sha256": "b58bc595d90e3ff21223202f3a8c22affe52a3fa01d8bddf05ab74ebfaf0f425",
+      "origin": "project",
+      "role": "Bounded sharded-checkpoint loader",
+      "upstream_path": null
+    },
+    {
+      "path": "model.py",
+      "sha256": "a87bedb18a03a918efaf27c451b86163093c4777a8b91eaa5e5ac4be9ea15160",
+      "upstream_path": "inference/model.py",
+      "upstream_sha256": "ce962f1face79d4f633d36436576214057a7e11443c9789935e1deb5c6cd1d71",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/inference/model.py",
+      "comparison": "modified",
+      "changes": [
+        "The only text change is the package-relative kernel import."
+      ]
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "32b5941df8839b7fc3612dd8065672b0265b31c33fd4c6935f22a6eed37f5fd5",
+      "upstream_path": "inference/requirements.txt",
+      "upstream_sha256": "857e0b8b58e41cabe16e55bf4ab7ff791677c53b25f0f3e104ef85227cd11eab",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash/blob/60d8d70770c6776ff598c94bb586a859a38244f1/inference/requirements.txt",
+      "comparison": "modified",
+      "changes": [
+        "Text lines match; final newline differs."
+      ]
+    },
+    {
+      "path": "vgdl_DS4.json",
+      "sha256": "1b09b76f90244ce1297ba777f5d2fb4c3afb9e6336a8249362ec40b42cc43814",
+      "origin": "project",
+      "role": "VGDL extraction configuration",
+      "upstream_path": null
+    },
+    {
+      "path": "vgdl_DS4_Base.json",
+      "sha256": "5a2bdd184411577f5308f64804173f2a1e22f7922f1973dcb0370845a5ba4285",
+      "origin": "project",
+      "role": "VGDL extraction configuration",
+      "upstream_path": null
+    },
+    {
+      "path": "vgdl_DS4_Flash.json",
+      "sha256": "aaf9be8e67712ee5bc1f1bce4add5fe613bddcdc7ed358f3151df77571decc57",
+      "origin": "project",
+      "role": "VGDL extraction configuration",
+      "upstream_path": null
+    },
+    {
+      "path": "vgdl_DS4_Flash_Base.json",
+      "sha256": "f190ec08dec71ad0bee6db3f423020a97d09b32ba5cce5e280067e4483de9af3",
+      "origin": "project",
+      "role": "VGDL extraction configuration",
+      "upstream_path": null
+    }
+  ]
+}

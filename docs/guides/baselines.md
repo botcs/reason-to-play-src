@@ -3,7 +3,7 @@
 For analysis of recorded baseline behaviour, use the
 [dataset analysis guide](dataset-analysis.md#behavioral-analysis).
 This guide covers baseline input formats, feature extraction and optional
-training. The [baseline source pins](../../baselines/sources.json) and
+training. The [baseline source pins](../../agents/ddqn/sources.json) and
 [EfficientZero source pins](../../agents/efficientzero/sources.json) record source
 commits; a source pin alone does not identify the run that produced an archived
 result.
@@ -24,7 +24,7 @@ For DDQN, use the [analysis environment](dataset-analysis.md#install), a
 hardware-appropriate PyTorch build and:
 
 ```bash
-python -m pip install -r baselines/requirements-inference.txt
+python -m pip install -e '.[ddqn]'
 ```
 
 EfficientZero training uses the separate upstream environment described below.
@@ -34,8 +34,8 @@ credentials. Keep their engine revisions separate:
 
 | Directory | Role |
 | --- | --- |
-| `baselines/vendor/rc_rl/extraction/` | DDQN feature extraction |
-| `baselines/vendor/rc_rl/current/` | DDQN training and behavioural generation |
+| `agents/ddqn/environment/extraction/` | DDQN feature extraction |
+| `agents/ddqn/environment/training/` | DDQN training and behavioural generation |
 | `agents/efficientzero/environment/` | EfficientZero's environment, level transformations and warmup levels |
 | `agents/efficientzero/inference/` | EfficientZero model inference |
 | `agents/efficientzero/extract_features.py`, `extract_traces.py` | Activation and trace extraction |
@@ -72,9 +72,9 @@ available or reached levels; the human and model advancement protocols differ.
 Only when collecting additional upstream records, use the source exporters:
 
 ```bash
-python tools/export_ddqn_history.py --workers 32 --output data/behavior/ddqn/episode-history.json
-python tools/convert_empa_summaries.py \
-  --input /absolute/data/EMPA1-behaviour --output data/behavior/empa --trusted-pickle
+python -m agents.ddqn.export_history --workers 32 --output /absolute/data/behavior/ddqn/episode-history.json
+python -m agents.empa.import_results \
+  --input /absolute/data/EMPA1-behaviour --output /absolute/data/behavior/empa --trusted-pickle
 ```
 
 The DDQN exporter requires W&B access to `dpag-rl/ddqn-vgdl` and uses
@@ -86,17 +86,16 @@ input is already JSON.
 
 The [fMRI guide](fmri-preprocessing.md#process-bold-and-align-baseline-features)
 contains the DDQN extraction command and local checkpoint-map format.
-`reason_to_play.features.ddqn` selects the checksum-verified
-`vendor/rc_rl/extraction/` snapshot in an editable checkout; use `--rc-rl-dir`
-for an explicit compatible source directory. Checkpoint downloads require
+`agents.ddqn.extract_features` selects the checksum-verified
+`agents/ddqn/environment/extraction/` implementation. Checkpoint downloads require
 `--allow-checkpoint-download`; a local checkpoint map supports offline use.
 The original `trial1-sequential` checkpoint mapping does not establish the
 weights behind every archived DDQN feature family.
 
-For a new training run, from `baselines/vendor/rc_rl/current/`:
+For a new training run:
 
 ```bash
-python runDDQN.py --game_name vgfmri4_bait --random_seed 7 --no_wandb
+python -m agents.ddqn.train --game_name vgfmri4_bait --random_seed 7 --no_wandb
 ```
 
 This is an entry-point example, not the paper's full training configuration.
@@ -144,7 +143,7 @@ To sample existing traces at the released BOLD samples, use the human JSONs
 and that participant's BOLD archive:
 
 ```bash
-python -m reason_to_play.fmri.align_efficientzero \
+python -m analysis.neural.align_efficientzero \
   --base-data /absolute/data/analysis/neural/inputs/sub-13/bold-ddqn-theory.npz \
   --behavior-dir /absolute/data/behavior/human \
   --trace-dir /absolute/data/features/efficientzero \
@@ -226,13 +225,6 @@ full retraining has not been validated. The recorded RGB inputs, warmup levels,
 checkpoint configurations and unresolved result-layer mapping are described in
 [reproduction limits](../reproduction-limits.md#baseline-checkpoints-and-layer-mappings).
 
-## Additional baseline sources
-
-Optional full RC_RL checkouts require authorized source access:
-
-```bash
-python baselines/setup.py rc-rl rc-rl-current --transport ssh
-```
-
-The EMPA reference is `tsividis/vgdl` at the `empa-reference` pin; it does not
-establish the exact revision behind received EMPA1 episode summaries.
+The [EMPA source record](../../agents/empa/sources.json) identifies the preceding
+`tsividis/vgdl` implementation. It does not establish the exact revision behind
+received EMPA1 episode summaries.

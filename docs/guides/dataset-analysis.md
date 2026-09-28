@@ -41,7 +41,7 @@ definitions are required. The reader returns the recorded fields as
 ordinary Python dictionaries:
 
 ```python
-from reason_to_play.data.behavior import iter_plays, load_runs, play_states
+from human.behavior import iter_plays, load_runs, play_states
 
 runs = load_runs("/data/reason-to-play/behavior/human")
 for play in iter_plays("/data/reason-to-play/behavior/human", subject="sub-13"):
@@ -72,14 +72,14 @@ for the historical archive. That reference is not the public replay schema.
 ## Behavioral analysis
 
 ```bash
-python -m reason_to_play.analysis.behavioral.episodes \
+python -m analysis.behavioral.episodes \
   --human-data "$DATASET/behavior/human" \
   --replays "$DATASET/behavior/lrm" --workers 32 \
   --ddqn "$DATASET/behavior/ddqn/episode-history.json" \
   --efficientzero "$DATASET/behavior/efficientzero" \
   --empa "$DATASET/behavior/empa" \
   --output /results/episodes.csv
-python -m reason_to_play.analysis.behavioral.plots discovery_curriculum_combined \
+python -m analysis.behavioral.plots discovery_curriculum_combined \
   --csv /results/episodes.csv --output-dir /results/figures
 ```
 
@@ -99,7 +99,7 @@ render its summaries and the full histories for analyses requiring every episode
 the two are different analysis inputs.
 
 ```bash
-python -m reason_to_play.analysis.behavioral.plots discovery_curriculum_combined \
+python -m analysis.behavioral.plots discovery_curriculum_combined \
   --csv "$DATASET/analysis/behavioral/retained-episode-table.csv" \
   --output-dir /results/retained-behavior-figures
 ```
@@ -121,7 +121,7 @@ MODEL_FEATURES="$DATASET/analysis/neural/inputs/model-features/lrm/qwen3.5-9b/el
 ```
 
 ```bash
-python -m reason_to_play.analysis.neural.encoding \
+python -m analysis.neural.encoding \
   --subject sub-13 \
   --base-data "${BASE_DATA:?Set BASE_DATA to the downloaded sub-13 base NPZ}" \
   --feature-file "${MODEL_FEATURES:?Set MODEL_FEATURES to the matching feature NPZ}" \
@@ -155,7 +155,7 @@ root for a different experimental condition.
 For EfficientZero, select the participant's archive and a named hook:
 
 ```bash
-python -m reason_to_play.analysis.neural.encoding \
+python -m analysis.neural.encoding \
   --subject sub-13 --base-data "${BASE_DATA:?Set BASE_DATA}" \
   --feature-file "$DATASET/analysis/neural/inputs/model-features/efficientzero/sub-13.npz" \
   --layer ez_value_policy_fc_policy_0 \
@@ -168,7 +168,7 @@ layer. See the [baseline guide](baselines.md#efficientzero-hidden-features) to
 align traces for a new dataset.
 
 The model/variant, layer and participant selection for the headline comparison
-is [experiments/neurips2026/encoding.json](../../experiments/neurips2026/encoding.json).
+is [experiments/neurips2026/analysis/encoding.json](../../experiments/neurips2026/analysis/encoding.json).
 Qwen uses `all`; DeepSeek uses `compressed`. Feature stream, performance band
 and nuisance-fit condition are separate dimensions. Missing data are not zero
 performance, and a partial model/cohort must not silently become a complete
@@ -188,7 +188,7 @@ COMMON_MASK="$DATASET/analysis/neural/inputs/atlas/common-mask.npz"
 Verify their manifest hashes rather than downloading another atlas version.
 
 ```bash
-python -m reason_to_play.analysis.neural.roi \
+python -m analysis.neural.roi \
   --results-dir /results/encoding --workers 32 \
   --fit-condition with-nuisance \
   --atlas "${ATLAS:?Set ATLAS to the released AAL-SPM12 image}" \
@@ -216,9 +216,9 @@ fit/feature selections.
 For a completed whole-cohort, whole-layer run:
 
 ```bash
-python -m reason_to_play.analysis.neural.plots groups \
+python -m analysis.neural.plots groups \
   --csv /results/encoding_roi.csv \
-  --selection-config experiments/neurips2026/encoding.json \
+  --selection-config experiments/neurips2026/analysis/encoding.json \
   --outdir /results/figures
 ```
 
@@ -233,9 +233,9 @@ To render the archived summary table, set `ARCHIVED_TABLE` to the downloaded
 `analysis/neural/results/master_encoding_data.csv` and use its separate selection:
 
 ```bash
-python -m reason_to_play.analysis.neural.plots groups \
+python -m analysis.neural.plots groups \
   --csv "${ARCHIVED_TABLE:?Set ARCHIVED_TABLE to master_encoding_data.csv}" \
-  --selection-config experiments/neurips2026/archived-encoding-table.json \
+  --selection-config experiments/neurips2026/analysis/archived-encoding-table.json \
   --outdir /results/archived-figures
 ```
 
@@ -254,7 +254,7 @@ Set `LLM_FEATURES` to the extraction directory containing
 already sampled feature NPZ used in the encoding example.
 
 ```bash
-python -m reason_to_play.fmri.align_llm \
+python -m analysis.neural.align_llm \
   --subject sub-13 \
   --behavior-dir "$DATASET/behavior/human" \
   --aligned-data "${BASE_DATA:?Set BASE_DATA to the downloaded sub-13 base NPZ}" \

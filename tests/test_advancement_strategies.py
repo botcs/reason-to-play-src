@@ -12,8 +12,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.generative_gameplay.agent import GameplayAgent
-from src.llm_eval.shared.config import (
+from agents.lrm.gameplay.agent import GameplayAgent
+from agents.lrm.config import (
     BlockedCurriculaAdvancement,
     Config,
     FixedBudgetAdvancement,

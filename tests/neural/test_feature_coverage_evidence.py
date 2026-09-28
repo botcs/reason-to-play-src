@@ -9,8 +9,8 @@ import sys
 import numpy as np
 import pytest
 
-from reason_to_play.analysis.neural.alignment import file_sha256, sample_order_sha256
-from reason_to_play.analysis.neural.encoding import load_aligned_data
+from analysis.neural.alignment import file_sha256, sample_order_sha256
+from analysis.neural.encoding import load_aligned_data
 
 
 @pytest.fixture
@@ -85,7 +85,7 @@ def test_coverage_survives_real_fit_and_resume_checks_association(
     command = [
         sys.executable,
         "-m",
-        "reason_to_play.analysis.neural.encoding",
+        "analysis.neural.encoding",
         "--subject",
         "sub-13",
         "--base-data",
@@ -107,7 +107,7 @@ def test_coverage_survives_real_fit_and_resume_checks_association(
         "--n-alphas-batch",
         "4",
     ]
-    env = {**os.environ, "PYTHONPATH": str(root / "src")}
+    env = {**os.environ, "PYTHONPATH": str(root)}
     subprocess.run(command, cwd=tmp_path, env=env, check=True, capture_output=True)
     result_path = tmp_path / "fit/sub-13/encoding_results_new.npz"
     with np.load(result_path, allow_pickle=False) as result:

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from reason_to_play.fmri import align_llm as align
+from analysis.neural import align_llm as align
 
 
 def original(identity, ordinal, start=1_600_000_000.0):
@@ -222,7 +222,7 @@ def test_multiturn_file_to_aligned_rows_uses_original_identity(
         output_dir=tmp_path / "output",
         llm_sources=[source],
     )
-    from reason_to_play.analysis.neural.alignment import validate_binding
+    from analysis.neural.alignment import validate_binding
 
     with np.load(result[0]) as output, np.load(tmp_path / "base.npz") as base:
         assert validate_binding(output, base, tmp_path / "base.npz")

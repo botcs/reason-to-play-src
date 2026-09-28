@@ -6,13 +6,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from reason_to_play.analysis.behavioral.baselines import (
+from analysis.behavioral.baselines import (
     ddqn_rows,
     efficientzero_rows,
     empa_rows,
 )
-from tools.export_ddqn_history import export
-from tools.convert_empa_summaries import convert
+from agents.ddqn.export_history import export
+from agents.empa.import_results import convert
 
 
 def test_ez_orders_episodes_and_excludes_warmup(tmp_path):

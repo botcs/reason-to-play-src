@@ -1,3 +1,0 @@
-# Install the reusable analysis package without the gameplay/API stack.
--e .[analysis]
-# Install a hardware-appropriate Torch build separately for PT feature loading.

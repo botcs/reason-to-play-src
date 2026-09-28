@@ -1,0 +1,20 @@
+hydra:
+  job:
+    chdir: false
+  output_subdir: null
+  run:
+    dir: .
+prompts: ???
+model: ???
+model_revision: null
+output_dir: out/sliding_window_features
+torch_dtype: bfloat16
+window_fraction: 0.3
+overlap: 0.5
+no_compile: true
+wandb_project: ''
+verbose: false
+action_compression: false
+random_init: false
+ablation_tag: ''
+continue_on_session_error: false

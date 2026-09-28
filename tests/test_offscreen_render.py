@@ -10,7 +10,7 @@ import pytest
 pygame = pytest.importorskip("pygame")
 pytest.importorskip("gym")
 
-from src.vgdl.interfaces.gym.env import VGDLEnv  # noqa: E402
+from environments.vgdl.interfaces.gym.env import VGDLEnv  # noqa: E402
 
 
 @pytest.fixture
@@ -28,7 +28,9 @@ def prohibit_display(monkeypatch):
 
 
 def make_env():
-    game = Path(__file__).resolve().parents[1] / "games/bait_vgfmri4_v0"
+    game = (
+        Path(__file__).resolve().parents[1] / "environments/definitions/bait_vgfmri4_v0"
+    )
     return VGDLEnv(
         game_file=str(game / "bait_vgfmri4.txt"),
         level_file=str(game / "bait_vgfmri4_lvl0.txt"),
@@ -92,7 +94,7 @@ def test_default_render_and_close_are_offscreen(prohibit_display):
 
 
 def test_base_termination_uses_only_explicit_engine_keys(monkeypatch):
-    from src.vgdl.core import Termination
+    from environments.vgdl.core import Termination
 
     def unexpected_events(*args, **kwargs):
         raise AssertionError("Engine termination must not poll desktop events")

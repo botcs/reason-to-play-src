@@ -5,12 +5,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.llm_eval.generative_gameplay.export_replay import capture_state
-from src.llm_eval.human_replay.zstate_adapter import (
+from agents.lrm.gameplay.recording import capture_state
+from agents.lrm.prompting.observations import (
     convert_zstate_to_viewer,
     realign_zstate_positions,
 )
-from src.llm_eval.shared.replay_codec import load_replay, save_replay
+from data.replay_codec import load_replay, save_replay
 
 
 def frame(tick=0, *, x=35, y=70, rect_pos=(43.75, 61.25)):
@@ -99,8 +99,8 @@ def test_generative_visual_preserves_fractional_rectangle_and_codec(tmp_path):
 def test_process_game_embeds_raw_visuals_and_keeps_prompt_alignment(
     tmp_path, monkeypatch, source_recording
 ):
-    from src.llm_eval.human_replay import run_replay
-    from src.llm_eval.shared.config import HarnessConfig, LLMConfig, ReplayConfig
+    from agents.lrm import prepare_prompts as run_replay
+    from agents.lrm.config import HarnessConfig, LLMConfig, ReplayConfig
 
     raw = [
         frame(tick, x=35 * (tick + 1), rect_pos=(43.75 + 35 * tick, 61.25))

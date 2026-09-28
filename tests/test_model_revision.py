@@ -2,12 +2,11 @@
 
 import sys
 
-import pytest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from src.llm_eval.human_replay import extract_features as extraction
-from src.llm_eval.shared.config import ExtractionConfig
+from agents.lrm.features import extract as extraction
+from agents.lrm.config import ExtractionConfig
 
 
 def test_runtime_pins_all_components_to_one_resolved_snapshot(monkeypatch):
@@ -50,12 +49,3 @@ def test_runtime_pins_all_components_to_one_resolved_snapshot(monkeypatch):
     assert auto_model.from_pretrained.call_args.kwargs["revision"] == resolved
     assert auto_model.from_pretrained.call_args.kwargs["config"] is config
     assert tokenizer.pad_token == tokenizer.eos_token
-
-
-def test_pinned_revision_cannot_reuse_unversioned_experiment_slots():
-    cfg = ExtractionConfig(model="test/model", model_revision="a" * 40)
-    cfg.exp_db.enabled = True
-    with pytest.raises(ValueError, match="slot IDs do not include the model revision"):
-        extraction._validate_revision_tracking(cfg)
-    cfg.exp_db.enabled = False
-    extraction._validate_revision_tracking(cfg)

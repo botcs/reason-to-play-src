@@ -24,11 +24,12 @@ def checkout_without_training(tmp_path_factory):
         checkout / "agents",
         ignore=shutil.ignore_patterns("training", "__pycache__"),
     )
-    shutil.copytree(
-        ROOT / "src" / "reason_to_play",
-        checkout / "src" / "reason_to_play",
-        ignore=shutil.ignore_patterns("__pycache__", "resources"),
-    )
+    for package in ("human", "data", "analysis", "environments"):
+        shutil.copytree(
+            ROOT / package,
+            checkout / package,
+            ignore=shutil.ignore_patterns("__pycache__"),
+        )
     assert not (checkout / "agents/efficientzero/training").exists()
     return checkout
 
@@ -36,7 +37,7 @@ def checkout_without_training(tmp_path_factory):
 def run_isolated(checkout, script, *arguments):
     env = os.environ.copy()
     env.update(
-        PYTHONPATH=os.pathsep.join((str(checkout), str(checkout / "src"))),
+        PYTHONPATH=str(checkout),
         OMP_NUM_THREADS="32",
         OPENBLAS_NUM_THREADS="32",
         MKL_NUM_THREADS="32",
@@ -77,8 +78,8 @@ def test_readers_and_model_forward_do_not_need_trainer(checkout_without_training
         checkout_without_training,
         """
         import torch
-        from reason_to_play.data import behavior
-        from reason_to_play.analysis.behavioral.baselines import efficientzero_rows
+        from human import behavior
+        from analysis.behavioral.baselines import efficientzero_rows
         from agents.efficientzero import extract_features, extract_traces
         from agents.efficientzero.inference.ez.agents.models.base_model import DynamicsNetwork
 

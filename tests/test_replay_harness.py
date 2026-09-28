@@ -13,11 +13,11 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.shared.config import HarnessConfig
-from src.llm_eval.shared.harness import Harness
-from src.llm_eval.shared.prompt_loader import PromptLoader
-from src.llm_eval.human_replay.replay_agent import ReplayAgent
-from src.llm_eval.human_replay.zstate_adapter import ZstateAdapter
+from agents.lrm.config import HarnessConfig
+from agents.lrm.prompting.harness import Harness
+from agents.lrm.prompting.prompt_loader import PromptLoader
+from agents.lrm.prompting.replay_agent import ReplayAgent
+from agents.lrm.prompting.observations import ZstateAdapter
 
 
 # ---------------------------------------------------------------------------
@@ -477,7 +477,7 @@ class TestBuildKnownInteractions:
 
     def test_returns_nonempty_set(self):
         """Should return a non-empty set of (color, effect, color) tuples."""
-        from src.llm_eval.human_replay.run_replay import _build_known_interactions
+        from agents.lrm.prepare_prompts import _build_known_interactions
 
         # Use canonical color mapping (identity -- no randomization)
         color_mapping = {
@@ -499,7 +499,7 @@ class TestBuildKnownInteractions:
 
     def test_colors_are_remapped(self):
         """Known interactions should use the randomized color names."""
-        from src.llm_eval.human_replay.run_replay import _build_known_interactions
+        from agents.lrm.prepare_prompts import _build_known_interactions
 
         # Swap goal and key colors
         color_mapping = {
@@ -788,7 +788,7 @@ class TestReplayAgentRealData:
     """Integration tests using recorded human JSON data."""
 
     def _load_first_bait_play(self):
-        from src.llm_eval.human_replay.data_loader import HumanPlayLoader
+        from human.behavior import HumanPlayLoader
 
         loader = HumanPlayLoader(HUMAN_DATA)
         for subject in loader.list_subjects():
@@ -1126,7 +1126,7 @@ class TestPersistentRealDataMockLLM:
     """Recorded human JSON tests with a mock LLM for rationale generation."""
 
     def _load_first_bait_play(self):
-        from src.llm_eval.human_replay.data_loader import HumanPlayLoader
+        from human.behavior import HumanPlayLoader
 
         loader = HumanPlayLoader(HUMAN_DATA)
         for subject in loader.list_subjects():

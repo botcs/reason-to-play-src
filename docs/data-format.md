@@ -124,7 +124,7 @@ standard library; it does not import BSON or an engine. Source datetimes and
 binary values in metadata/events use explicit `$rtp` encodings in JSON.
 
 ```python
-from reason_to_play.data.behavior import iter_plays, load_runs, play_states
+from human.behavior import iter_plays, load_runs, play_states
 
 root = "/data/reason-to-play/behavior/human"
 runs = load_runs(root)
@@ -135,7 +135,7 @@ for play in iter_plays(root, subject="sub-13"):
 ```
 
 The same functions accept one `.human.replay.json.gz` file as their input.
-Use `reason_to_play.data.replay_codec.load_replay` for the full replay dictionary
+Use `data.replay_codec.load_replay` for the full replay dictionary
 with expanded viewer states and unchanged conversations. Inspect files with the
 [web replay viewer](https://botcs.github.io/reason-to-play/replay.html).
 

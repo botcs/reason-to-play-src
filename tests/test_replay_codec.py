@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.shared.replay_codec import (
+from data.replay_codec import (
     delta_encode_states,
     expand_delta_states,
     load_replay,
@@ -23,7 +23,7 @@ def test_delta_bytes_independent_of_python_hash_seed():
     """Release checksums must not depend on process hash randomization."""
     script = """
 import json
-from reason_to_play.data.replay_codec import delta_encode_states
+from data.replay_codec import delta_encode_states
 keys = ['wall', 'avatar', 'goal', 'projectile', 'floor', 'resource']
 record = {'states': [
     {'sprites': {key: [{'col': 0}] for key in keys}},

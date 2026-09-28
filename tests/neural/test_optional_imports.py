@@ -6,10 +6,9 @@ import shutil
 import subprocess
 import sys
 
-import pytest
 
-from reason_to_play.features import ddqn
-from reason_to_play.fmri import align_baselines
+from agents.ddqn import extract_features as ddqn
+from analysis.neural import prepare_inputs as align_baselines
 
 
 def test_canonical_and_npz_readers_do_not_import_tensor_or_cloud_clients(tmp_path):
@@ -35,9 +34,9 @@ logging.basicConfig = lambda *a, **k: (_ for _ in ()).throw(
 original_path = list(sys.path)
 original_handlers = list(logging.getLogger().handlers)
 modules = [
-    importlib.import_module("reason_to_play." + name)
-    for name in ["fmri.align_baselines", "fmri.align_llm", "fmri.preprocess",
-                 "fmri.extract_bold", "features.ddqn", "analysis.neural.roi"]
+    importlib.import_module(name)
+    for name in ["analysis.neural.prepare_inputs", "analysis.neural.align_llm", "human.neural.process_bold",
+                 "human.neural.bold", "agents.ddqn.extract_features", "analysis.neural.roi"]
 ]
 assert sys.path == original_path
 assert logging.getLogger().handlers == original_handlers
@@ -70,19 +69,21 @@ def test_editable_baseline_discovery_checks_pinned_sources():
     assert source["revision"] == ddqn.RC_RL_EXTRACTION_REVISION
 
 
-def test_install_without_vendor_requires_explicit_baseline_directory(tmp_path):
-    # Reproduce the wheel resource layout without copying baseline code into it.
-    path = tmp_path / "site-packages/reason_to_play/features/ddqn.py"
+def test_installed_extractor_resolves_included_environment(tmp_path):
+    path = tmp_path / "site-packages/agents/ddqn/extract_features.py"
     path.parent.mkdir(parents=True)
     shutil.copyfile(Path(ddqn.__file__), path)
-    spec = importlib.util.spec_from_file_location("unbundled_ddqn", path)
+    environment = path.parent / "environment/extraction"
+    shutil.copytree(ddqn.DEFAULT_RC_RL_DIR, environment)
+    spec = importlib.util.spec_from_file_location("installed_ddqn", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert module.DEFAULT_RC_RL_DIR is None
-    with pytest.raises(FileNotFoundError, match="not bundled.*wheel"):
-        module.load_baseline(None)
-    assert module.resolve_baseline_directory(ddqn.DEFAULT_RC_RL_DIR) == (
-        ddqn.DEFAULT_RC_RL_DIR.resolve()
+    assert module.resolve_baseline_directory() == environment.resolve()
+    source = module.baseline_source_provenance(module.resolve_baseline_directory())
+    assert source["revision"] == ddqn.RC_RL_EXTRACTION_REVISION
+    assert (
+        source["manifest_sha256"]
+        == ddqn.baseline_source_provenance(ddqn.DEFAULT_RC_RL_DIR)["manifest_sha256"]
     )
 
 

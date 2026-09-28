@@ -8,7 +8,7 @@ import sys
 import pandas as pd
 import pytest
 
-from reason_to_play.analysis.neural.plots import select_encoding_rows
+from analysis.neural.plots import select_encoding_rows
 
 
 def experiment():
@@ -151,7 +151,7 @@ def test_archived_selection_rejects_changed_input_before_plotting(tmp_path):
         [
             sys.executable,
             "-m",
-            "reason_to_play.analysis.neural.plots",
+            "analysis.neural.plots",
             "aggregate",
             "--csv",
             str(source),
@@ -171,10 +171,7 @@ def test_selection_entrypoint_runs_outside_checkout(tmp_path):
     table().to_csv(csv, index=False)
     config = tmp_path / "selection.json"
     config.write_text(json.dumps(experiment()))
-    script = (
-        Path(__file__).resolve().parents[1]
-        / "src/reason_to_play/analysis/neural/plots.py"
-    )
+    script = Path(__file__).resolve().parents[1] / "analysis/neural/plots.py"
     output = tmp_path / "figures"
     subprocess.run(
         [

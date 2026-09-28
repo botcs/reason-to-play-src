@@ -136,7 +136,7 @@ def test_nullable_death_practice_upper_levels_and_independent_clocks(tmp_path, w
 
 
 def test_selects_one_condition_and_keeps_original_run_order(tmp_path, monkeypatch):
-    import reason_to_play.data.replay_behavior as reader
+    import human.behavior as reader
 
     def no_sprite_expansion(*args):
         raise AssertionError("Catalogue must not expand sprite trajectories")
@@ -217,7 +217,7 @@ def test_standalone_cli_uses_own_condition_and_runs_outside_checkout(tmp_path):
             str(output),
         ],
         cwd=tmp_path,
-        env=dict(os.environ, PYTHONPATH=str(root / "src")),
+        env=dict(os.environ, PYTHONPATH=str(root)),
         check=True,
         capture_output=True,
     )

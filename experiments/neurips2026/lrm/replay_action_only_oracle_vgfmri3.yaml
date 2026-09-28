@@ -1,0 +1,43 @@
+program: agents.lrm.prepare_prompts
+method: grid
+name: replay-action-only-oracle-vgfmri3
+parameters:
+  harness.rationale_mode:
+    value: action-only
+  harness.suggestion_level:
+    values:
+    - minimal
+    - oracle
+  replay.subject:
+    values:
+    - sub-01
+    - sub-02
+    - sub-03
+    - sub-04
+    - sub-05
+    - sub-06
+    - sub-07
+    - sub-08
+    - sub-09
+    - sub-10
+    - sub-11
+  replay.game_filter:
+    values:
+    - vgfmri3_bait
+    - vgfmri3_chase
+    - vgfmri3_helper
+    - vgfmri3_lemmings
+    - vgfmri3_plaqueAttack
+    - vgfmri3_zelda
+  replay.action_frames_only:
+    value: true
+  replay.stride:
+    value: 1
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.prepare_prompts
+- ${args_no_hyphens}

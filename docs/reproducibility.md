@@ -10,22 +10,22 @@ copy of the derivative dataset. Ordinary analysis needs neither OpenNeuro BSON
 nor raw MRI, author cloud credentials or an online atlas download. The release
 is being prepared; pin the verified dataset and code revisions when published.
 
-For new gameplay or feature extraction, follow the examples below. Gameplay
-and extraction modules currently run from the checkout root; installed
-`reason_to_play` analysis modules can run from any working directory. Data and
-model weights are separate from this code checkout.
+For new gameplay or feature extraction, follow the examples below. Install the
+relevant optional dependencies, then call the Python modules from any working
+directory. Supply explicit paths for data and model weights, which are separate
+from the source checkout.
 
 ## Pipeline and inputs
 
 | Stage | Implementation | Input | Output |
 | --- | --- | --- | --- |
-| Human replay | `src.llm_eval.human_replay.run_replay` | Released per-game human files | New replay conversations with embedded trajectories |
-| Model gameplay | `src.llm_eval.generative_gameplay.run` | Game definitions, prompts and model | Generative replays |
-| LLM feature extraction | `src.llm_eval.human_replay.extract_features` | Prompt records and model weights | Activations, target metadata and exact prompts |
-| fMRI reconstruction | `reason_to_play.fmri.fmriprep`, `.preprocess` | Raw BIDS, then fMRIPrep output | Preprocessed BOLD |
-| Neural alignment | `reason_to_play.fmri.align_baselines`, `.align_llm` | Canonical behavior, BOLD and features | Features and nuisance variables sampled on the BOLD timeline |
-| Behavioral analysis | `reason_to_play.analysis.behavioral` | Canonical behavior and recorded model runs | Episode tables and figures |
-| Neural analysis | `reason_to_play.analysis.neural` | Processed BOLD/features, folds, masks and atlas | Encoding results, ROI tables and figures |
+| Human replay | `agents.lrm.prepare_prompts` | Released per-game human files | New replay conversations with embedded trajectories |
+| Model gameplay | `agents.lrm.play` | Game definitions, prompts and model | Generative replays |
+| LLM feature extraction | `agents.lrm.features.extract` | Prompt records and model weights | Activations, target metadata and exact prompts |
+| fMRI reconstruction | `reconstruction.tomov23.fmriprep`, `human.neural.process_bold` | Raw BIDS, then fMRIPrep output | Preprocessed BOLD |
+| Neural alignment | `analysis.neural.prepare_inputs`, `.align_llm` | Canonical behavior, BOLD and features | Features and nuisance variables sampled on the BOLD timeline |
+| Behavioral analysis | `analysis.behavioral` | Canonical behavior and recorded model runs | Episode tables and figures |
+| Neural analysis | `analysis.neural` | Processed BOLD/features, folds, masks and atlas | Encoding results, ROI tables and figures |
 
 Raw model activations and features sampled at scanner times are different
 products. Join them using recorded timestamps and scanner timing. In particular,
@@ -50,14 +50,15 @@ For API gameplay and action-only human replay, run from the checkout using
 Python 3.12:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -e '.[lrm]'
 ```
 
 For local model inference and feature extraction, the pinned environment uses
 CUDA 12.8 on an HGX B200 node with eight GPUs. The matching install is:
 
 ```bash
-python -m pip install -r requirements-full.txt \
+python -m pip install -e '.[lrm,local-models,analysis,release]'
+python -m pip install -r agents/lrm/backends/requirements-b200.txt \
   --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
@@ -69,8 +70,8 @@ CPU install. The [DeepSeek runtimes](#optional-deepseek-runtimes) have additiona
 kernel and model-conversion requirements. Full-model execution on other hardware
 is outside the bounded validation reported here.
 
-Dataset analysis has its own smaller [installation](guides/dataset-analysis.md#install),
-also available through `requirements-analysis.txt`. DDQN and EfficientZero use
+Dataset analysis has its own smaller [installation](guides/dataset-analysis.md#install)
+through `.[analysis]`. DDQN and EfficientZero use
 the [baseline environment](guides/baselines.md), including its separately
 pinned engines and hardware-appropriate Torch build. EfficientZero feature
 extraction runs directly as `python -m agents.efficientzero.extract_features`
@@ -81,13 +82,8 @@ Raw-MRI reconstruction
 requires the container and external inputs in the
 [fMRI guide](guides/fmri-preprocessing.md).
 
-The source tree can run without the private DynamoDB experiment tables:
-`exp_db.enabled=false` is the default. `logging.wandb_project=''` disables
-remote logging. API gameplay additionally needs `OPENROUTER_API_KEY`.
-
-Optional [Text-observation experiments](guides/text-observations.md) use a
-separate vLLM environment and JSONL interface. They are separate from the
-paper's human replay and feature workflow below.
+`logging.wandb_project=''` disables remote logging. API gameplay needs
+`OPENROUTER_API_KEY`; mock gameplay and action-only replay run locally.
 
 ## Replay and model gameplay
 
@@ -107,14 +103,14 @@ Gameplay supports `action-only`, `prompted-rationale`, and `copied-reasoning`.
 The `game.advancement` strategy selects `blocked_curricula` or `fixed_budget`;
 frame budgets count engine updates, including idle frames, separately from
 model decisions. Their configuration is defined in
-[`shared/config.py`](../src/llm_eval/shared/config.py).
+[`shared/config.py`](../agents/lrm/config.py).
 
 The human data root contains
 `sub-XX/GAME/CONDITION.human.replay.json.gz`, with the trajectory, conversation
 and scanner metadata embedded in each file. Point to that directory:
 
 ```bash
-python -m src.llm_eval.human_replay.run_replay \
+python -m agents.lrm.prepare_prompts \
     replay.data_dir=/absolute/path/to/behavior/human \
     replay.subject=sub-13 \
     harness.rationale_mode=action-only harness.suggestion_level=minimal \
@@ -135,7 +131,7 @@ copied into the saved trace; this is not evidence of the participant's actual
 thought process. Replay does not support `prompted-rationale`.
 
 ```bash
-python -m src.llm_eval.generative_gameplay.run \
+python -m agents.lrm.play \
     game.game=bait_vgfmri4 \
     llm.backend=openrouter llm.model=deepseek/deepseek-v3.2 \
     harness.rationale_mode=copied-reasoning \
@@ -145,7 +141,7 @@ python -m src.llm_eval.generative_gameplay.run \
 A credential-free engine check is:
 
 ```bash
-python -m src.llm_eval.generative_gameplay.run \
+python -m agents.lrm.play \
     llm.backend=mock game.game=bait_vgfmri4 \
     game.advancement.total_frame_budget=20 logging.output_dir=out/smoke
 ```
@@ -153,13 +149,13 @@ python -m src.llm_eval.generative_gameplay.run \
 ## Latent activation extraction
 
 The generic Hugging Face extractor uses
-[`conf/extract_features/default.yaml`](../conf/extract_features/default.yaml).
+[`agents/lrm/configs/extract_features/default.yaml`](../agents/lrm/configs/extract_features/default.yaml).
 It builds overlapping windows, preserves complete messages, and assigns every
 assistant-turn target to exactly one window. It stores post-residual hidden
 states plus pre-residual attention and MLP states.
 
 ```bash
-python -m src.llm_eval.human_replay.extract_features \
+python -m agents.lrm.features.extract \
     'prompts=out/replays/action-only/minimal/*.human.replay.json.gz' \
     model=Qwen/Qwen3.5-9B \
     model_revision="${HF_MODEL_COMMIT:?Set HF_MODEL_COMMIT to an immutable model commit}" \
@@ -179,9 +175,7 @@ The generic loader resolves the configuration once, uses that same snapshot for
 the tokenizer and model weights, and records both `requested_model_revision` and
 the resolved `model_revision` in the session and provenance. Historical files
 without that metadata remain unpinned; a present model ID alone is not a
-checkpoint hash. Pinned extraction requires `exp_db.enabled=false`: the
-experiment-table slot IDs lack a revision dimension, so enabling them
-would risk reusing a different checkpoint.
+checkpoint hash.
 
 Use a distinct `output_dir` for each revision/rationale/suggestion/window condition;
 those dimensions are recorded in the payload but absent from its
@@ -193,40 +187,40 @@ run/play identifiers, or token offsets during release normalization.
 
 Message-boundary detection supports ChatML and DeepSeek chat templates; other
 templates fail explicitly. Extraction stops on the first failed session by
-default. `exp_db.continue_on_session_error=true` processes the remaining sessions
+default. `continue_on_session_error=true` processes the remaining sessions
 and retains successful outputs, but all three extraction entrypoints still exit
-nonzero if any selected session failed. Completed, skipped/non-claimable and
+nonzero if any selected session failed. Completed, skipped and
 failed sessions are counted separately.
 
 ### Optional DeepSeek runtimes
 
-`deepseek_inference/` contains the V3.2 custom runtime and checkpoint converter.
+`agents/lrm/backends/deepseek_v32/` contains the V3.2 custom runtime and checkpoint converter.
 Its upstream MIT notice and [sources](sources/README.md#sources-and-implementations) identify
 the implementation.
 Convert model weights for the same tensor-parallel size used during extraction:
 
 ```bash
-python deepseek_inference/convert.py \
+python -m agents.lrm.backends.deepseek_v32.convert \
     --hf-ckpt-path /absolute/path/to/DeepSeek-V3.2 \
     --save-path /absolute/path/to/converted-v32 \
     --n-experts 256 --model-parallel 8
 
 torchrun --nproc-per-node 8 --standalone \
-    -m src.llm_eval.human_replay.extract_features_v32 \
+    -m agents.lrm.features.extract_deepseek_v32 \
     'prompts=out/replays/action-only/minimal/*.human.replay.json.gz' \
     model=deepseek-ai/DeepSeek-V3.2 \
     +ckpt_path=/absolute/path/to/converted-v32 \
-    +ds_config=deepseek_inference/vgdl_DS32.json \
+    +ds_config=agents/lrm/backends/deepseek_v32/vgdl_DS32.json \
     output_dir=out/features-v32/action-only/minimal
 ```
 
 The leading `+` on the two DeepSeek-specific overrides is required because
 they are not members of the shared Hydra extraction config. V3.2 also needs
 its runtime kernel dependencies, including `fast_hadamard_transform`; see
-`deepseek_inference/requirements.txt` and the full environment requirements.
+`agents/lrm/backends/deepseek_v32/requirements.txt` and the full environment requirements.
 Full-scale GPU extraction is outside the bounded checks reported here.
 
-The V4 runtime is also included in `deepseek_v4_inference/`, with the MIT
+The V4 runtime is also included in `agents/lrm/backends/deepseek_v4/`, with the MIT
 notice and exact upstream Hugging Face revision recorded in its provenance.
 Its converter and configs distinguish Pro, Flash, and Base checkpoints. Use
 `extract_features_v4` with the matching converted checkpoint and config;
@@ -234,11 +228,11 @@ conversion parallelism must match `torchrun` parallelism:
 
 ```bash
 torchrun --nproc-per-node 8 --standalone \
-    -m src.llm_eval.human_replay.extract_features_v4 \
+    -m agents.lrm.features.extract_deepseek_v4 \
     'prompts=out/replays/action-only/minimal/*.human.replay.json.gz' \
     model=deepseek-ai/DeepSeek-V4-Flash \
     +ckpt_path=/absolute/path/to/converted-v4-flash \
-    +ds_config=deepseek_v4_inference/vgdl_DS4_Flash.json \
+    +ds_config=agents/lrm/backends/deepseek_v4/vgdl_DS4_Flash.json \
     output_dir=out/features-v4-flash/action-only/minimal
 ```
 
@@ -268,15 +262,15 @@ The [neural workflow](guides/dataset-analysis.md#neural-encoding-from-processed-
 documents explicit processed inputs, seeded fresh fits, the shared spatial
 mask, ROI aggregation and model/cohort selection. Use the supplied atlas and
 pinned mask when rebuilding the study's ROI table. Fresh baseline result labels
-require an explicit [layer map](../experiments/neurips2026/baseline-layer-map.example.json).
+require an explicit [layer map](../experiments/neurips2026/analysis/baseline-layer-map.example.json).
 The unresolved historical EfficientZero layer mapping is not inferred.
 
 ## Validation and release boundaries
 
 ```bash
-python -m pip install -r requirements-dev.txt
-ruff check src/ tests/ tools/
-ruff format --check src/ tests/ tools/
+python -m pip install -e '.[dev,analysis,lrm,local-models,release,ddqn,efficientzero]'
+ruff check agents/ human/ data/ analysis/ environments/ reconstruction/ tests/ scripts/
+ruff format --check agents/ human/ data/ analysis/ environments/ reconstruction/ tests/ scripts/
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest tests/ -x -q
 ```
 

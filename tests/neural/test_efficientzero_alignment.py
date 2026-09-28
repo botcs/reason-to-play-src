@@ -9,9 +9,9 @@ import types
 import numpy as np
 import pytest
 
-from reason_to_play.analysis.neural.alignment import file_sha256, validate_binding
-from reason_to_play.analysis.neural.encoding import load_aligned_data
-from reason_to_play.fmri import align_efficientzero as ez
+from analysis.neural.alignment import file_sha256, validate_binding
+from analysis.neural.encoding import load_aligned_data
+from analysis.neural import align_efficientzero as ez
 
 REP, VALUE, DYNAMICS = ez.ALL_LAYERS[0], ez.ALL_LAYERS[4], ez.ALL_LAYERS[11]
 
@@ -262,7 +262,7 @@ def test_database_identity_deserializes_without_database_import(tmp_path, monkey
     restored = ez.load_trace_document(path)
     assert str(restored["identity"]) == bytes(range(12)).hex()
     np.testing.assert_array_equal(restored["activation"], np.arange(4))
-    from reason_to_play.fmri.align_baselines import load_ez_traces
+    from analysis.neural.prepare_inputs import load_ez_traces
 
     original_reader = load_ez_traces(path, layers=[REP])
     assert str(original_reader["metadata"]["play_key"]) == bytes(range(12)).hex()
@@ -347,8 +347,8 @@ def test_compact_clocks_match_canonical_reader_without_sprite_expansion(
     context, tmp_path, monkeypatch
 ):
     import gzip
-    from reason_to_play.data.behavior import iter_plays
-    from reason_to_play.data import replay_behavior
+    from human.behavior import iter_plays
+    from human import behavior as replay_behavior
 
     ctx, plays, runs = context
     frames, records = [], []
@@ -413,11 +413,7 @@ def test_compact_clocks_match_canonical_reader_without_sprite_expansion(
 
 def test_compact_clocks_match_real_human_file():
     import os
-    from reason_to_play.data.replay_behavior import (
-        read_record,
-        record_plays,
-        replay_paths,
-    )
+    from human.behavior import read_record, record_plays, replay_paths
 
     root = os.environ.get("REASON_TO_PLAY_HUMAN_DATA")
     if not root:
@@ -458,7 +454,7 @@ def test_last_frame_sampling_records_method_and_hook_mapping(context, tmp_path):
 
 
 def test_canonical_efficientzero_discovery(tmp_path):
-    from reason_to_play.analysis.neural.encoding import encoding_input_paths
+    from analysis.neural.encoding import encoding_input_paths
 
     root = tmp_path / "analysis/neural/inputs"
     base = root / "sub-01/bold-ddqn-theory.npz"

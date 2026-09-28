@@ -5,16 +5,16 @@ import json
 import numpy as np
 import pytest
 
-from reason_to_play.analysis.neural.alignment import (
+from analysis.neural.alignment import (
     bind_to_base,
     file_sha256,
     sample_order_sha256,
 )
-from reason_to_play.analysis.neural.encoding import (
+from analysis.neural.encoding import (
     encoding_input_paths,
     load_aligned_data,
 )
-from reason_to_play.fmri.align_baselines import (
+from analysis.neural.prepare_inputs import (
     find_available_ez_plays,
     find_games_and_levels,
     load_model_features_for_level,
@@ -142,7 +142,7 @@ def test_baseline_canonical_paths_preserve_original_play_ids(tmp_path):
 
 
 def test_original_mixed_case_game_resolves_model_tensor(tmp_path):
-    from reason_to_play.fmri.align_llm import _multiturn_file_for
+    from analysis.neural.align_llm import _multiturn_file_for
 
     feature = tmp_path / "sub-09/plaqueAttack_vgfmri3.pt"
     feature.parent.mkdir(parents=True)

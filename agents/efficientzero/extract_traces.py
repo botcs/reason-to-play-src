@@ -28,7 +28,7 @@ from agents.efficientzero.inference.ez.agents.models.base_model import (
 )
 
 
-from reason_to_play.data.behavior import (
+from human.behavior import (
     behavior_root,
     iter_plays as canonical_plays,
     play_states,
@@ -743,7 +743,7 @@ class VGDLZStateLoader:
         dataset_root: Union[str, Path],
     ) -> None:
         self.dataset_root = Path(dataset_root).expanduser().resolve()
-        from reason_to_play.data.replay_behavior import replay_paths
+        from human.behavior import replay_paths
 
         self.dump_root = behavior_root(self.dataset_root)
         if not replay_paths(self.dump_root):
@@ -1328,7 +1328,7 @@ def record_trace_provenance(
         "renderer_source": {
             "module": "agents.efficientzero.observations",
             "sha256": _sha256(root / "observations.py"),
-            "game_description_parser": "src.vgdl.VGDLParser",
+            "game_description_parser": "environments.vgdl.VGDLParser",
         },
         "model_source": _source_record(root / "inference"),
         "extractor_source": _source_record(root),

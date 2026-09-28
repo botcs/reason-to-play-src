@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "reference_source": {
+    "url": "https://github.com/tsividis/vgdl",
+    "revision": "f41409ae242412e6722a2c7518547ac7d1eb36d2"
+  },
+  "supported_scope": [
+    "Supplied episode summary import",
+    "Supplied theory regressor decoding",
+    "HRR theory representation"
+  ],
+  "theory_implementation": {
+    "repository": "https://github.com/botcs/tomov23-analysis",
+    "revision": "26fa74ce715781bfdd7a6f6a4bc2a6685e5a8678",
+    "path": "encoding_model_slurm/stages/align.py"
+  },
+  "result_attribution": "Reference source does not establish the producing revision for every received result."
+}

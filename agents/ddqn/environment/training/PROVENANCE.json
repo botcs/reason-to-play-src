@@ -1,0 +1,2205 @@
+{
+  "source": "https://github.com/botcs/RC_RL",
+  "commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+  "role": "training",
+  "license_status": "No repository-wide license located. Preserve original contributor attribution and component terms. This directory is excluded from the root MIT license.",
+  "selection": "Environment adapter, game loader, engine and original/recovered game definitions. Model and training implementations live in agents/ddqn.",
+  "files": [
+    {
+      "path": "VGDLEnv.py",
+      "sha256": "a662258aa5ac11fb249a9756cc32e25b60df026e6154e455778db1164545c524",
+      "source_sha256": "a0af238b1d03f1cac2ed9bb56b126edea4f0594e7763be45115a67b77e3b3f25",
+      "source_git_blob": "3a338acef13570edd88ef61066002903483288e7",
+      "modifications": [
+        "Package-qualified imports isolate this engine from other agent environments."
+      ]
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "e71d0f30b265c5804d39ddeb865512a274aab9c8ab4c7db25ca9b4874e367a65",
+      "source_sha256": null,
+      "source_git_blob": null,
+      "modifications": [
+        "Package marker."
+      ]
+    },
+    {
+      "path": "all_games/vgfmri3_bait.txt",
+      "sha256": "1a2f4755ff02e7a4e81dfe1ad7eaaf35ece6d55c73d5a3d29b89892ad46fc295",
+      "source_sha256": "1a2f4755ff02e7a4e81dfe1ad7eaaf35ece6d55c73d5a3d29b89892ad46fc295",
+      "source_git_blob": "5f4368815037e854c380cdda3217536d0e88f588",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl0.txt",
+      "sha256": "ff13f46ca9f4ce9ab296db173c63ca4f60158fb1dae639cf012ab7c911a31c52",
+      "source_sha256": "ff13f46ca9f4ce9ab296db173c63ca4f60158fb1dae639cf012ab7c911a31c52",
+      "source_git_blob": "e8ea6d7b6ffb69fd3e69e517e4e43918b6dbda20",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl1.txt",
+      "sha256": "3d89805c22899247af40cdb1550cd9684c101fa6aa4a82102a8e0869deb761a9",
+      "source_sha256": "3d89805c22899247af40cdb1550cd9684c101fa6aa4a82102a8e0869deb761a9",
+      "source_git_blob": "60d78422fc9106367c5896819eb2fe1e0f6769bd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl10.txt",
+      "sha256": "951375bc1da7a8fe48fef3a484463924327389043997b872c92a2556877792a3",
+      "source_sha256": "951375bc1da7a8fe48fef3a484463924327389043997b872c92a2556877792a3",
+      "source_git_blob": "b72b38d88297912a9c8246a6af7d0cba126e801a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl11.txt",
+      "sha256": "738a09bbc4d3340c8ca5dfc31849dacfddd7a89e415574567b322e8cb6161ae1",
+      "source_sha256": "738a09bbc4d3340c8ca5dfc31849dacfddd7a89e415574567b322e8cb6161ae1",
+      "source_git_blob": "8fbc0385708d8b13f776cfe11eadebb078dd1be1",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl2.txt",
+      "sha256": "baa4707e449f83a2d067b9e55c44f0e212f67a630db639384a419b1bf5145680",
+      "source_sha256": "baa4707e449f83a2d067b9e55c44f0e212f67a630db639384a419b1bf5145680",
+      "source_git_blob": "d57b86842972d19ce36392cd54d88a42c7b14fde",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl3.txt",
+      "sha256": "13f7a23dea9fedbc06ec49b6cc3aef420149a20d47ff0c7a03ebee0ca3789a05",
+      "source_sha256": "13f7a23dea9fedbc06ec49b6cc3aef420149a20d47ff0c7a03ebee0ca3789a05",
+      "source_git_blob": "3da4bbd14cc55c04b304c907fc2ec7ad2aa791f4",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl4.txt",
+      "sha256": "ab3411f08035d607e5de3e82ecef83f0e879ca6d1c176987ae23fe0c511d91f1",
+      "source_sha256": "ab3411f08035d607e5de3e82ecef83f0e879ca6d1c176987ae23fe0c511d91f1",
+      "source_git_blob": "86bdfc2aa6468aa0a2dc65ee17a2ddd976a2fafa",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl5.txt",
+      "sha256": "3b15d24462d1d9e2e5c39f7eadab118ed99ea5130ee5a98e72eb8e5794bfd666",
+      "source_sha256": "3b15d24462d1d9e2e5c39f7eadab118ed99ea5130ee5a98e72eb8e5794bfd666",
+      "source_git_blob": "5acf63219e14850d26ec98689b3d2b4ca7165061",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl6.txt",
+      "sha256": "f932d0186ac274078ab0121c96c16c517f4a7d8b9d3d8546dbc79cbc6504f388",
+      "source_sha256": "f932d0186ac274078ab0121c96c16c517f4a7d8b9d3d8546dbc79cbc6504f388",
+      "source_git_blob": "9c6804079de7bccac00a3b9e22add84d3c365c8c",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl7.txt",
+      "sha256": "487495d07e765fea5e7492dc349220c887fefe209473663c88c5b6a70a68736c",
+      "source_sha256": "487495d07e765fea5e7492dc349220c887fefe209473663c88c5b6a70a68736c",
+      "source_git_blob": "0054417b0a1d5485f8098c776557c89c21ef55b1",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl8.txt",
+      "sha256": "628b656820b71a458c1c53fe9bafe948fcd8240fe957f7ca040d8aab5edb7ac3",
+      "source_sha256": "628b656820b71a458c1c53fe9bafe948fcd8240fe957f7ca040d8aab5edb7ac3",
+      "source_git_blob": "9d4221bcd773611c017a4b8f08052fda860340b7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_bait_lvl9.txt",
+      "sha256": "066d1f58622fe244f9f74df6ec01c353c6e5795c56ea5ab8a87718bdd7959dae",
+      "source_sha256": "066d1f58622fe244f9f74df6ec01c353c6e5795c56ea5ab8a87718bdd7959dae",
+      "source_git_blob": "ca5505efc185c02a9a4d8c5d1b33c05b55047417",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase.txt",
+      "sha256": "e1bc6ba0f03353a08640e82a3c240bc4deb0063d00264e0af9da73049d1c8893",
+      "source_sha256": "e1bc6ba0f03353a08640e82a3c240bc4deb0063d00264e0af9da73049d1c8893",
+      "source_git_blob": "932c546e97ef52c8d690d916a1278d67913cf2e9",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl0.txt",
+      "sha256": "f0642ab2cf79c610032836c71c87d8483a003d0bc64afc5278fdaa6c2f5e8c38",
+      "source_sha256": "f0642ab2cf79c610032836c71c87d8483a003d0bc64afc5278fdaa6c2f5e8c38",
+      "source_git_blob": "ee4c972ca87e5edd68de485f74e2af910847eef7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl1.txt",
+      "sha256": "3b2a645d500a38864cc93444b7704132362e8497cc0acd168a1a198932223edc",
+      "source_sha256": "3b2a645d500a38864cc93444b7704132362e8497cc0acd168a1a198932223edc",
+      "source_git_blob": "84f16e71104a4c10b3c6875e85649d16b30c5834",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl10.txt",
+      "sha256": "e7f56192951ea4067515700be1f908de4a1ec0c48c718440b8c36552ebbe8c09",
+      "source_sha256": "e7f56192951ea4067515700be1f908de4a1ec0c48c718440b8c36552ebbe8c09",
+      "source_git_blob": "50964871274c1d93772c1620f361bcd4dd5363b9",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl11.txt",
+      "sha256": "5a9ee83141c8be57737b9167d3039912ec417f23b289dbbdc6975d74ade1884f",
+      "source_sha256": "5a9ee83141c8be57737b9167d3039912ec417f23b289dbbdc6975d74ade1884f",
+      "source_git_blob": "38ebded112eda96081cd90eabe3eb60d9c22fb18",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl2.txt",
+      "sha256": "d552a7763f3bb9dc6a301f5dea6f93f3aa1610a805d1edad6e0da0b935a1714a",
+      "source_sha256": "d552a7763f3bb9dc6a301f5dea6f93f3aa1610a805d1edad6e0da0b935a1714a",
+      "source_git_blob": "4bf0d49acbdd7eb976dcc6e820de722eaeff12c3",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl3.txt",
+      "sha256": "7bae130b6b2308ebc32f9f3973009ec05a776dbcdd4dd33b4c1ff547dc66697d",
+      "source_sha256": "7bae130b6b2308ebc32f9f3973009ec05a776dbcdd4dd33b4c1ff547dc66697d",
+      "source_git_blob": "1d1ae696efde45d7038bb0d10b6a6fce6731531a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl4.txt",
+      "sha256": "9920468aae1c40771997415c43361a70c5374e782ad02b5945ec6dd2ad4f32ea",
+      "source_sha256": "9920468aae1c40771997415c43361a70c5374e782ad02b5945ec6dd2ad4f32ea",
+      "source_git_blob": "74819346eb12d51e34f1cada091a1b263a6fe5d7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl5.txt",
+      "sha256": "0915f10d96b037f58d9dd513f4a09ae4d7bc4b19bc7aed6e363399ef4a231a4f",
+      "source_sha256": "0915f10d96b037f58d9dd513f4a09ae4d7bc4b19bc7aed6e363399ef4a231a4f",
+      "source_git_blob": "f9b497ac54e8aa230f8195a26c859f3eff14b1ed",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl6.txt",
+      "sha256": "6dcad872c252af7354bc688da10f57519398e1ea261bedba61830b61e98f06ef",
+      "source_sha256": "6dcad872c252af7354bc688da10f57519398e1ea261bedba61830b61e98f06ef",
+      "source_git_blob": "ad05293044418c34a6145720595fead810b032c8",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl7.txt",
+      "sha256": "3a2ccfb83579bcd9d5a0266d5014026352416c067dbb93883e727c58e711f5f3",
+      "source_sha256": "3a2ccfb83579bcd9d5a0266d5014026352416c067dbb93883e727c58e711f5f3",
+      "source_git_blob": "d75f87264e05a9a27af9cbce2d6beda98a5af9b8",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl8.txt",
+      "sha256": "f9a5835f137a2292506004d148a42314074ffaae809ec7720ae45c55f78d497d",
+      "source_sha256": "f9a5835f137a2292506004d148a42314074ffaae809ec7720ae45c55f78d497d",
+      "source_git_blob": "aa43ff4cae1c56461181be7aa1e1e408e0b5b1e5",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_chase_lvl9.txt",
+      "sha256": "b7d01596d0a56db7faa98e8f6bdaa28676fab430db492819d6ca405f92863bfd",
+      "source_sha256": "b7d01596d0a56db7faa98e8f6bdaa28676fab430db492819d6ca405f92863bfd",
+      "source_git_blob": "46012b032140d03c2a347bc64e8ea6b192712334",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper.txt",
+      "sha256": "c0df925c5744e9cb7fed7de66ed23032b19887b27307fea28f7a8fb17caec865",
+      "source_sha256": "c0df925c5744e9cb7fed7de66ed23032b19887b27307fea28f7a8fb17caec865",
+      "source_git_blob": "8bbe62a021cbb08acc2ea47f69cbec19df78ddca",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl0.txt",
+      "sha256": "7f4bced48e55763916b807107cf2a9e55c09d48b663dd46368aeef74a93e92d5",
+      "source_sha256": "7f4bced48e55763916b807107cf2a9e55c09d48b663dd46368aeef74a93e92d5",
+      "source_git_blob": "8ecedd0fd2d7173a942b4f80ab960c9efe5bbdc6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl1.txt",
+      "sha256": "0e813a0c0c95c00ab676ef15f02c0643fc2188259ed5771eda4723be405b5353",
+      "source_sha256": "0e813a0c0c95c00ab676ef15f02c0643fc2188259ed5771eda4723be405b5353",
+      "source_git_blob": "487141e80f97d402578e8594d3cce11dc73abc79",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl10.txt",
+      "sha256": "f84c7796bed6f2f7becdfce23f5781f086b24de0987fb0aa9fc9a22abc598d7e",
+      "source_sha256": "f84c7796bed6f2f7becdfce23f5781f086b24de0987fb0aa9fc9a22abc598d7e",
+      "source_git_blob": "c0ea9ff327c3081269f9802a6f7e22d90b886e0f",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl11.txt",
+      "sha256": "015895ff31b3772c308e15c7b778b0907d85263dc0c66fd403c64a17b8b462b8",
+      "source_sha256": "015895ff31b3772c308e15c7b778b0907d85263dc0c66fd403c64a17b8b462b8",
+      "source_git_blob": "dbd48437a81c963620f11e08d940fa05f13aad32",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl2.txt",
+      "sha256": "42b89e3ad04c847badb60703fc338b6fbc87dc46e4e9bd113a9dffde1b31bb40",
+      "source_sha256": "42b89e3ad04c847badb60703fc338b6fbc87dc46e4e9bd113a9dffde1b31bb40",
+      "source_git_blob": "72cbae48b9c1915d7a61c3df4068809dbffa0c41",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl3.txt",
+      "sha256": "7dfab1dc22b6eeca423c2265c0666027916ce987d3cdc874490c475392eb69f7",
+      "source_sha256": "7dfab1dc22b6eeca423c2265c0666027916ce987d3cdc874490c475392eb69f7",
+      "source_git_blob": "bb696f23c58b7e2c8f8ac424a3e7c04573fcff95",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl4.txt",
+      "sha256": "82c641c7d5d97fb2d1b1008e555384e1b9e954e12a32e082d857a25017010289",
+      "source_sha256": "82c641c7d5d97fb2d1b1008e555384e1b9e954e12a32e082d857a25017010289",
+      "source_git_blob": "75e14683fed2c634be5dc55adec0812cec46ed38",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl5.txt",
+      "sha256": "3aa1543b4e4ed2928af6766e5e1844a4e6f316e720d845b12d342b10c6c47349",
+      "source_sha256": "3aa1543b4e4ed2928af6766e5e1844a4e6f316e720d845b12d342b10c6c47349",
+      "source_git_blob": "076b3cf0543a872d5f13a887db9c768a4b2d22ab",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl6.txt",
+      "sha256": "c04ffc6e44d0e7250c2434797552d32a911c4364083dcfd76ca325f8e44620cc",
+      "source_sha256": "c04ffc6e44d0e7250c2434797552d32a911c4364083dcfd76ca325f8e44620cc",
+      "source_git_blob": "bc815cd374d0c7be2b25e53e1dc308e989c3d23a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl7.txt",
+      "sha256": "bc7876f18218d30edb8571a5db472ee184e0b45db5b9e3a4002524fe9cd62c33",
+      "source_sha256": "bc7876f18218d30edb8571a5db472ee184e0b45db5b9e3a4002524fe9cd62c33",
+      "source_git_blob": "15b498abb03bf525e9c59376e40784e12e38cfa0",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl8.txt",
+      "sha256": "8b1a81975d18d9a66fef6554beab003be4cba248aeae69d9d341e2f044640244",
+      "source_sha256": "8b1a81975d18d9a66fef6554beab003be4cba248aeae69d9d341e2f044640244",
+      "source_git_blob": "2bd1fd2ec919ca783277e60c440f3fe4df9a73e7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_helper_lvl9.txt",
+      "sha256": "9a3abe102d36c1afbc5c5d4a9840f03d56e32d0a948020b3794ff40b34a984f6",
+      "source_sha256": "9a3abe102d36c1afbc5c5d4a9840f03d56e32d0a948020b3794ff40b34a984f6",
+      "source_git_blob": "8f9928d1fc57b0ddfd740adf8aa43f249c37a617",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings.txt",
+      "sha256": "1f3123b2596a9b44e14e686808ac7c96f8d173498d8148c6efccf3e42199df68",
+      "source_sha256": "1f3123b2596a9b44e14e686808ac7c96f8d173498d8148c6efccf3e42199df68",
+      "source_git_blob": "2ba5fdd176271d21a5da55206cd8a891d224bcf5",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl0.txt",
+      "sha256": "9710831376063703ea77a0dd97d4f8c21e30d555703309d2b065bd308d51e98a",
+      "source_sha256": "9710831376063703ea77a0dd97d4f8c21e30d555703309d2b065bd308d51e98a",
+      "source_git_blob": "7720c7f9d76571a66d9caa9049afca03e751040a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl1.txt",
+      "sha256": "505e5fee2fa57bc68ee015183bee68a6f61ae2e0466fb4b9643ccaf9833baafe",
+      "source_sha256": "505e5fee2fa57bc68ee015183bee68a6f61ae2e0466fb4b9643ccaf9833baafe",
+      "source_git_blob": "8a9f4bea64633f63d19ba6d09ad7320d9c4835f2",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl10.txt",
+      "sha256": "bc0c3e707d427c49f11fde3635420a49fd3833279deda34e554c54b0af865f1c",
+      "source_sha256": "bc0c3e707d427c49f11fde3635420a49fd3833279deda34e554c54b0af865f1c",
+      "source_git_blob": "295f61873b84401f406cd4d66ab7a6fc5c1e72f6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl11.txt",
+      "sha256": "4d1cf1b0e8c873b04b2db08be0dbfe4e483bc87480fdbfa25730a51549407d7f",
+      "source_sha256": "4d1cf1b0e8c873b04b2db08be0dbfe4e483bc87480fdbfa25730a51549407d7f",
+      "source_git_blob": "902b209f00eec342233ecc8724834eecc0d8f63d",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl2.txt",
+      "sha256": "dd9036c30b851fee095f5383c7fbb853630856debca08f277654bdcf9eb57d79",
+      "source_sha256": "dd9036c30b851fee095f5383c7fbb853630856debca08f277654bdcf9eb57d79",
+      "source_git_blob": "4f68abc12b99fa6d7ca76688752879cd91bd3477",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl3.txt",
+      "sha256": "78fbcf1f0f042805923aa3c597abaaa6816ba6ae7177ceadaecd7f8e180a0f67",
+      "source_sha256": "78fbcf1f0f042805923aa3c597abaaa6816ba6ae7177ceadaecd7f8e180a0f67",
+      "source_git_blob": "49216163b2fff866b56c2a760e112a4ec7d7c1c2",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl4.txt",
+      "sha256": "fc9975345dbff83b1bf3a40b8486068c048e4108c02411c8479e842cd0b83bab",
+      "source_sha256": "fc9975345dbff83b1bf3a40b8486068c048e4108c02411c8479e842cd0b83bab",
+      "source_git_blob": "950cad50e4265c605bbee4b12a2915dfd322093c",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl5.txt",
+      "sha256": "5fc24b123180b4d165e4eccec63f8fdff7d3ff7667cc4aa6bf71d21930528173",
+      "source_sha256": "5fc24b123180b4d165e4eccec63f8fdff7d3ff7667cc4aa6bf71d21930528173",
+      "source_git_blob": "f9e234b39fdb62740c1a7b4e305587fd1234e788",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl6.txt",
+      "sha256": "0252ce9203e396f34276d66cbea09836b74d74238edb1b673491da7333bda93b",
+      "source_sha256": "0252ce9203e396f34276d66cbea09836b74d74238edb1b673491da7333bda93b",
+      "source_git_blob": "051fc6d08fbcf5f5f3b51ac11399218f7a0dec44",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl7.txt",
+      "sha256": "9a90848b66f698670d1c590f647152c9edde93277341b20c2b75aafecd503390",
+      "source_sha256": "9a90848b66f698670d1c590f647152c9edde93277341b20c2b75aafecd503390",
+      "source_git_blob": "cf77cfe0837f66508fea92bf48ad01aec4fafddd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl8.txt",
+      "sha256": "ce155347c11fee8e41596b9f85f9b3cf7062df51708460a08b13b9c1feab40be",
+      "source_sha256": "ce155347c11fee8e41596b9f85f9b3cf7062df51708460a08b13b9c1feab40be",
+      "source_git_blob": "f057e5e1487457372444ffaf96131748fa8ea31a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_lemmings_lvl9.txt",
+      "sha256": "60e2e7bf055345289203bfffd8760e824d7e927413f82fdd7bbeb5bcb8047525",
+      "source_sha256": "60e2e7bf055345289203bfffd8760e824d7e927413f82fdd7bbeb5bcb8047525",
+      "source_git_blob": "5e074d7aad0692710d9e1a47eb1cc7005f7527f0",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack.txt",
+      "sha256": "7a7564009e00ad51e6150eda4352006bae608a27c16f84ee1be2cd829d278e81",
+      "source_sha256": "7a7564009e00ad51e6150eda4352006bae608a27c16f84ee1be2cd829d278e81",
+      "source_git_blob": "afb42ea431ba1618ae3658f1917a7e8a90bc5be8",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl0.txt",
+      "sha256": "633b4397a2088a8448011ce4815735d7f4f63842b6aa99e40bdd9d9f493e2c34",
+      "source_sha256": "633b4397a2088a8448011ce4815735d7f4f63842b6aa99e40bdd9d9f493e2c34",
+      "source_git_blob": "b9068565aaf6d0317814da58b7802ab7ad914275",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl1.txt",
+      "sha256": "9c73f29f6398deb72c5bc370c44bd80db75b3ad1790726f3fb2684869f2f3404",
+      "source_sha256": "9c73f29f6398deb72c5bc370c44bd80db75b3ad1790726f3fb2684869f2f3404",
+      "source_git_blob": "cf98dcef7adb081e119e643336bcf4956f3faa8d",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl10.txt",
+      "sha256": "0909a11ff13ee6300b593fcd6eafb9ee152cb40f783727dd5a09870e392d8420",
+      "source_sha256": "0909a11ff13ee6300b593fcd6eafb9ee152cb40f783727dd5a09870e392d8420",
+      "source_git_blob": "8ab84e22eceb56f5f1b4ebcf97c1f8a0ecf39c09",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl11.txt",
+      "sha256": "5db747a443679c09dc26460e9e1d3c629ffdc7cfc626028d5f3a8af1ae9dd92f",
+      "source_sha256": "5db747a443679c09dc26460e9e1d3c629ffdc7cfc626028d5f3a8af1ae9dd92f",
+      "source_git_blob": "0bea36ed177b007a86bfebdeb6090b21f11c00cd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl2.txt",
+      "sha256": "ee17b76579f08a431b0abe7b474d657262bf90d8016c528b5d5b07e06448bf4e",
+      "source_sha256": "ee17b76579f08a431b0abe7b474d657262bf90d8016c528b5d5b07e06448bf4e",
+      "source_git_blob": "94dfb3c19ff5ecdf236f501334e456a82daaa213",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl3.txt",
+      "sha256": "905c138dfca57e9037e9508887a3d088c5068f6094c05039d4157d3ba9ff64d6",
+      "source_sha256": "905c138dfca57e9037e9508887a3d088c5068f6094c05039d4157d3ba9ff64d6",
+      "source_git_blob": "5d49b6df330034b319a02ee05f2639778ca9b776",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl4.txt",
+      "sha256": "ea381c40464cdddef388fea720c400b7703c68f33f8a80996de3b1371e06464e",
+      "source_sha256": "ea381c40464cdddef388fea720c400b7703c68f33f8a80996de3b1371e06464e",
+      "source_git_blob": "f4b5c55b0fde3292924d0a6ded02d21c02023326",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl5.txt",
+      "sha256": "afc599eb1aaaa972c5e2c52b46d996f804b528a20007e9a28d5c448a16464ba8",
+      "source_sha256": "afc599eb1aaaa972c5e2c52b46d996f804b528a20007e9a28d5c448a16464ba8",
+      "source_git_blob": "12a2b2f2aca1c5d3fffa4b207ac35abd1d751069",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl6.txt",
+      "sha256": "4204f631048f2cdd54a0cc1d4b782987967bb93c29ffab8022a5a42a8bfdd4f4",
+      "source_sha256": "4204f631048f2cdd54a0cc1d4b782987967bb93c29ffab8022a5a42a8bfdd4f4",
+      "source_git_blob": "ec8f4ff48951436ac0feb92b98ffe3effb936229",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl7.txt",
+      "sha256": "7a6e5ef19d620437dfd64711479d22e9037b2c0fbab5ba297b4718283eb5eda9",
+      "source_sha256": "7a6e5ef19d620437dfd64711479d22e9037b2c0fbab5ba297b4718283eb5eda9",
+      "source_git_blob": "ee92d82d3469d008b9dbc422ce58ba179e2dd854",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl8.txt",
+      "sha256": "488530fea5dac6c7ca26d190d587e2c03f0182af32dec41d653753ef59fe0170",
+      "source_sha256": "488530fea5dac6c7ca26d190d587e2c03f0182af32dec41d653753ef59fe0170",
+      "source_git_blob": "537dd14a3c833b0159898e441d5a49dccc354781",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_plaqueAttack_lvl9.txt",
+      "sha256": "3c5494a49a1439643f11347c1c82032284693e0152eb3b5195f29a99d7a6aa0b",
+      "source_sha256": "3c5494a49a1439643f11347c1c82032284693e0152eb3b5195f29a99d7a6aa0b",
+      "source_git_blob": "a8286cddd716b5770dca30cc7fce926e18554110",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_sokoban.txt",
+      "sha256": "9c4c190c9b0d115c555e4a0bf54296d34e0554ccd43ff3f2912ad68c477f47ab",
+      "source_sha256": "9c4c190c9b0d115c555e4a0bf54296d34e0554ccd43ff3f2912ad68c477f47ab",
+      "source_git_blob": "9d708500bcb4bca76c066568951641c8076d954a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_sokoban_lvl0.txt",
+      "sha256": "2b08470a6db7c096eaf97c41e1f57bcb0d15736d917ae413e8176a75551a79a1",
+      "source_sha256": "2b08470a6db7c096eaf97c41e1f57bcb0d15736d917ae413e8176a75551a79a1",
+      "source_git_blob": "b66e4bf9970cbd722f270e3fb71804835970bf75",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_sokoban_lvl1.txt",
+      "sha256": "90a9807c39d9f30b1e65d67314d7c0b765a1cad6c38eac74008a9f53d09a8ffb",
+      "source_sha256": "90a9807c39d9f30b1e65d67314d7c0b765a1cad6c38eac74008a9f53d09a8ffb",
+      "source_git_blob": "c27dae8ad2ba33b311ebdc1aaebbc39b24793b78",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_sokoban_lvl2.txt",
+      "sha256": "083ba88b6d72561437ce0a8f4ab256abd062674024bad3efe04efdc6fbb20fb9",
+      "source_sha256": "083ba88b6d72561437ce0a8f4ab256abd062674024bad3efe04efdc6fbb20fb9",
+      "source_git_blob": "8a2ba0ca2c1b1a533952b15e06b042fc346274ce",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda.txt",
+      "sha256": "94a1b9a5d3ce19f23eeb20064455aba04c4d5c27df12d46426450f10832a3408",
+      "source_sha256": "94a1b9a5d3ce19f23eeb20064455aba04c4d5c27df12d46426450f10832a3408",
+      "source_git_blob": "daae49f2219dcd5f6f7c1354b1f726eec990693a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl0.txt",
+      "sha256": "0803f30ba0975e3d2629619b4ff17c874ed5c853b9d62955c08461800d888dc9",
+      "source_sha256": "0803f30ba0975e3d2629619b4ff17c874ed5c853b9d62955c08461800d888dc9",
+      "source_git_blob": "66750e857f3aaf53862b9da6d238b234887ea4fe",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl1.txt",
+      "sha256": "177ace22c64f2113a724f24c68650f9066b6fc99ce3d24022b9b2e7bf8f2480a",
+      "source_sha256": "177ace22c64f2113a724f24c68650f9066b6fc99ce3d24022b9b2e7bf8f2480a",
+      "source_git_blob": "853eded5a6fcee7889cbfe54d14766eaa9210545",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl10.txt",
+      "sha256": "279aa3e75901f0617111d14b7e47f1b39d6b408efddd805364a7e5723583ee89",
+      "source_sha256": "279aa3e75901f0617111d14b7e47f1b39d6b408efddd805364a7e5723583ee89",
+      "source_git_blob": "38ec8a347d468f1b89d2eefd129e18b8ec040cbe",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl11.txt",
+      "sha256": "463e6faac54f7a17812eec5fa8f9c1b23b19b6ca1fa185fd10077986aff83942",
+      "source_sha256": "463e6faac54f7a17812eec5fa8f9c1b23b19b6ca1fa185fd10077986aff83942",
+      "source_git_blob": "75d75e255756959301b182af0022ee3681f73f4d",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl2.txt",
+      "sha256": "8fe3afbf75112fb972ad9ffb5cda304528195eae1500fed0cd8b80d805f84a8c",
+      "source_sha256": "8fe3afbf75112fb972ad9ffb5cda304528195eae1500fed0cd8b80d805f84a8c",
+      "source_git_blob": "064712a74a98711135e4c82dcb428f6d76caaa65",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl3.txt",
+      "sha256": "ef8876c332ca504e693b21f6ef1b9275f404ba323921d8cdcadb22c2ffe3e7a5",
+      "source_sha256": "ef8876c332ca504e693b21f6ef1b9275f404ba323921d8cdcadb22c2ffe3e7a5",
+      "source_git_blob": "8f9fb0c1dab16253483cb9fede78485bc3a51c72",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl4.txt",
+      "sha256": "91b725945adfb4d48580978150bd427057de3683a8eaef3ca43acb2e1a4441b5",
+      "source_sha256": "91b725945adfb4d48580978150bd427057de3683a8eaef3ca43acb2e1a4441b5",
+      "source_git_blob": "b0b5d93487170b1b782b6df4c2749af89cf7767c",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl5.txt",
+      "sha256": "d35c11d39610eec969f3ac2196e1767a2f54d2520a842127e68937e318f8fff3",
+      "source_sha256": "d35c11d39610eec969f3ac2196e1767a2f54d2520a842127e68937e318f8fff3",
+      "source_git_blob": "6f1e41e5a1f31fd5181a355c7065b9ae535e2d90",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl6.txt",
+      "sha256": "c43be0d66454f905a0ed4f05ada912cfa9cd0344234e8987e692c4ae28afe687",
+      "source_sha256": "c43be0d66454f905a0ed4f05ada912cfa9cd0344234e8987e692c4ae28afe687",
+      "source_git_blob": "f69d1ff21b73ebca569fa97d8e4aa8321b9095b3",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl7.txt",
+      "sha256": "9e0098f65224465a4d602cce0425e681e3f5ed2b533d7f748e8c9885e5d27998",
+      "source_sha256": "9e0098f65224465a4d602cce0425e681e3f5ed2b533d7f748e8c9885e5d27998",
+      "source_git_blob": "280ba976ef26e40ee7afb1f0002f336dc367ea6d",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl8.txt",
+      "sha256": "5623c2543ecc3fe4d853b4beb8028dc8f0197604c944415e7517bd9abc866acf",
+      "source_sha256": "5623c2543ecc3fe4d853b4beb8028dc8f0197604c944415e7517bd9abc866acf",
+      "source_git_blob": "64d5a9b08f8027c30db58796b109a80773d3dea2",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri3_zelda_lvl9.txt",
+      "sha256": "32d7a94822664b0355ecc72bd7adec70b1bc94443dfc2958ebb4490d6d29f5f3",
+      "source_sha256": "32d7a94822664b0355ecc72bd7adec70b1bc94443dfc2958ebb4490d6d29f5f3",
+      "source_git_blob": "ac9e57297a3fc49f3237eb4865c411397766717f",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge.txt",
+      "sha256": "cd37d6ce22c5244821af63a2a8085a318fe50c91fd7227f9ab62643daec514ad",
+      "source_sha256": "cd37d6ce22c5244821af63a2a8085a318fe50c91fd7227f9ab62643daec514ad",
+      "source_git_blob": "bb793f0232346661d1f540066166af1bf1f6116e",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl0.txt",
+      "sha256": "56345ad9b4b360cbe6a6875a88b4e658a2196b2623d83cbf325b67b76f7bd946",
+      "source_sha256": "56345ad9b4b360cbe6a6875a88b4e658a2196b2623d83cbf325b67b76f7bd946",
+      "source_git_blob": "61e1401555d68e82e79935649773696d67257209",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl1.txt",
+      "sha256": "25c8841546c021b6951c512de3e2193c3b29b71fc772989ffe1a013f9b0bdfed",
+      "source_sha256": "25c8841546c021b6951c512de3e2193c3b29b71fc772989ffe1a013f9b0bdfed",
+      "source_git_blob": "64387071ec4b377a32059165fcc9097f432efddd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl2.txt",
+      "sha256": "d4c0660f9536efe947fa5add898704c1553a1ae60450974a16d60546ddd794db",
+      "source_sha256": "d4c0660f9536efe947fa5add898704c1553a1ae60450974a16d60546ddd794db",
+      "source_git_blob": "5946301e339e54e1b2086ca68c4656870a3de796",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl3.txt",
+      "sha256": "5756be85f2d09c28a06003b0ea4202dfb26158bf08f158f5e6f1eb9849443a37",
+      "source_sha256": "5756be85f2d09c28a06003b0ea4202dfb26158bf08f158f5e6f1eb9849443a37",
+      "source_git_blob": "d3c5a0eace504fa2b41b472328f3690ac4f7f3e8",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl4.txt",
+      "sha256": "b53bf0b5d025a745b8e8522dccfe8a600a0b7885d07edef8a84a35500f39a450",
+      "source_sha256": "b53bf0b5d025a745b8e8522dccfe8a600a0b7885d07edef8a84a35500f39a450",
+      "source_git_blob": "d1e8a848986eb4f0ac8ba7537e9954aff884155e",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl5.txt",
+      "sha256": "a4661ace8eb9c216d160219b93d900e7a909793f0daad97502fd255403bcc559",
+      "source_sha256": "a4661ace8eb9c216d160219b93d900e7a909793f0daad97502fd255403bcc559",
+      "source_git_blob": "5cb14c608395778433fe06d84f620ee6835a3bfc",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl6.txt",
+      "sha256": "ea84b19e176a755489e4de4245af4ab32b76a54bc4a8d3a480d1b62354f7e3eb",
+      "source_sha256": "ea84b19e176a755489e4de4245af4ab32b76a54bc4a8d3a480d1b62354f7e3eb",
+      "source_git_blob": "93592068b8cfd8e4c36ef311eef8fd379f6b83d6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl7.txt",
+      "sha256": "69e4cb3b016cb34ff4a803529962aaf20dd63f7cd26522843ec0aa9616837c16",
+      "source_sha256": "69e4cb3b016cb34ff4a803529962aaf20dd63f7cd26522843ec0aa9616837c16",
+      "source_git_blob": "e868452aace3021696e13b4fbe5053a798583240",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_avoidgeorge_lvl8.txt",
+      "sha256": "d1dc1117f18b89d50ca5ecdbfdc12d6299be0221095a75bf2e965a22e1a76833",
+      "source_sha256": "d1dc1117f18b89d50ca5ecdbfdc12d6299be0221095a75bf2e965a22e1a76833",
+      "source_git_blob": "e8f08f7e42c58b25da89145c18ccd7a824503591",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait.txt",
+      "sha256": "046ab1134fb4ac8b5a76c88a1b547d397597148630d8192e4793879a1b36537b",
+      "source_sha256": "046ab1134fb4ac8b5a76c88a1b547d397597148630d8192e4793879a1b36537b",
+      "source_git_blob": "57d51b3c55b3ee70d0a0e1a070f21c2ec739b831",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl0.txt",
+      "sha256": "010a0b22dc0b3654ecbe637abd125a275f8661e839b0dce7704eb633b33cbfa6",
+      "source_sha256": "010a0b22dc0b3654ecbe637abd125a275f8661e839b0dce7704eb633b33cbfa6",
+      "source_git_blob": "0e375d3a85d0c09cdebbf61e4d56e163ac4dcbcc",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl1.txt",
+      "sha256": "57b1ece0d3c07da2ede5db455f010ee997ec1d7eed769192db6284c370509737",
+      "source_sha256": "57b1ece0d3c07da2ede5db455f010ee997ec1d7eed769192db6284c370509737",
+      "source_git_blob": "3e7e85c52859a1d42a8779add4f740da5e678671",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl2.txt",
+      "sha256": "6e14a404be604acd46729cdf13a6e87a5c4310866b70d0e3365fe48534cf3a24",
+      "source_sha256": "6e14a404be604acd46729cdf13a6e87a5c4310866b70d0e3365fe48534cf3a24",
+      "source_git_blob": "ffd249b8cabdd89aab90a98148433310384940a6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl3.txt",
+      "sha256": "197961317cce277f9ccfc95128af2ad8159519c212d46887b36cbca1022d1a7f",
+      "source_sha256": "197961317cce277f9ccfc95128af2ad8159519c212d46887b36cbca1022d1a7f",
+      "source_git_blob": "70f5dd71661db49ca2392199069100280ba35807",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl4.txt",
+      "sha256": "e3dfbf4deffb592cc8a08b30f452d8a3913cbbdd6bbc358356d52a7a6547f5f5",
+      "source_sha256": "e3dfbf4deffb592cc8a08b30f452d8a3913cbbdd6bbc358356d52a7a6547f5f5",
+      "source_git_blob": "471d0ffa1c037e40c121f74f8faae1cb2969d60a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl5.txt",
+      "sha256": "3a42f3c5369e6fce0dbeb4075b443075efc6f08045afc2ec2fce44c47468c9cc",
+      "source_sha256": "3a42f3c5369e6fce0dbeb4075b443075efc6f08045afc2ec2fce44c47468c9cc",
+      "source_git_blob": "b226756d82b55822362bd4f6b35a31aef2f42eff",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl6.txt",
+      "sha256": "4c7006442ce27817a420baa14fc7ca5ae6a08bad83c20000e1a21dfebb6c94db",
+      "source_sha256": "4c7006442ce27817a420baa14fc7ca5ae6a08bad83c20000e1a21dfebb6c94db",
+      "source_git_blob": "78d8dc65875ae9d4de970ba6b492ab58983debea",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl7.txt",
+      "sha256": "01afdecaac0b2a4a126a55fe89f961df18bf4cc5fad0140dc1c54553f9b2c54a",
+      "source_sha256": "01afdecaac0b2a4a126a55fe89f961df18bf4cc5fad0140dc1c54553f9b2c54a",
+      "source_git_blob": "1061cedcaa9f1015c9a17c5cbf6f7128277547b7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_bait_lvl8.txt",
+      "sha256": "b7139e652d6b4ddc275ef841b6fc9b0e4c933ff912b561f363449fc216050d63",
+      "source_sha256": "b7139e652d6b4ddc275ef841b6fc9b0e4c933ff912b561f363449fc216050d63",
+      "source_git_blob": "20186dc55f2aabc6f2a5d9a741766c3f8d12add5",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase.txt",
+      "sha256": "0c2d7a067dc1c2b31bc4facc62bbee549f19813c08b3901d9e7b1da3a4fe7015",
+      "source_sha256": "0c2d7a067dc1c2b31bc4facc62bbee549f19813c08b3901d9e7b1da3a4fe7015",
+      "source_git_blob": "efba1ec477c4b00a86fe1d66a56d04daf57096a6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl0.txt",
+      "sha256": "a1845d758ce8af84c213961c2e975935a8acca9c06b20233a48a97072b68c736",
+      "source_sha256": "a1845d758ce8af84c213961c2e975935a8acca9c06b20233a48a97072b68c736",
+      "source_git_blob": "a95fe81552e286b39900a701fab82adbf8da6547",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl1.txt",
+      "sha256": "889a6447dde327b33d890c510deade4a4cfb21e9d08cd6e95ae7bfccb8a2d5de",
+      "source_sha256": "889a6447dde327b33d890c510deade4a4cfb21e9d08cd6e95ae7bfccb8a2d5de",
+      "source_git_blob": "fbac0ef3135daad894492046dc1ce18d73717336",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl2.txt",
+      "sha256": "889cc6c4896f7a34a9536a47617f2cfcdf4b52494432826b037d28907eec7ee6",
+      "source_sha256": "889cc6c4896f7a34a9536a47617f2cfcdf4b52494432826b037d28907eec7ee6",
+      "source_git_blob": "b957ddedaf094b450e4f6ba2714f443e100d8a61",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl3.txt",
+      "sha256": "b8461feea830a9b7d1bd1e22a87daa4b98e9fc8c09224beced4317653730749b",
+      "source_sha256": "b8461feea830a9b7d1bd1e22a87daa4b98e9fc8c09224beced4317653730749b",
+      "source_git_blob": "ad2ddf403bfeb495d9b3407c280f024586ef5f92",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl4.txt",
+      "sha256": "b901ce729fff3fbcd7ac7f066429600e50f95e8759394e2b3e76617491572942",
+      "source_sha256": "b901ce729fff3fbcd7ac7f066429600e50f95e8759394e2b3e76617491572942",
+      "source_git_blob": "a8a074ed3a9e1f7d5bc4f6f59b4a39ce0d31a68a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl5.txt",
+      "sha256": "0d819c0c3d98d5fc7c3d4087a7b3803c8055f3e757421b99d4b6c086e0dc52b5",
+      "source_sha256": "0d819c0c3d98d5fc7c3d4087a7b3803c8055f3e757421b99d4b6c086e0dc52b5",
+      "source_git_blob": "4f6d7c223e4679b273c776b206f86f0a4172120b",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl6.txt",
+      "sha256": "1a06a9e8ca9218a70683dc16ccc91f943e94b468a1a2231a2853c26c04577303",
+      "source_sha256": "1a06a9e8ca9218a70683dc16ccc91f943e94b468a1a2231a2853c26c04577303",
+      "source_git_blob": "117cefbfba7a80347a4c783862ffa6ed8889b3b3",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl7.txt",
+      "sha256": "efc1b709efe8f4e40e2e97983e5499612646bedd5b97ca55eb65bb5760d2748d",
+      "source_sha256": "efc1b709efe8f4e40e2e97983e5499612646bedd5b97ca55eb65bb5760d2748d",
+      "source_git_blob": "9dacf2b93b61ecaa8f1eb83ae7c4d58ae3c2770a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_chase_lvl8.txt",
+      "sha256": "174b2678316bf86bf88376729a2025ea6735d6cd3069bfa5c1d3b2222ad4f540",
+      "source_sha256": "174b2678316bf86bf88376729a2025ea6735d6cd3069bfa5c1d3b2222ad4f540",
+      "source_git_blob": "69563b29a4a53ab13adb2efccaca3d37ff5bb8a0",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper.txt",
+      "sha256": "800efc2d9ca47ab02b5ba1848805f7ee8f0ba2d56b55d6e4ccc7ff92b7f0ae4d",
+      "source_sha256": "800efc2d9ca47ab02b5ba1848805f7ee8f0ba2d56b55d6e4ccc7ff92b7f0ae4d",
+      "source_git_blob": "ddd46a3c558e33062a63d4766dc914c787d22a03",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl0.txt",
+      "sha256": "135208bd9cf6602dc20f58114612de8a3fea54593da6701895f906a6fc0a795b",
+      "source_sha256": "135208bd9cf6602dc20f58114612de8a3fea54593da6701895f906a6fc0a795b",
+      "source_git_blob": "7862a3ec067693893e92e2d396e7138f7ee83297",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl1.txt",
+      "sha256": "06d84b7bdcdd63bee0482fe877c8c98194876a7551cccab47673c87f38277757",
+      "source_sha256": "06d84b7bdcdd63bee0482fe877c8c98194876a7551cccab47673c87f38277757",
+      "source_git_blob": "7a0552f15bb790080fa3fef4b6a807b704f09624",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl2.txt",
+      "sha256": "13619b8e30d66568087eeb06f09228ad4ed14ded615fa6c53a09fd13120d34dc",
+      "source_sha256": "13619b8e30d66568087eeb06f09228ad4ed14ded615fa6c53a09fd13120d34dc",
+      "source_git_blob": "1d9a9f9f73adfe80cdb420d2ec3131906d34896b",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl3.txt",
+      "sha256": "a07e3038b5d34c41f1934a20961e3cc847ad84ccca86dcb328cfb50d77790859",
+      "source_sha256": "a07e3038b5d34c41f1934a20961e3cc847ad84ccca86dcb328cfb50d77790859",
+      "source_git_blob": "2283158097ca0813fa7873be7903945d7c18126a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl4.txt",
+      "sha256": "14907125c404fc6f7f724a67804edc66b3e761bb6b44b52f325ea1f3a8a42870",
+      "source_sha256": "14907125c404fc6f7f724a67804edc66b3e761bb6b44b52f325ea1f3a8a42870",
+      "source_git_blob": "bc448ca1b9fd857baa99593bcd6cd9abf75c9766",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl5.txt",
+      "sha256": "ef3d231030396563aac67ee65fc0e4bd085ac62547f98e2ec3caed31467d521b",
+      "source_sha256": "ef3d231030396563aac67ee65fc0e4bd085ac62547f98e2ec3caed31467d521b",
+      "source_git_blob": "fb400a7f399309c89f9c52e807b75a407aad0812",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl6.txt",
+      "sha256": "7d3d6ebbfd1fa982af3ec4046ccffa2549b830aed34fb585a91cd0128196d3c2",
+      "source_sha256": "7d3d6ebbfd1fa982af3ec4046ccffa2549b830aed34fb585a91cd0128196d3c2",
+      "source_git_blob": "81145adb103b8a40815d706659926e31787aeabd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl7.txt",
+      "sha256": "5a1d7132f68665550ddc3d7a3f87d1176707d89074b852230268dc6db9f94b66",
+      "source_sha256": "5a1d7132f68665550ddc3d7a3f87d1176707d89074b852230268dc6db9f94b66",
+      "source_git_blob": "19681c002aa256bf7eafaa0cc01454268a0acfb7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_helper_lvl8.txt",
+      "sha256": "ce373bc8f250b45072d933b4d03b9c2ae6cfd474ae9ede00e5ffae96a714bc2a",
+      "source_sha256": "ce373bc8f250b45072d933b4d03b9c2ae6cfd474ae9ede00e5ffae96a714bc2a",
+      "source_git_blob": "9f0cb526bdedab1de1888d626be2fff282bd479a",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings.txt",
+      "sha256": "d563911954f3762939a2d5e55a13669cb6813662fcbc1a2ee8c823560aea763c",
+      "source_sha256": "d563911954f3762939a2d5e55a13669cb6813662fcbc1a2ee8c823560aea763c",
+      "source_git_blob": "fd019ab0c4fc5874b1d014fa88447b7f6cfd1105",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl0.txt",
+      "sha256": "42d74ea56367a0642b598f16b462f4584d79e0edaaac6457c02701e73c58db09",
+      "source_sha256": "42d74ea56367a0642b598f16b462f4584d79e0edaaac6457c02701e73c58db09",
+      "source_git_blob": "1c1d7e054f0565d265cc8d53b2ddea0ee1f0d708",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl1.txt",
+      "sha256": "a924e8c66d6c40e5f5d95bb3a0f7e0f8213ce6bc3c8465798ae59d907fea7fe3",
+      "source_sha256": "a924e8c66d6c40e5f5d95bb3a0f7e0f8213ce6bc3c8465798ae59d907fea7fe3",
+      "source_git_blob": "5b0f5399152d188592f1064ec68b99783b5abdc6",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl2.txt",
+      "sha256": "4fd11912f55629d270b84f097c3405c61e0a3e566040fb82219a0569e1e24647",
+      "source_sha256": "4fd11912f55629d270b84f097c3405c61e0a3e566040fb82219a0569e1e24647",
+      "source_git_blob": "8e6bd969cfe4f69ad6ae31bd2f3a3e9db92a7eab",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl3.txt",
+      "sha256": "495573d137f7dd73da19f9147f1d521bf6fb6b34f665921582c7f5aedf9a3e85",
+      "source_sha256": "495573d137f7dd73da19f9147f1d521bf6fb6b34f665921582c7f5aedf9a3e85",
+      "source_git_blob": "d526af13453a7988a32de2774ed0cad4f918e963",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl4.txt",
+      "sha256": "9f07d2e441aabe7a6abb687073fda11f90d8ca82ee65e4cd759acfc2c475d282",
+      "source_sha256": "9f07d2e441aabe7a6abb687073fda11f90d8ca82ee65e4cd759acfc2c475d282",
+      "source_git_blob": "9b1a22ca9deca1a0339accfeacea69d275443412",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl5.txt",
+      "sha256": "d41f7b58e11f4a15fc82dbe343032c462c8350385831ee3720eac019d1fb61cc",
+      "source_sha256": "d41f7b58e11f4a15fc82dbe343032c462c8350385831ee3720eac019d1fb61cc",
+      "source_git_blob": "cad030bc802bab11d42474b7c20e8d84467a9a4d",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl6.txt",
+      "sha256": "474b433ee3f862fb01af6c28d55afb3a3edc0781fb9947b016d8a4be4d96c45a",
+      "source_sha256": "474b433ee3f862fb01af6c28d55afb3a3edc0781fb9947b016d8a4be4d96c45a",
+      "source_git_blob": "a99e2df3009961d59e83a399e922c48e0b6189fd",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl7.txt",
+      "sha256": "8d4b8994daa0d4c734aec3e97c0446806ab2faf5574e2daad5300218aa4d4f7d",
+      "source_sha256": "8d4b8994daa0d4c734aec3e97c0446806ab2faf5574e2daad5300218aa4d4f7d",
+      "source_git_blob": "6a68bb1e05dc9d88170e0a7b4815fa5e002b86eb",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_lemmings_lvl8.txt",
+      "sha256": "6c7be5a0727e022eb599c9ab089e33594f3b00af72043110303abd5f733c38e6",
+      "source_sha256": "6c7be5a0727e022eb599c9ab089e33594f3b00af72043110303abd5f733c38e6",
+      "source_git_blob": "9d2f982545d2a55cce2ade80ed3b62ffb0cb4cd7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda.txt",
+      "sha256": "70262e47b2d59804b031f21f5fd5788373714650e7e88192139486a142bbbabe",
+      "source_sha256": "70262e47b2d59804b031f21f5fd5788373714650e7e88192139486a142bbbabe",
+      "source_git_blob": "ba62f35f48c232b1fb36ac929ade93b4cec7ecb2",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl0.txt",
+      "sha256": "b13fd16e34cf322c8f7a3f4c3be758aaf5c26064d6696e27e8397fdca2493913",
+      "source_sha256": "b13fd16e34cf322c8f7a3f4c3be758aaf5c26064d6696e27e8397fdca2493913",
+      "source_git_blob": "0e42f173a00aea9515b94d10842c83e979a73f58",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl1.txt",
+      "sha256": "d201ac6c0e0d03a17445743a008c6a7969e0ad48975653769258b69e6d203536",
+      "source_sha256": "d201ac6c0e0d03a17445743a008c6a7969e0ad48975653769258b69e6d203536",
+      "source_git_blob": "a05415362a2e755b03ba94fa6a3d48f739e5241b",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl2.txt",
+      "sha256": "bb0d77f219b50e8279e52c630903bb819aadf71adb32717a7279162339d2294e",
+      "source_sha256": "bb0d77f219b50e8279e52c630903bb819aadf71adb32717a7279162339d2294e",
+      "source_git_blob": "364577a7be500db4e034b2857dd99f57149e8281",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl3.txt",
+      "sha256": "0bcad64129253fcc481eba4e28d33c7b6f082d515978fd94716a910070d761f3",
+      "source_sha256": "0bcad64129253fcc481eba4e28d33c7b6f082d515978fd94716a910070d761f3",
+      "source_git_blob": "4fa20cddfea6582c2eb947bc38f91ea7068b2d28",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl4.txt",
+      "sha256": "faf5ec2ebccff235116c13139a03502bd099358b0e78c085865a84e716e605c5",
+      "source_sha256": "faf5ec2ebccff235116c13139a03502bd099358b0e78c085865a84e716e605c5",
+      "source_git_blob": "c365d37f344bd16676eaad3cf68d2c76c29772f4",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl5.txt",
+      "sha256": "d4a7934135ec376421171ad375f0c206b1604da73e07aa02a47462a902745f79",
+      "source_sha256": "d4a7934135ec376421171ad375f0c206b1604da73e07aa02a47462a902745f79",
+      "source_git_blob": "7abc16cbc678622a5ec33595c7a38cb51ba433a7",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl6.txt",
+      "sha256": "de583340cf8e39e4cb68ea28c8fd75425cc8c9a940a251f099cf188865f87b88",
+      "source_sha256": "de583340cf8e39e4cb68ea28c8fd75425cc8c9a940a251f099cf188865f87b88",
+      "source_git_blob": "c2343e654bb29c3532cfb8e9abea97f0770907d1",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl7.txt",
+      "sha256": "d693ee9631ff995c6b7653f823c42fd5b1356f5f629fa9da0675e012d82530c0",
+      "source_sha256": "d693ee9631ff995c6b7653f823c42fd5b1356f5f629fa9da0675e012d82530c0",
+      "source_git_blob": "7a6963ec45b9f3cdd6a391fb802535232c6cc26b",
+      "modifications": []
+    },
+    {
+      "path": "all_games/vgfmri4_zelda_lvl8.txt",
+      "sha256": "f78761a0354e57df382fa5d11716d49558cdbd86b396b766f7184e90d1790500",
+      "source_sha256": "f78761a0354e57df382fa5d11716d49558cdbd86b396b766f7184e90d1790500",
+      "source_git_blob": "249b64e44a6daa8c6bb0e10eae6c0f99772ed66a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge.txt",
+      "source_path": "all_games_original/avoidgeorge.txt",
+      "source_git_blob": "4145a6364aba64081f716f10b6233e48f2c685a8",
+      "source_sha256": "2893b995d5a76c17a9a102ec2720cae334572e2d2a7b764da481c7bbcf61ec5f",
+      "sha256": "2893b995d5a76c17a9a102ec2720cae334572e2d2a7b764da481c7bbcf61ec5f",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge_lvl0.txt",
+      "source_path": "all_games_original/avoidgeorge_lvl0.txt",
+      "source_git_blob": "95f8828c2dc3b0869b97cad0730aa7290cd7a3ae",
+      "source_sha256": "684c33d4585ed87664247c636deac3c137a34fe1861ec5ac39054d9dc3ad9f44",
+      "sha256": "684c33d4585ed87664247c636deac3c137a34fe1861ec5ac39054d9dc3ad9f44",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge_lvl1.txt",
+      "source_path": "all_games_original/avoidgeorge_lvl1.txt",
+      "source_git_blob": "6b8ca84927a0104fae77ebe5a2093b3c131f0e0e",
+      "source_sha256": "8daade52100e77127c155cd7e1ee6bc49eda756f0dd598d9b28345027ccafe6e",
+      "sha256": "8daade52100e77127c155cd7e1ee6bc49eda756f0dd598d9b28345027ccafe6e",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge_lvl2.txt",
+      "source_path": "all_games_original/avoidgeorge_lvl2.txt",
+      "source_git_blob": "3f8b7ed70806371eebf2137622bc55f85bc14135",
+      "source_sha256": "2780444b319e434b77c0ebaf556bfeda0e7d0e1dc2da76b24de498b5c2de875c",
+      "sha256": "2780444b319e434b77c0ebaf556bfeda0e7d0e1dc2da76b24de498b5c2de875c",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge_lvl3.txt",
+      "source_path": "all_games_original/avoidgeorge_lvl3.txt",
+      "source_git_blob": "25d1b29a7a5fbd2e31d5afcf8a79e271344e40d7",
+      "source_sha256": "81b5a5214e4e3a0ffdefd73e23085f446ae6b2e3fe48d3eb6e69062147207bef",
+      "sha256": "81b5a5214e4e3a0ffdefd73e23085f446ae6b2e3fe48d3eb6e69062147207bef",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/avoidgeorge_lvl4.txt",
+      "source_path": "all_games_original/avoidgeorge_lvl4.txt",
+      "source_git_blob": "c202f0cdb492e81e19ed97ee114be7eb010ee6b3",
+      "source_sha256": "2a62ba4cb6c7dd623ec22cd73f9c9cf5628d9e7d2fe4aeda907cc7d4c574f321",
+      "sha256": "2a62ba4cb6c7dd623ec22cd73f9c9cf5628d9e7d2fe4aeda907cc7d4c574f321",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait.txt",
+      "source_path": "all_games_original/bait.txt",
+      "source_git_blob": "1f71a6b07aeff9d16c7083bc65ba32ad47a606be",
+      "source_sha256": "816e36670c55f39952e88645d12e659eff027cbaf9e84f3a7a8091ebc5f6c354",
+      "sha256": "816e36670c55f39952e88645d12e659eff027cbaf9e84f3a7a8091ebc5f6c354",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait_lvl0.txt",
+      "source_path": "all_games_original/bait_lvl0.txt",
+      "source_git_blob": "aa9505fc8efb99484b74840ffc90248096cca69b",
+      "source_sha256": "96d0e07aacd5e6eaa030637dcf4306d8181e870aa2ecdd3c569c281ba398129f",
+      "sha256": "96d0e07aacd5e6eaa030637dcf4306d8181e870aa2ecdd3c569c281ba398129f",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait_lvl1.txt",
+      "source_path": "all_games_original/bait_lvl1.txt",
+      "source_git_blob": "9bb433a5d41ad286cf3833627fce8a0be2b138d5",
+      "source_sha256": "09cee60771c8f05ca9c346138db6f34f189eef2a5ccff91687892b8eed926897",
+      "sha256": "09cee60771c8f05ca9c346138db6f34f189eef2a5ccff91687892b8eed926897",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait_lvl2.txt",
+      "source_path": "all_games_original/bait_lvl2.txt",
+      "source_git_blob": "093c6a33e54dd3695ab8f74ff008db6b7ed0da48",
+      "source_sha256": "43b9b571edd74934db0fb7b014331aa35235cba60a25148e3ad424e342525761",
+      "sha256": "43b9b571edd74934db0fb7b014331aa35235cba60a25148e3ad424e342525761",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait_lvl3.txt",
+      "source_path": "all_games_original/bait_lvl3.txt",
+      "source_git_blob": "5301c88c2bfcad4c89e023afca80144a1dcbbc38",
+      "source_sha256": "ff730b4d53d7051caff0f8089d82b7b439d3cbaf6f0c931526a2588141b94e9c",
+      "sha256": "ff730b4d53d7051caff0f8089d82b7b439d3cbaf6f0c931526a2588141b94e9c",
+      "modifications": []
+    },
+    {
+      "path": "all_games_original/bait_lvl4.txt",
+      "source_path": "all_games_original/bait_lvl4.txt",
+      "source_git_blob": "0f1f17c4d151b082272483c850da109947fd002c",
+      "source_sha256": "d8a0b59db6f6296acfb356c2e75b39e574337c9eecb36d0d45f70ba703630892",
+      "sha256": "d8a0b59db6f6296acfb356c2e75b39e574337c9eecb36d0d45f70ba703630892",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait.txt",
+      "sha256": "562677f11394710412743ba83daf3eee3f3aa867a2171dabe1efe17e7f040175",
+      "source_sha256": "562677f11394710412743ba83daf3eee3f3aa867a2171dabe1efe17e7f040175",
+      "source_git_blob": "5f3d771dfae7ad367f5862c5376fd0863e8721d4",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl0.txt",
+      "sha256": "ff13f46ca9f4ce9ab296db173c63ca4f60158fb1dae639cf012ab7c911a31c52",
+      "source_sha256": "ff13f46ca9f4ce9ab296db173c63ca4f60158fb1dae639cf012ab7c911a31c52",
+      "source_git_blob": "e8ea6d7b6ffb69fd3e69e517e4e43918b6dbda20",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl1.txt",
+      "sha256": "3d89805c22899247af40cdb1550cd9684c101fa6aa4a82102a8e0869deb761a9",
+      "source_sha256": "3d89805c22899247af40cdb1550cd9684c101fa6aa4a82102a8e0869deb761a9",
+      "source_git_blob": "60d78422fc9106367c5896819eb2fe1e0f6769bd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl10.txt",
+      "sha256": "951375bc1da7a8fe48fef3a484463924327389043997b872c92a2556877792a3",
+      "source_sha256": "951375bc1da7a8fe48fef3a484463924327389043997b872c92a2556877792a3",
+      "source_git_blob": "b72b38d88297912a9c8246a6af7d0cba126e801a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl11.txt",
+      "sha256": "738a09bbc4d3340c8ca5dfc31849dacfddd7a89e415574567b322e8cb6161ae1",
+      "source_sha256": "738a09bbc4d3340c8ca5dfc31849dacfddd7a89e415574567b322e8cb6161ae1",
+      "source_git_blob": "8fbc0385708d8b13f776cfe11eadebb078dd1be1",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl2.txt",
+      "sha256": "baa4707e449f83a2d067b9e55c44f0e212f67a630db639384a419b1bf5145680",
+      "source_sha256": "baa4707e449f83a2d067b9e55c44f0e212f67a630db639384a419b1bf5145680",
+      "source_git_blob": "d57b86842972d19ce36392cd54d88a42c7b14fde",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl3.txt",
+      "sha256": "13f7a23dea9fedbc06ec49b6cc3aef420149a20d47ff0c7a03ebee0ca3789a05",
+      "source_sha256": "13f7a23dea9fedbc06ec49b6cc3aef420149a20d47ff0c7a03ebee0ca3789a05",
+      "source_git_blob": "3da4bbd14cc55c04b304c907fc2ec7ad2aa791f4",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl4.txt",
+      "sha256": "ab3411f08035d607e5de3e82ecef83f0e879ca6d1c176987ae23fe0c511d91f1",
+      "source_sha256": "ab3411f08035d607e5de3e82ecef83f0e879ca6d1c176987ae23fe0c511d91f1",
+      "source_git_blob": "86bdfc2aa6468aa0a2dc65ee17a2ddd976a2fafa",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl5.txt",
+      "sha256": "3b15d24462d1d9e2e5c39f7eadab118ed99ea5130ee5a98e72eb8e5794bfd666",
+      "source_sha256": "3b15d24462d1d9e2e5c39f7eadab118ed99ea5130ee5a98e72eb8e5794bfd666",
+      "source_git_blob": "5acf63219e14850d26ec98689b3d2b4ca7165061",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl6.txt",
+      "sha256": "f932d0186ac274078ab0121c96c16c517f4a7d8b9d3d8546dbc79cbc6504f388",
+      "source_sha256": "f932d0186ac274078ab0121c96c16c517f4a7d8b9d3d8546dbc79cbc6504f388",
+      "source_git_blob": "9c6804079de7bccac00a3b9e22add84d3c365c8c",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl7.txt",
+      "sha256": "487495d07e765fea5e7492dc349220c887fefe209473663c88c5b6a70a68736c",
+      "source_sha256": "487495d07e765fea5e7492dc349220c887fefe209473663c88c5b6a70a68736c",
+      "source_git_blob": "0054417b0a1d5485f8098c776557c89c21ef55b1",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl8.txt",
+      "sha256": "628b656820b71a458c1c53fe9bafe948fcd8240fe957f7ca040d8aab5edb7ac3",
+      "source_sha256": "628b656820b71a458c1c53fe9bafe948fcd8240fe957f7ca040d8aab5edb7ac3",
+      "source_git_blob": "9d4221bcd773611c017a4b8f08052fda860340b7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_bait_lvl9.txt",
+      "sha256": "066d1f58622fe244f9f74df6ec01c353c6e5795c56ea5ab8a87718bdd7959dae",
+      "source_sha256": "066d1f58622fe244f9f74df6ec01c353c6e5795c56ea5ab8a87718bdd7959dae",
+      "source_git_blob": "ca5505efc185c02a9a4d8c5d1b33c05b55047417",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase.txt",
+      "sha256": "82e1fdb784871a4352c40002e692093a09bdd6ae71cd12791b026aeb5326b109",
+      "source_sha256": "82e1fdb784871a4352c40002e692093a09bdd6ae71cd12791b026aeb5326b109",
+      "source_git_blob": "1ddfa095c8f9658a65a581db5d10671d6ea5b62d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl0.txt",
+      "sha256": "f0642ab2cf79c610032836c71c87d8483a003d0bc64afc5278fdaa6c2f5e8c38",
+      "source_sha256": "f0642ab2cf79c610032836c71c87d8483a003d0bc64afc5278fdaa6c2f5e8c38",
+      "source_git_blob": "ee4c972ca87e5edd68de485f74e2af910847eef7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl1.txt",
+      "sha256": "3b2a645d500a38864cc93444b7704132362e8497cc0acd168a1a198932223edc",
+      "source_sha256": "3b2a645d500a38864cc93444b7704132362e8497cc0acd168a1a198932223edc",
+      "source_git_blob": "84f16e71104a4c10b3c6875e85649d16b30c5834",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl10.txt",
+      "sha256": "e7f56192951ea4067515700be1f908de4a1ec0c48c718440b8c36552ebbe8c09",
+      "source_sha256": "e7f56192951ea4067515700be1f908de4a1ec0c48c718440b8c36552ebbe8c09",
+      "source_git_blob": "50964871274c1d93772c1620f361bcd4dd5363b9",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl11.txt",
+      "sha256": "5a9ee83141c8be57737b9167d3039912ec417f23b289dbbdc6975d74ade1884f",
+      "source_sha256": "5a9ee83141c8be57737b9167d3039912ec417f23b289dbbdc6975d74ade1884f",
+      "source_git_blob": "38ebded112eda96081cd90eabe3eb60d9c22fb18",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl2.txt",
+      "sha256": "d552a7763f3bb9dc6a301f5dea6f93f3aa1610a805d1edad6e0da0b935a1714a",
+      "source_sha256": "d552a7763f3bb9dc6a301f5dea6f93f3aa1610a805d1edad6e0da0b935a1714a",
+      "source_git_blob": "4bf0d49acbdd7eb976dcc6e820de722eaeff12c3",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl3.txt",
+      "sha256": "7bae130b6b2308ebc32f9f3973009ec05a776dbcdd4dd33b4c1ff547dc66697d",
+      "source_sha256": "7bae130b6b2308ebc32f9f3973009ec05a776dbcdd4dd33b4c1ff547dc66697d",
+      "source_git_blob": "1d1ae696efde45d7038bb0d10b6a6fce6731531a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl4.txt",
+      "sha256": "9920468aae1c40771997415c43361a70c5374e782ad02b5945ec6dd2ad4f32ea",
+      "source_sha256": "9920468aae1c40771997415c43361a70c5374e782ad02b5945ec6dd2ad4f32ea",
+      "source_git_blob": "74819346eb12d51e34f1cada091a1b263a6fe5d7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl5.txt",
+      "sha256": "0915f10d96b037f58d9dd513f4a09ae4d7bc4b19bc7aed6e363399ef4a231a4f",
+      "source_sha256": "0915f10d96b037f58d9dd513f4a09ae4d7bc4b19bc7aed6e363399ef4a231a4f",
+      "source_git_blob": "f9b497ac54e8aa230f8195a26c859f3eff14b1ed",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl6.txt",
+      "sha256": "6dcad872c252af7354bc688da10f57519398e1ea261bedba61830b61e98f06ef",
+      "source_sha256": "6dcad872c252af7354bc688da10f57519398e1ea261bedba61830b61e98f06ef",
+      "source_git_blob": "ad05293044418c34a6145720595fead810b032c8",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl7.txt",
+      "sha256": "3a2ccfb83579bcd9d5a0266d5014026352416c067dbb93883e727c58e711f5f3",
+      "source_sha256": "3a2ccfb83579bcd9d5a0266d5014026352416c067dbb93883e727c58e711f5f3",
+      "source_git_blob": "d75f87264e05a9a27af9cbce2d6beda98a5af9b8",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl8.txt",
+      "sha256": "f9a5835f137a2292506004d148a42314074ffaae809ec7720ae45c55f78d497d",
+      "source_sha256": "f9a5835f137a2292506004d148a42314074ffaae809ec7720ae45c55f78d497d",
+      "source_git_blob": "aa43ff4cae1c56461181be7aa1e1e408e0b5b1e5",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_chase_lvl9.txt",
+      "sha256": "b7d01596d0a56db7faa98e8f6bdaa28676fab430db492819d6ca405f92863bfd",
+      "source_sha256": "b7d01596d0a56db7faa98e8f6bdaa28676fab430db492819d6ca405f92863bfd",
+      "source_git_blob": "46012b032140d03c2a347bc64e8ea6b192712334",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper.txt",
+      "sha256": "88a30b8fda1ae7df07260c33363199dd27718a468b62b19808563e7fa048232e",
+      "source_sha256": "88a30b8fda1ae7df07260c33363199dd27718a468b62b19808563e7fa048232e",
+      "source_git_blob": "57e64a11896ae1093297544d9a8cfe062d577bbe",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl0.txt",
+      "sha256": "7f4bced48e55763916b807107cf2a9e55c09d48b663dd46368aeef74a93e92d5",
+      "source_sha256": "7f4bced48e55763916b807107cf2a9e55c09d48b663dd46368aeef74a93e92d5",
+      "source_git_blob": "8ecedd0fd2d7173a942b4f80ab960c9efe5bbdc6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl1.txt",
+      "sha256": "0e813a0c0c95c00ab676ef15f02c0643fc2188259ed5771eda4723be405b5353",
+      "source_sha256": "0e813a0c0c95c00ab676ef15f02c0643fc2188259ed5771eda4723be405b5353",
+      "source_git_blob": "487141e80f97d402578e8594d3cce11dc73abc79",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl10.txt",
+      "sha256": "f84c7796bed6f2f7becdfce23f5781f086b24de0987fb0aa9fc9a22abc598d7e",
+      "source_sha256": "f84c7796bed6f2f7becdfce23f5781f086b24de0987fb0aa9fc9a22abc598d7e",
+      "source_git_blob": "c0ea9ff327c3081269f9802a6f7e22d90b886e0f",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl11.txt",
+      "sha256": "015895ff31b3772c308e15c7b778b0907d85263dc0c66fd403c64a17b8b462b8",
+      "source_sha256": "015895ff31b3772c308e15c7b778b0907d85263dc0c66fd403c64a17b8b462b8",
+      "source_git_blob": "dbd48437a81c963620f11e08d940fa05f13aad32",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl2.txt",
+      "sha256": "42b89e3ad04c847badb60703fc338b6fbc87dc46e4e9bd113a9dffde1b31bb40",
+      "source_sha256": "42b89e3ad04c847badb60703fc338b6fbc87dc46e4e9bd113a9dffde1b31bb40",
+      "source_git_blob": "72cbae48b9c1915d7a61c3df4068809dbffa0c41",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl3.txt",
+      "sha256": "7dfab1dc22b6eeca423c2265c0666027916ce987d3cdc874490c475392eb69f7",
+      "source_sha256": "7dfab1dc22b6eeca423c2265c0666027916ce987d3cdc874490c475392eb69f7",
+      "source_git_blob": "bb696f23c58b7e2c8f8ac424a3e7c04573fcff95",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl4.txt",
+      "sha256": "82c641c7d5d97fb2d1b1008e555384e1b9e954e12a32e082d857a25017010289",
+      "source_sha256": "82c641c7d5d97fb2d1b1008e555384e1b9e954e12a32e082d857a25017010289",
+      "source_git_blob": "75e14683fed2c634be5dc55adec0812cec46ed38",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl5.txt",
+      "sha256": "3aa1543b4e4ed2928af6766e5e1844a4e6f316e720d845b12d342b10c6c47349",
+      "source_sha256": "3aa1543b4e4ed2928af6766e5e1844a4e6f316e720d845b12d342b10c6c47349",
+      "source_git_blob": "076b3cf0543a872d5f13a887db9c768a4b2d22ab",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl6.txt",
+      "sha256": "c04ffc6e44d0e7250c2434797552d32a911c4364083dcfd76ca325f8e44620cc",
+      "source_sha256": "c04ffc6e44d0e7250c2434797552d32a911c4364083dcfd76ca325f8e44620cc",
+      "source_git_blob": "bc815cd374d0c7be2b25e53e1dc308e989c3d23a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl7.txt",
+      "sha256": "bc7876f18218d30edb8571a5db472ee184e0b45db5b9e3a4002524fe9cd62c33",
+      "source_sha256": "bc7876f18218d30edb8571a5db472ee184e0b45db5b9e3a4002524fe9cd62c33",
+      "source_git_blob": "15b498abb03bf525e9c59376e40784e12e38cfa0",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl8.txt",
+      "sha256": "8b1a81975d18d9a66fef6554beab003be4cba248aeae69d9d341e2f044640244",
+      "source_sha256": "8b1a81975d18d9a66fef6554beab003be4cba248aeae69d9d341e2f044640244",
+      "source_git_blob": "2bd1fd2ec919ca783277e60c440f3fe4df9a73e7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_helper_lvl9.txt",
+      "sha256": "9a3abe102d36c1afbc5c5d4a9840f03d56e32d0a948020b3794ff40b34a984f6",
+      "source_sha256": "9a3abe102d36c1afbc5c5d4a9840f03d56e32d0a948020b3794ff40b34a984f6",
+      "source_git_blob": "8f9928d1fc57b0ddfd740adf8aa43f249c37a617",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings.txt",
+      "sha256": "baec21a7a8b1b5d468380a547210abdd1e64d19eb23fa3aac67d081f817130f7",
+      "source_sha256": "baec21a7a8b1b5d468380a547210abdd1e64d19eb23fa3aac67d081f817130f7",
+      "source_git_blob": "d6e0ed7bb762937e6dd0bac43ba99794176bb7d7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl0.txt",
+      "sha256": "9710831376063703ea77a0dd97d4f8c21e30d555703309d2b065bd308d51e98a",
+      "source_sha256": "9710831376063703ea77a0dd97d4f8c21e30d555703309d2b065bd308d51e98a",
+      "source_git_blob": "7720c7f9d76571a66d9caa9049afca03e751040a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl1.txt",
+      "sha256": "505e5fee2fa57bc68ee015183bee68a6f61ae2e0466fb4b9643ccaf9833baafe",
+      "source_sha256": "505e5fee2fa57bc68ee015183bee68a6f61ae2e0466fb4b9643ccaf9833baafe",
+      "source_git_blob": "8a9f4bea64633f63d19ba6d09ad7320d9c4835f2",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl10.txt",
+      "sha256": "bc0c3e707d427c49f11fde3635420a49fd3833279deda34e554c54b0af865f1c",
+      "source_sha256": "bc0c3e707d427c49f11fde3635420a49fd3833279deda34e554c54b0af865f1c",
+      "source_git_blob": "295f61873b84401f406cd4d66ab7a6fc5c1e72f6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl11.txt",
+      "sha256": "4d1cf1b0e8c873b04b2db08be0dbfe4e483bc87480fdbfa25730a51549407d7f",
+      "source_sha256": "4d1cf1b0e8c873b04b2db08be0dbfe4e483bc87480fdbfa25730a51549407d7f",
+      "source_git_blob": "902b209f00eec342233ecc8724834eecc0d8f63d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl2.txt",
+      "sha256": "dd9036c30b851fee095f5383c7fbb853630856debca08f277654bdcf9eb57d79",
+      "source_sha256": "dd9036c30b851fee095f5383c7fbb853630856debca08f277654bdcf9eb57d79",
+      "source_git_blob": "4f68abc12b99fa6d7ca76688752879cd91bd3477",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl3.txt",
+      "sha256": "78fbcf1f0f042805923aa3c597abaaa6816ba6ae7177ceadaecd7f8e180a0f67",
+      "source_sha256": "78fbcf1f0f042805923aa3c597abaaa6816ba6ae7177ceadaecd7f8e180a0f67",
+      "source_git_blob": "49216163b2fff866b56c2a760e112a4ec7d7c1c2",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl4.txt",
+      "sha256": "fc9975345dbff83b1bf3a40b8486068c048e4108c02411c8479e842cd0b83bab",
+      "source_sha256": "fc9975345dbff83b1bf3a40b8486068c048e4108c02411c8479e842cd0b83bab",
+      "source_git_blob": "950cad50e4265c605bbee4b12a2915dfd322093c",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl5.txt",
+      "sha256": "5fc24b123180b4d165e4eccec63f8fdff7d3ff7667cc4aa6bf71d21930528173",
+      "source_sha256": "5fc24b123180b4d165e4eccec63f8fdff7d3ff7667cc4aa6bf71d21930528173",
+      "source_git_blob": "f9e234b39fdb62740c1a7b4e305587fd1234e788",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl6.txt",
+      "sha256": "0252ce9203e396f34276d66cbea09836b74d74238edb1b673491da7333bda93b",
+      "source_sha256": "0252ce9203e396f34276d66cbea09836b74d74238edb1b673491da7333bda93b",
+      "source_git_blob": "051fc6d08fbcf5f5f3b51ac11399218f7a0dec44",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl7.txt",
+      "sha256": "9a90848b66f698670d1c590f647152c9edde93277341b20c2b75aafecd503390",
+      "source_sha256": "9a90848b66f698670d1c590f647152c9edde93277341b20c2b75aafecd503390",
+      "source_git_blob": "cf77cfe0837f66508fea92bf48ad01aec4fafddd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl8.txt",
+      "sha256": "ce155347c11fee8e41596b9f85f9b3cf7062df51708460a08b13b9c1feab40be",
+      "source_sha256": "ce155347c11fee8e41596b9f85f9b3cf7062df51708460a08b13b9c1feab40be",
+      "source_git_blob": "f057e5e1487457372444ffaf96131748fa8ea31a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_lemmings_lvl9.txt",
+      "sha256": "60e2e7bf055345289203bfffd8760e824d7e927413f82fdd7bbeb5bcb8047525",
+      "source_sha256": "60e2e7bf055345289203bfffd8760e824d7e927413f82fdd7bbeb5bcb8047525",
+      "source_git_blob": "5e074d7aad0692710d9e1a47eb1cc7005f7527f0",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack.txt",
+      "sha256": "1a617df6d101086e608a2188943aaaf723e8cbc98e4166af1042aec6b5aa76c7",
+      "source_sha256": "1a617df6d101086e608a2188943aaaf723e8cbc98e4166af1042aec6b5aa76c7",
+      "source_git_blob": "7f2ff8b117bd4a8145c80a8640e8eb95e3ec42c5",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl0.txt",
+      "sha256": "633b4397a2088a8448011ce4815735d7f4f63842b6aa99e40bdd9d9f493e2c34",
+      "source_sha256": "633b4397a2088a8448011ce4815735d7f4f63842b6aa99e40bdd9d9f493e2c34",
+      "source_git_blob": "b9068565aaf6d0317814da58b7802ab7ad914275",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl1.txt",
+      "sha256": "9c73f29f6398deb72c5bc370c44bd80db75b3ad1790726f3fb2684869f2f3404",
+      "source_sha256": "9c73f29f6398deb72c5bc370c44bd80db75b3ad1790726f3fb2684869f2f3404",
+      "source_git_blob": "cf98dcef7adb081e119e643336bcf4956f3faa8d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl10.txt",
+      "sha256": "0909a11ff13ee6300b593fcd6eafb9ee152cb40f783727dd5a09870e392d8420",
+      "source_sha256": "0909a11ff13ee6300b593fcd6eafb9ee152cb40f783727dd5a09870e392d8420",
+      "source_git_blob": "8ab84e22eceb56f5f1b4ebcf97c1f8a0ecf39c09",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl11.txt",
+      "sha256": "5db747a443679c09dc26460e9e1d3c629ffdc7cfc626028d5f3a8af1ae9dd92f",
+      "source_sha256": "5db747a443679c09dc26460e9e1d3c629ffdc7cfc626028d5f3a8af1ae9dd92f",
+      "source_git_blob": "0bea36ed177b007a86bfebdeb6090b21f11c00cd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl2.txt",
+      "sha256": "ee17b76579f08a431b0abe7b474d657262bf90d8016c528b5d5b07e06448bf4e",
+      "source_sha256": "ee17b76579f08a431b0abe7b474d657262bf90d8016c528b5d5b07e06448bf4e",
+      "source_git_blob": "94dfb3c19ff5ecdf236f501334e456a82daaa213",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl3.txt",
+      "sha256": "905c138dfca57e9037e9508887a3d088c5068f6094c05039d4157d3ba9ff64d6",
+      "source_sha256": "905c138dfca57e9037e9508887a3d088c5068f6094c05039d4157d3ba9ff64d6",
+      "source_git_blob": "5d49b6df330034b319a02ee05f2639778ca9b776",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl4.txt",
+      "sha256": "ea381c40464cdddef388fea720c400b7703c68f33f8a80996de3b1371e06464e",
+      "source_sha256": "ea381c40464cdddef388fea720c400b7703c68f33f8a80996de3b1371e06464e",
+      "source_git_blob": "f4b5c55b0fde3292924d0a6ded02d21c02023326",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl5.txt",
+      "sha256": "afc599eb1aaaa972c5e2c52b46d996f804b528a20007e9a28d5c448a16464ba8",
+      "source_sha256": "afc599eb1aaaa972c5e2c52b46d996f804b528a20007e9a28d5c448a16464ba8",
+      "source_git_blob": "12a2b2f2aca1c5d3fffa4b207ac35abd1d751069",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl6.txt",
+      "sha256": "4204f631048f2cdd54a0cc1d4b782987967bb93c29ffab8022a5a42a8bfdd4f4",
+      "source_sha256": "4204f631048f2cdd54a0cc1d4b782987967bb93c29ffab8022a5a42a8bfdd4f4",
+      "source_git_blob": "ec8f4ff48951436ac0feb92b98ffe3effb936229",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl7.txt",
+      "sha256": "7a6e5ef19d620437dfd64711479d22e9037b2c0fbab5ba297b4718283eb5eda9",
+      "source_sha256": "7a6e5ef19d620437dfd64711479d22e9037b2c0fbab5ba297b4718283eb5eda9",
+      "source_git_blob": "ee92d82d3469d008b9dbc422ce58ba179e2dd854",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl8.txt",
+      "sha256": "488530fea5dac6c7ca26d190d587e2c03f0182af32dec41d653753ef59fe0170",
+      "source_sha256": "488530fea5dac6c7ca26d190d587e2c03f0182af32dec41d653753ef59fe0170",
+      "source_git_blob": "537dd14a3c833b0159898e441d5a49dccc354781",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_plaqueAttack_lvl9.txt",
+      "sha256": "3c5494a49a1439643f11347c1c82032284693e0152eb3b5195f29a99d7a6aa0b",
+      "source_sha256": "3c5494a49a1439643f11347c1c82032284693e0152eb3b5195f29a99d7a6aa0b",
+      "source_git_blob": "a8286cddd716b5770dca30cc7fce926e18554110",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_sokoban.txt",
+      "sha256": "309c8bded0262e636340057d79aefef6afe0cce977fb71ffa1e24285a2ef17d1",
+      "source_sha256": "309c8bded0262e636340057d79aefef6afe0cce977fb71ffa1e24285a2ef17d1",
+      "source_git_blob": "1c3a1df42bfd251e2f89c42f1deda779569df1d9",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_sokoban_lvl0.txt",
+      "sha256": "2b08470a6db7c096eaf97c41e1f57bcb0d15736d917ae413e8176a75551a79a1",
+      "source_sha256": "2b08470a6db7c096eaf97c41e1f57bcb0d15736d917ae413e8176a75551a79a1",
+      "source_git_blob": "b66e4bf9970cbd722f270e3fb71804835970bf75",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_sokoban_lvl1.txt",
+      "sha256": "90a9807c39d9f30b1e65d67314d7c0b765a1cad6c38eac74008a9f53d09a8ffb",
+      "source_sha256": "90a9807c39d9f30b1e65d67314d7c0b765a1cad6c38eac74008a9f53d09a8ffb",
+      "source_git_blob": "c27dae8ad2ba33b311ebdc1aaebbc39b24793b78",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_sokoban_lvl2.txt",
+      "sha256": "083ba88b6d72561437ce0a8f4ab256abd062674024bad3efe04efdc6fbb20fb9",
+      "source_sha256": "083ba88b6d72561437ce0a8f4ab256abd062674024bad3efe04efdc6fbb20fb9",
+      "source_git_blob": "8a2ba0ca2c1b1a533952b15e06b042fc346274ce",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda.txt",
+      "sha256": "233bfd7e8d605302c7dee2b5b60ee444aeffbae4796974b4db1d87879e069f5a",
+      "source_sha256": "233bfd7e8d605302c7dee2b5b60ee444aeffbae4796974b4db1d87879e069f5a",
+      "source_git_blob": "ffb8bb95e4e1ab687e32f23fa92bd5b5808a4811",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl0.txt",
+      "sha256": "0803f30ba0975e3d2629619b4ff17c874ed5c853b9d62955c08461800d888dc9",
+      "source_sha256": "0803f30ba0975e3d2629619b4ff17c874ed5c853b9d62955c08461800d888dc9",
+      "source_git_blob": "66750e857f3aaf53862b9da6d238b234887ea4fe",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl1.txt",
+      "sha256": "177ace22c64f2113a724f24c68650f9066b6fc99ce3d24022b9b2e7bf8f2480a",
+      "source_sha256": "177ace22c64f2113a724f24c68650f9066b6fc99ce3d24022b9b2e7bf8f2480a",
+      "source_git_blob": "853eded5a6fcee7889cbfe54d14766eaa9210545",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl10.txt",
+      "sha256": "279aa3e75901f0617111d14b7e47f1b39d6b408efddd805364a7e5723583ee89",
+      "source_sha256": "279aa3e75901f0617111d14b7e47f1b39d6b408efddd805364a7e5723583ee89",
+      "source_git_blob": "38ec8a347d468f1b89d2eefd129e18b8ec040cbe",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl11.txt",
+      "sha256": "463e6faac54f7a17812eec5fa8f9c1b23b19b6ca1fa185fd10077986aff83942",
+      "source_sha256": "463e6faac54f7a17812eec5fa8f9c1b23b19b6ca1fa185fd10077986aff83942",
+      "source_git_blob": "75d75e255756959301b182af0022ee3681f73f4d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl2.txt",
+      "sha256": "8fe3afbf75112fb972ad9ffb5cda304528195eae1500fed0cd8b80d805f84a8c",
+      "source_sha256": "8fe3afbf75112fb972ad9ffb5cda304528195eae1500fed0cd8b80d805f84a8c",
+      "source_git_blob": "064712a74a98711135e4c82dcb428f6d76caaa65",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl3.txt",
+      "sha256": "ef8876c332ca504e693b21f6ef1b9275f404ba323921d8cdcadb22c2ffe3e7a5",
+      "source_sha256": "ef8876c332ca504e693b21f6ef1b9275f404ba323921d8cdcadb22c2ffe3e7a5",
+      "source_git_blob": "8f9fb0c1dab16253483cb9fede78485bc3a51c72",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl4.txt",
+      "sha256": "91b725945adfb4d48580978150bd427057de3683a8eaef3ca43acb2e1a4441b5",
+      "source_sha256": "91b725945adfb4d48580978150bd427057de3683a8eaef3ca43acb2e1a4441b5",
+      "source_git_blob": "b0b5d93487170b1b782b6df4c2749af89cf7767c",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl5.txt",
+      "sha256": "d35c11d39610eec969f3ac2196e1767a2f54d2520a842127e68937e318f8fff3",
+      "source_sha256": "d35c11d39610eec969f3ac2196e1767a2f54d2520a842127e68937e318f8fff3",
+      "source_git_blob": "6f1e41e5a1f31fd5181a355c7065b9ae535e2d90",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl6.txt",
+      "sha256": "c43be0d66454f905a0ed4f05ada912cfa9cd0344234e8987e692c4ae28afe687",
+      "source_sha256": "c43be0d66454f905a0ed4f05ada912cfa9cd0344234e8987e692c4ae28afe687",
+      "source_git_blob": "f69d1ff21b73ebca569fa97d8e4aa8321b9095b3",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl7.txt",
+      "sha256": "9e0098f65224465a4d602cce0425e681e3f5ed2b533d7f748e8c9885e5d27998",
+      "source_sha256": "9e0098f65224465a4d602cce0425e681e3f5ed2b533d7f748e8c9885e5d27998",
+      "source_git_blob": "280ba976ef26e40ee7afb1f0002f336dc367ea6d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl8.txt",
+      "sha256": "5623c2543ecc3fe4d853b4beb8028dc8f0197604c944415e7517bd9abc866acf",
+      "source_sha256": "5623c2543ecc3fe4d853b4beb8028dc8f0197604c944415e7517bd9abc866acf",
+      "source_git_blob": "64d5a9b08f8027c30db58796b109a80773d3dea2",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri3_zelda_lvl9.txt",
+      "sha256": "32d7a94822664b0355ecc72bd7adec70b1bc94443dfc2958ebb4490d6d29f5f3",
+      "source_sha256": "32d7a94822664b0355ecc72bd7adec70b1bc94443dfc2958ebb4490d6d29f5f3",
+      "source_git_blob": "ac9e57297a3fc49f3237eb4865c411397766717f",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge.txt",
+      "sha256": "1a2ec5df9e46906fc39158da533aa4aaf3927617147574676f9aec27b808bbf4",
+      "source_sha256": "1a2ec5df9e46906fc39158da533aa4aaf3927617147574676f9aec27b808bbf4",
+      "source_git_blob": "a3a35f61d0c02aa4a7b570a8026e0f0313fc6963",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl0.txt",
+      "sha256": "56345ad9b4b360cbe6a6875a88b4e658a2196b2623d83cbf325b67b76f7bd946",
+      "source_sha256": "56345ad9b4b360cbe6a6875a88b4e658a2196b2623d83cbf325b67b76f7bd946",
+      "source_git_blob": "61e1401555d68e82e79935649773696d67257209",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl1.txt",
+      "sha256": "25c8841546c021b6951c512de3e2193c3b29b71fc772989ffe1a013f9b0bdfed",
+      "source_sha256": "25c8841546c021b6951c512de3e2193c3b29b71fc772989ffe1a013f9b0bdfed",
+      "source_git_blob": "64387071ec4b377a32059165fcc9097f432efddd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl2.txt",
+      "sha256": "d4c0660f9536efe947fa5add898704c1553a1ae60450974a16d60546ddd794db",
+      "source_sha256": "d4c0660f9536efe947fa5add898704c1553a1ae60450974a16d60546ddd794db",
+      "source_git_blob": "5946301e339e54e1b2086ca68c4656870a3de796",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl3.txt",
+      "sha256": "5756be85f2d09c28a06003b0ea4202dfb26158bf08f158f5e6f1eb9849443a37",
+      "source_sha256": "5756be85f2d09c28a06003b0ea4202dfb26158bf08f158f5e6f1eb9849443a37",
+      "source_git_blob": "d3c5a0eace504fa2b41b472328f3690ac4f7f3e8",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl4.txt",
+      "sha256": "b53bf0b5d025a745b8e8522dccfe8a600a0b7885d07edef8a84a35500f39a450",
+      "source_sha256": "b53bf0b5d025a745b8e8522dccfe8a600a0b7885d07edef8a84a35500f39a450",
+      "source_git_blob": "d1e8a848986eb4f0ac8ba7537e9954aff884155e",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl5.txt",
+      "sha256": "a4661ace8eb9c216d160219b93d900e7a909793f0daad97502fd255403bcc559",
+      "source_sha256": "a4661ace8eb9c216d160219b93d900e7a909793f0daad97502fd255403bcc559",
+      "source_git_blob": "5cb14c608395778433fe06d84f620ee6835a3bfc",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl6.txt",
+      "sha256": "ea84b19e176a755489e4de4245af4ab32b76a54bc4a8d3a480d1b62354f7e3eb",
+      "source_sha256": "ea84b19e176a755489e4de4245af4ab32b76a54bc4a8d3a480d1b62354f7e3eb",
+      "source_git_blob": "93592068b8cfd8e4c36ef311eef8fd379f6b83d6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl7.txt",
+      "sha256": "69e4cb3b016cb34ff4a803529962aaf20dd63f7cd26522843ec0aa9616837c16",
+      "source_sha256": "69e4cb3b016cb34ff4a803529962aaf20dd63f7cd26522843ec0aa9616837c16",
+      "source_git_blob": "e868452aace3021696e13b4fbe5053a798583240",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_avoidgeorge_lvl8.txt",
+      "sha256": "d1dc1117f18b89d50ca5ecdbfdc12d6299be0221095a75bf2e965a22e1a76833",
+      "source_sha256": "d1dc1117f18b89d50ca5ecdbfdc12d6299be0221095a75bf2e965a22e1a76833",
+      "source_git_blob": "e8f08f7e42c58b25da89145c18ccd7a824503591",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl0.txt",
+      "sha256": "010a0b22dc0b3654ecbe637abd125a275f8661e839b0dce7704eb633b33cbfa6",
+      "source_sha256": "010a0b22dc0b3654ecbe637abd125a275f8661e839b0dce7704eb633b33cbfa6",
+      "source_git_blob": "0e375d3a85d0c09cdebbf61e4d56e163ac4dcbcc",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl1.txt",
+      "sha256": "57b1ece0d3c07da2ede5db455f010ee997ec1d7eed769192db6284c370509737",
+      "source_sha256": "57b1ece0d3c07da2ede5db455f010ee997ec1d7eed769192db6284c370509737",
+      "source_git_blob": "3e7e85c52859a1d42a8779add4f740da5e678671",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl2.txt",
+      "sha256": "6e14a404be604acd46729cdf13a6e87a5c4310866b70d0e3365fe48534cf3a24",
+      "source_sha256": "6e14a404be604acd46729cdf13a6e87a5c4310866b70d0e3365fe48534cf3a24",
+      "source_git_blob": "ffd249b8cabdd89aab90a98148433310384940a6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl3.txt",
+      "sha256": "197961317cce277f9ccfc95128af2ad8159519c212d46887b36cbca1022d1a7f",
+      "source_sha256": "197961317cce277f9ccfc95128af2ad8159519c212d46887b36cbca1022d1a7f",
+      "source_git_blob": "70f5dd71661db49ca2392199069100280ba35807",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl4.txt",
+      "sha256": "e3dfbf4deffb592cc8a08b30f452d8a3913cbbdd6bbc358356d52a7a6547f5f5",
+      "source_sha256": "e3dfbf4deffb592cc8a08b30f452d8a3913cbbdd6bbc358356d52a7a6547f5f5",
+      "source_git_blob": "471d0ffa1c037e40c121f74f8faae1cb2969d60a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl5.txt",
+      "sha256": "3a42f3c5369e6fce0dbeb4075b443075efc6f08045afc2ec2fce44c47468c9cc",
+      "source_sha256": "3a42f3c5369e6fce0dbeb4075b443075efc6f08045afc2ec2fce44c47468c9cc",
+      "source_git_blob": "b226756d82b55822362bd4f6b35a31aef2f42eff",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl6.txt",
+      "sha256": "4c7006442ce27817a420baa14fc7ca5ae6a08bad83c20000e1a21dfebb6c94db",
+      "source_sha256": "4c7006442ce27817a420baa14fc7ca5ae6a08bad83c20000e1a21dfebb6c94db",
+      "source_git_blob": "78d8dc65875ae9d4de970ba6b492ab58983debea",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl7.txt",
+      "sha256": "01afdecaac0b2a4a126a55fe89f961df18bf4cc5fad0140dc1c54553f9b2c54a",
+      "source_sha256": "01afdecaac0b2a4a126a55fe89f961df18bf4cc5fad0140dc1c54553f9b2c54a",
+      "source_git_blob": "1061cedcaa9f1015c9a17c5cbf6f7128277547b7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_lvl8.txt",
+      "sha256": "b7139e652d6b4ddc275ef841b6fc9b0e4c933ff912b561f363449fc216050d63",
+      "source_sha256": "b7139e652d6b4ddc275ef841b6fc9b0e4c933ff912b561f363449fc216050d63",
+      "source_git_blob": "20186dc55f2aabc6f2a5d9a741766c3f8d12add5",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_var1.txt",
+      "sha256": "365ae8577b64a6c3e20673b06010b8583aae409432b8fc05f8239f90b8bc6f73",
+      "source_sha256": "365ae8577b64a6c3e20673b06010b8583aae409432b8fc05f8239f90b8bc6f73",
+      "source_git_blob": "0fa474859ba2d6529e4ce3008c7d92c9b41f0806",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_bait_var2.txt",
+      "sha256": "d327d575e17e50083fed2ceb7d5f940b16aa02095ceae352c71befe837618a1c",
+      "source_sha256": "d327d575e17e50083fed2ceb7d5f940b16aa02095ceae352c71befe837618a1c",
+      "source_git_blob": "916c76c1f289f9bb9f168044ff75c028bb42060d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl0.txt",
+      "sha256": "a1845d758ce8af84c213961c2e975935a8acca9c06b20233a48a97072b68c736",
+      "source_sha256": "a1845d758ce8af84c213961c2e975935a8acca9c06b20233a48a97072b68c736",
+      "source_git_blob": "a95fe81552e286b39900a701fab82adbf8da6547",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl1.txt",
+      "sha256": "889a6447dde327b33d890c510deade4a4cfb21e9d08cd6e95ae7bfccb8a2d5de",
+      "source_sha256": "889a6447dde327b33d890c510deade4a4cfb21e9d08cd6e95ae7bfccb8a2d5de",
+      "source_git_blob": "fbac0ef3135daad894492046dc1ce18d73717336",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl2.txt",
+      "sha256": "889cc6c4896f7a34a9536a47617f2cfcdf4b52494432826b037d28907eec7ee6",
+      "source_sha256": "889cc6c4896f7a34a9536a47617f2cfcdf4b52494432826b037d28907eec7ee6",
+      "source_git_blob": "b957ddedaf094b450e4f6ba2714f443e100d8a61",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl3.txt",
+      "sha256": "b8461feea830a9b7d1bd1e22a87daa4b98e9fc8c09224beced4317653730749b",
+      "source_sha256": "b8461feea830a9b7d1bd1e22a87daa4b98e9fc8c09224beced4317653730749b",
+      "source_git_blob": "ad2ddf403bfeb495d9b3407c280f024586ef5f92",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl4.txt",
+      "sha256": "b901ce729fff3fbcd7ac7f066429600e50f95e8759394e2b3e76617491572942",
+      "source_sha256": "b901ce729fff3fbcd7ac7f066429600e50f95e8759394e2b3e76617491572942",
+      "source_git_blob": "a8a074ed3a9e1f7d5bc4f6f59b4a39ce0d31a68a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl5.txt",
+      "sha256": "0d819c0c3d98d5fc7c3d4087a7b3803c8055f3e757421b99d4b6c086e0dc52b5",
+      "source_sha256": "0d819c0c3d98d5fc7c3d4087a7b3803c8055f3e757421b99d4b6c086e0dc52b5",
+      "source_git_blob": "4f6d7c223e4679b273c776b206f86f0a4172120b",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl6.txt",
+      "sha256": "1a06a9e8ca9218a70683dc16ccc91f943e94b468a1a2231a2853c26c04577303",
+      "source_sha256": "1a06a9e8ca9218a70683dc16ccc91f943e94b468a1a2231a2853c26c04577303",
+      "source_git_blob": "117cefbfba7a80347a4c783862ffa6ed8889b3b3",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl7.txt",
+      "sha256": "efc1b709efe8f4e40e2e97983e5499612646bedd5b97ca55eb65bb5760d2748d",
+      "source_sha256": "efc1b709efe8f4e40e2e97983e5499612646bedd5b97ca55eb65bb5760d2748d",
+      "source_git_blob": "9dacf2b93b61ecaa8f1eb83ae7c4d58ae3c2770a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_lvl8.txt",
+      "sha256": "174b2678316bf86bf88376729a2025ea6735d6cd3069bfa5c1d3b2222ad4f540",
+      "source_sha256": "174b2678316bf86bf88376729a2025ea6735d6cd3069bfa5c1d3b2222ad4f540",
+      "source_git_blob": "69563b29a4a53ab13adb2efccaca3d37ff5bb8a0",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_var1.txt",
+      "sha256": "577d0b88b28e2b560267efd0226779a60511cc5dae9235848af7b79e05dafaee",
+      "source_sha256": "577d0b88b28e2b560267efd0226779a60511cc5dae9235848af7b79e05dafaee",
+      "source_git_blob": "37926e3789a66577e826ae09348353802d0ce012",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_chase_var2.txt",
+      "sha256": "098a39e3f18a44248707072e3f4ac8cd5e678b0a9bf4effb75a4909004082fc3",
+      "source_sha256": "098a39e3f18a44248707072e3f4ac8cd5e678b0a9bf4effb75a4909004082fc3",
+      "source_git_blob": "60ce66d60c2fc3c81f4482b75c602ebb1fb448d0",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper.txt",
+      "sha256": "39d9e3957f73afc51bb7c0a20ee1fd170305df61f98b01c8d41b75510202a462",
+      "source_sha256": "39d9e3957f73afc51bb7c0a20ee1fd170305df61f98b01c8d41b75510202a462",
+      "source_git_blob": "380488b1dd7cadb86aa8213fa2c45ec0a67b07d6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl0.txt",
+      "sha256": "135208bd9cf6602dc20f58114612de8a3fea54593da6701895f906a6fc0a795b",
+      "source_sha256": "135208bd9cf6602dc20f58114612de8a3fea54593da6701895f906a6fc0a795b",
+      "source_git_blob": "7862a3ec067693893e92e2d396e7138f7ee83297",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl1.txt",
+      "sha256": "06d84b7bdcdd63bee0482fe877c8c98194876a7551cccab47673c87f38277757",
+      "source_sha256": "06d84b7bdcdd63bee0482fe877c8c98194876a7551cccab47673c87f38277757",
+      "source_git_blob": "7a0552f15bb790080fa3fef4b6a807b704f09624",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl2.txt",
+      "sha256": "13619b8e30d66568087eeb06f09228ad4ed14ded615fa6c53a09fd13120d34dc",
+      "source_sha256": "13619b8e30d66568087eeb06f09228ad4ed14ded615fa6c53a09fd13120d34dc",
+      "source_git_blob": "1d9a9f9f73adfe80cdb420d2ec3131906d34896b",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl3.txt",
+      "sha256": "a07e3038b5d34c41f1934a20961e3cc847ad84ccca86dcb328cfb50d77790859",
+      "source_sha256": "a07e3038b5d34c41f1934a20961e3cc847ad84ccca86dcb328cfb50d77790859",
+      "source_git_blob": "2283158097ca0813fa7873be7903945d7c18126a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl4.txt",
+      "sha256": "14907125c404fc6f7f724a67804edc66b3e761bb6b44b52f325ea1f3a8a42870",
+      "source_sha256": "14907125c404fc6f7f724a67804edc66b3e761bb6b44b52f325ea1f3a8a42870",
+      "source_git_blob": "bc448ca1b9fd857baa99593bcd6cd9abf75c9766",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl5.txt",
+      "sha256": "ef3d231030396563aac67ee65fc0e4bd085ac62547f98e2ec3caed31467d521b",
+      "source_sha256": "ef3d231030396563aac67ee65fc0e4bd085ac62547f98e2ec3caed31467d521b",
+      "source_git_blob": "fb400a7f399309c89f9c52e807b75a407aad0812",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl6.txt",
+      "sha256": "7d3d6ebbfd1fa982af3ec4046ccffa2549b830aed34fb585a91cd0128196d3c2",
+      "source_sha256": "7d3d6ebbfd1fa982af3ec4046ccffa2549b830aed34fb585a91cd0128196d3c2",
+      "source_git_blob": "81145adb103b8a40815d706659926e31787aeabd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl7.txt",
+      "sha256": "5a1d7132f68665550ddc3d7a3f87d1176707d89074b852230268dc6db9f94b66",
+      "source_sha256": "5a1d7132f68665550ddc3d7a3f87d1176707d89074b852230268dc6db9f94b66",
+      "source_git_blob": "19681c002aa256bf7eafaa0cc01454268a0acfb7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_helper_lvl8.txt",
+      "sha256": "ce373bc8f250b45072d933b4d03b9c2ae6cfd474ae9ede00e5ffae96a714bc2a",
+      "source_sha256": "ce373bc8f250b45072d933b4d03b9c2ae6cfd474ae9ede00e5ffae96a714bc2a",
+      "source_git_blob": "9f0cb526bdedab1de1888d626be2fff282bd479a",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings.txt",
+      "sha256": "b50dcde2e6d2b206f354c2fd38b0362a73631187163b45982e06e682e6400156",
+      "source_sha256": "b50dcde2e6d2b206f354c2fd38b0362a73631187163b45982e06e682e6400156",
+      "source_git_blob": "592e59574486823c93549b1671054a9d0ebf38c5",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl0.txt",
+      "sha256": "42d74ea56367a0642b598f16b462f4584d79e0edaaac6457c02701e73c58db09",
+      "source_sha256": "42d74ea56367a0642b598f16b462f4584d79e0edaaac6457c02701e73c58db09",
+      "source_git_blob": "1c1d7e054f0565d265cc8d53b2ddea0ee1f0d708",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl1.txt",
+      "sha256": "a924e8c66d6c40e5f5d95bb3a0f7e0f8213ce6bc3c8465798ae59d907fea7fe3",
+      "source_sha256": "a924e8c66d6c40e5f5d95bb3a0f7e0f8213ce6bc3c8465798ae59d907fea7fe3",
+      "source_git_blob": "5b0f5399152d188592f1064ec68b99783b5abdc6",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl2.txt",
+      "sha256": "4fd11912f55629d270b84f097c3405c61e0a3e566040fb82219a0569e1e24647",
+      "source_sha256": "4fd11912f55629d270b84f097c3405c61e0a3e566040fb82219a0569e1e24647",
+      "source_git_blob": "8e6bd969cfe4f69ad6ae31bd2f3a3e9db92a7eab",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl3.txt",
+      "sha256": "495573d137f7dd73da19f9147f1d521bf6fb6b34f665921582c7f5aedf9a3e85",
+      "source_sha256": "495573d137f7dd73da19f9147f1d521bf6fb6b34f665921582c7f5aedf9a3e85",
+      "source_git_blob": "d526af13453a7988a32de2774ed0cad4f918e963",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl4.txt",
+      "sha256": "9f07d2e441aabe7a6abb687073fda11f90d8ca82ee65e4cd759acfc2c475d282",
+      "source_sha256": "9f07d2e441aabe7a6abb687073fda11f90d8ca82ee65e4cd759acfc2c475d282",
+      "source_git_blob": "9b1a22ca9deca1a0339accfeacea69d275443412",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl5.txt",
+      "sha256": "d41f7b58e11f4a15fc82dbe343032c462c8350385831ee3720eac019d1fb61cc",
+      "source_sha256": "d41f7b58e11f4a15fc82dbe343032c462c8350385831ee3720eac019d1fb61cc",
+      "source_git_blob": "cad030bc802bab11d42474b7c20e8d84467a9a4d",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl6.txt",
+      "sha256": "474b433ee3f862fb01af6c28d55afb3a3edc0781fb9947b016d8a4be4d96c45a",
+      "source_sha256": "474b433ee3f862fb01af6c28d55afb3a3edc0781fb9947b016d8a4be4d96c45a",
+      "source_git_blob": "a99e2df3009961d59e83a399e922c48e0b6189fd",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl7.txt",
+      "sha256": "8d4b8994daa0d4c734aec3e97c0446806ab2faf5574e2daad5300218aa4d4f7d",
+      "source_sha256": "8d4b8994daa0d4c734aec3e97c0446806ab2faf5574e2daad5300218aa4d4f7d",
+      "source_git_blob": "6a68bb1e05dc9d88170e0a7b4815fa5e002b86eb",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_lemmings_lvl8.txt",
+      "sha256": "6c7be5a0727e022eb599c9ab089e33594f3b00af72043110303abd5f733c38e6",
+      "source_sha256": "6c7be5a0727e022eb599c9ab089e33594f3b00af72043110303abd5f733c38e6",
+      "source_git_blob": "9d2f982545d2a55cce2ade80ed3b62ffb0cb4cd7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda.txt",
+      "sha256": "25970eed981861c1482d48dad94fc2194bd364edfb8838e8768ab75895875d78",
+      "source_sha256": "25970eed981861c1482d48dad94fc2194bd364edfb8838e8768ab75895875d78",
+      "source_git_blob": "6b9aeb0d844774e33b4b517f24262d4de46e7c71",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl0.txt",
+      "sha256": "b13fd16e34cf322c8f7a3f4c3be758aaf5c26064d6696e27e8397fdca2493913",
+      "source_sha256": "b13fd16e34cf322c8f7a3f4c3be758aaf5c26064d6696e27e8397fdca2493913",
+      "source_git_blob": "0e42f173a00aea9515b94d10842c83e979a73f58",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl1.txt",
+      "sha256": "d201ac6c0e0d03a17445743a008c6a7969e0ad48975653769258b69e6d203536",
+      "source_sha256": "d201ac6c0e0d03a17445743a008c6a7969e0ad48975653769258b69e6d203536",
+      "source_git_blob": "a05415362a2e755b03ba94fa6a3d48f739e5241b",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl2.txt",
+      "sha256": "bb0d77f219b50e8279e52c630903bb819aadf71adb32717a7279162339d2294e",
+      "source_sha256": "bb0d77f219b50e8279e52c630903bb819aadf71adb32717a7279162339d2294e",
+      "source_git_blob": "364577a7be500db4e034b2857dd99f57149e8281",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl3.txt",
+      "sha256": "0bcad64129253fcc481eba4e28d33c7b6f082d515978fd94716a910070d761f3",
+      "source_sha256": "0bcad64129253fcc481eba4e28d33c7b6f082d515978fd94716a910070d761f3",
+      "source_git_blob": "4fa20cddfea6582c2eb947bc38f91ea7068b2d28",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl4.txt",
+      "sha256": "faf5ec2ebccff235116c13139a03502bd099358b0e78c085865a84e716e605c5",
+      "source_sha256": "faf5ec2ebccff235116c13139a03502bd099358b0e78c085865a84e716e605c5",
+      "source_git_blob": "c365d37f344bd16676eaad3cf68d2c76c29772f4",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl5.txt",
+      "sha256": "d4a7934135ec376421171ad375f0c206b1604da73e07aa02a47462a902745f79",
+      "source_sha256": "d4a7934135ec376421171ad375f0c206b1604da73e07aa02a47462a902745f79",
+      "source_git_blob": "7abc16cbc678622a5ec33595c7a38cb51ba433a7",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl6.txt",
+      "sha256": "de583340cf8e39e4cb68ea28c8fd75425cc8c9a940a251f099cf188865f87b88",
+      "source_sha256": "de583340cf8e39e4cb68ea28c8fd75425cc8c9a940a251f099cf188865f87b88",
+      "source_git_blob": "c2343e654bb29c3532cfb8e9abea97f0770907d1",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl7.txt",
+      "sha256": "d693ee9631ff995c6b7653f823c42fd5b1356f5f629fa9da0675e012d82530c0",
+      "source_sha256": "d693ee9631ff995c6b7653f823c42fd5b1356f5f629fa9da0675e012d82530c0",
+      "source_git_blob": "7a6963ec45b9f3cdd6a391fb802535232c6cc26b",
+      "modifications": []
+    },
+    {
+      "path": "all_games_recovered/vgfmri4_zelda_lvl8.txt",
+      "sha256": "f78761a0354e57df382fa5d11716d49558cdbd86b396b766f7184e90d1790500",
+      "source_sha256": "f78761a0354e57df382fa5d11716d49558cdbd86b396b766f7184e90d1790500",
+      "source_git_blob": "249b64e44a6daa8c6bb0e10eae6c0f99772ed66a",
+      "modifications": []
+    },
+    {
+      "path": "utils.py",
+      "sha256": "4ed0b02ff51fc4867bcd3b409e091d1fe19b2a92792510c287d4fc10b0a5110f",
+      "source_sha256": "707f9934e6df059218d966fbc29f64a636d90c1d629ffd03e45cc077f73c63e2",
+      "source_git_blob": "c195b2d2e9ff7c26d8984a2c6c9db62d222e5044",
+      "modifications": [
+        "Package-qualified imports isolate this engine from other agent environments."
+      ]
+    },
+    {
+      "path": "vgdl/__init__.py",
+      "sha256": "237ad7eddcb9451ccc35cb87ba7e866c8199fe99e1e030f1b4cf860f78e88f4b",
+      "source_sha256": "af625a47ae311386e19b74d27a01b89bc52014fd6bf6bf99d373ae7975052752",
+      "source_git_blob": "b16af6537e8b3b7ad2910a2e0e534ea87fbadb3b",
+      "modifications": [
+        "Use package-relative imports without global module aliases."
+      ]
+    },
+    {
+      "path": "vgdl/ai.py",
+      "sha256": "58ee6ca97bbc4a11e1e9e603b83f71902d04c91384a5dab5e4b24d506a1a29f8",
+      "source_sha256": "58ee6ca97bbc4a11e1e9e603b83f71902d04c91384a5dab5e4b24d506a1a29f8",
+      "source_git_blob": "59d2b723d3347dd0ac02baeb07bf0923965e3e45",
+      "modifications": []
+    },
+    {
+      "path": "vgdl/colors.py",
+      "sha256": "2abb1958f616dcdd783c3ad6d37587f524305c390f48d27d0d13a093fedcfde7",
+      "source_sha256": "2abb1958f616dcdd783c3ad6d37587f524305c390f48d27d0d13a093fedcfde7",
+      "source_git_blob": "d283d3135504016f93c47446c7a450f5725d730c",
+      "modifications": []
+    },
+    {
+      "path": "vgdl/core.py",
+      "sha256": "1f5fe4349b2ec8477f46fa4a3352b08031d9ee8a2e7acc9188cffc5416961ea1",
+      "source_sha256": "621afe9cfd46e6371e3f4a8abd00743aaea531ac3426010f192353ce48fea6cd",
+      "source_git_blob": "612edacd59fd4cc496812559aba51bfe8bd16ac9",
+      "modifications": [
+        "Use package-relative imports without global module aliases."
+      ]
+    },
+    {
+      "path": "vgdl/ontology.py",
+      "sha256": "2ab66caa81d6c9f7d452035b12eb1b61fd388fb72d2b79c42089b717d9169182",
+      "source_sha256": "255d61d1ed8c75f62f8571be43f84cb48de65d0bd3740cc7a0d884149dcec210",
+      "source_git_blob": "126b01157a1754e1ae4c5a844353e03bbd4a0fa3",
+      "modifications": [
+        "Use package-relative imports without global module aliases."
+      ]
+    },
+    {
+      "path": "vgdl/rlenvironmentnonstatic.py",
+      "sha256": "9aee0befcb3b3d6a108fb372ba934222e504c86d9a7893759ce021b61a240256",
+      "source_sha256": "8ba2274f160355341cbf8e119b7d67f2340c5ea1d17c9fb96177e832b579b3a4",
+      "source_git_blob": "f95aaaca46b68d065c6d40fa22e6150e4a8fac41",
+      "modifications": [
+        "Package-qualified imports isolate this engine from other agent environments."
+      ]
+    },
+    {
+      "path": "vgdl/stateobsnonstatic.py",
+      "sha256": "cc9a8d3c78eab1e3dbc38ca1ad73cf9413a2479516e0a80ba1e293ddfdac6cd4",
+      "source_sha256": "cc9a8d3c78eab1e3dbc38ca1ad73cf9413a2479516e0a80ba1e293ddfdac6cd4",
+      "source_git_blob": "d8a38368aa6384f3026e971d42810060ab4c0789",
+      "modifications": []
+    },
+    {
+      "path": "vgdl/tools.py",
+      "sha256": "2b8a8996d71c24c2e3f96c0a03859bb08262a31fcf2b7bbce0e8af8639db4007",
+      "source_sha256": "2b8a8996d71c24c2e3f96c0a03859bb08262a31fcf2b7bbce0e8af8639db4007",
+      "source_git_blob": "29c3978e2cb21c20190a3967ac9e97812f5fc266",
+      "modifications": []
+    },
+    {
+      "path": "vgdl/util.py",
+      "sha256": "486044a514cad4d685a4376e27a83380e1869b95a4fcf22a8967530dbab11bd7",
+      "source_sha256": "486044a514cad4d685a4376e27a83380e1869b95a4fcf22a8967530dbab11bd7",
+      "source_git_blob": "a934ab25d373240f0a18083f34f81a4db754e50f",
+      "modifications": []
+    }
+  ]
+}

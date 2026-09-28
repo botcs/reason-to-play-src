@@ -19,10 +19,8 @@ def test_completed_batch_distinguishes_failed_and_skipped_sessions(
     if backend != "generic":
         pytest.importorskip("transformers")
         pytest.importorskip("safetensors")
-    suffix = "" if backend == "generic" else f"_{backend}"
-    module = importlib.import_module(
-        f"src.llm_eval.human_replay.extract_features{suffix}"
-    )
+    suffix = "" if backend == "generic" else f"_deepseek_{backend}"
+    module = importlib.import_module(f"agents.lrm.features.extract{suffix}")
     runtime = "_load_runtime" if backend == "generic" else f"_load_{backend}_runtime"
     monkeypatch.setattr(module, runtime, lambda *args: (None, None, None))
     monkeypatch.setattr(module, "IS_MAIN", True)
@@ -60,7 +58,7 @@ def test_completed_batch_distinguishes_failed_and_skipped_sessions(
         "prompts": str(inputs / "*.replay.json.gz"),
         "model": "test/model",
         "output_dir": str(tmp_path / "outputs"),
-        "exp_db": {"enabled": False, "continue_on_session_error": True},
+        "continue_on_session_error": True,
     }
     if backend != "generic":
         config.update(ckpt_path="test/shards", ds_config="test/config.json")
@@ -82,10 +80,10 @@ def test_completed_batch_distinguishes_failed_and_skipped_sessions(
 
 
 def test_default_stops_on_first_error(tmp_path, monkeypatch):
-    from src.llm_eval.human_replay import extract_features as module
-    from src.llm_eval.shared.config import ExtractionConfig
+    from agents.lrm.features import extract as module
+    from agents.lrm.config import ExtractionConfig
 
-    assert ExtractionConfig().exp_db.continue_on_session_error is False
+    assert ExtractionConfig().continue_on_session_error is False
     for name in ("a_fail", "b_other"):
         (tmp_path / f"{name}.replay.json.gz").touch()
     visited = []

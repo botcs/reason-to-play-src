@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "upstream": "https://github.com/botcs/RC_RL",
+  "training_revision": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+  "extraction_revision": "8f5f8a3c6facba2962319ea4892396057061370c",
+  "files": [
+    {
+      "path": "train.py",
+      "source_path": "runDDQN.py",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "5009f50f22ee30e416798dc984078d3f9d392473f9713edc934d1ce034be53f7",
+      "source_git_blob": "9eff95ab080f226f233e1634ff14a76562156e63",
+      "sha256": "84e75736edb26a4dcfae4c3c6ea582ee152b27bf4528a8e7afcd66e0d6f23f17",
+      "adaptations": [
+        "Package imports, explicit resource/output paths and optional logging; training equations and default hyperparameters retained."
+      ]
+    },
+    {
+      "path": "player.py",
+      "source_path": "player.py",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "73015f9f133c2d21056c012cb40c4736be3b57df6a508ecfd0b2aaac0f0651bf",
+      "source_git_blob": "a8c778755966834d5a679460b5434c5bb76b1e15",
+      "sha256": "65075f5ea10149ddc1bdc6136900b01dfaae49b2e98463506eff387994abd251",
+      "adaptations": [
+        "Package imports, explicit resource/output paths and optional logging; training equations and default hyperparameters retained."
+      ]
+    },
+    {
+      "path": "model.py",
+      "source_path": "rl_models.py",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "03409fa72b50730e36fc6011852f92194af1549a5f70faae6bcfe6ae5bbee6e9",
+      "source_git_blob": "db9f964c1c93201884abb3919d6ae35541352948",
+      "sha256": "b815bec7dece8cb0e96b160449828a3d083985e5a4bf23c4d3902fb68079ecc0",
+      "adaptations": [
+        "Removed unused imports and formatted source; equations, parameter names and initialization preserved."
+      ],
+      "identical_original_source_at": "8f5f8a3c6facba2962319ea4892396057061370c"
+    }
+  ],
+  "experiment_configs": [
+    {
+      "path": "experiments/neurips2026/ddqn/ddqn-avoidgeorge-hparam-search.yaml",
+      "source_path": "ddqn-avoidgeorge-hparam-search.yaml",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "a1bf9f77bd169cb9670e70f9af6bc8207d265fca3c220e504b21c8baeaffc29e",
+      "sha256": "2afeb714e11b95b18042abb10fb86abc30a6d3ee8f1c2311a7a9ae95d2a8fa4d",
+      "adaptations": [
+        "Run agents.ddqn.train as a Python module; search grids select the pinned original game directory."
+      ]
+    },
+    {
+      "path": "experiments/neurips2026/ddqn/ddqn-bait-hparam-search.yaml",
+      "source_path": "ddqn-bait-hparam-search.yaml",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "b48a9ade3d67ae2b1ac48d049e4436bd372d33893973eee06c5f455a196924c0",
+      "sha256": "d019de752cf84ce6b8f22e5a21f9f5d9c02b0dc1a4527be3b9656695b5e1bbfe",
+      "adaptations": [
+        "Run agents.ddqn.train as a Python module; search grids select the pinned original game directory."
+      ]
+    },
+    {
+      "path": "experiments/neurips2026/ddqn/ddqn-multi-game-best-hparams.yaml",
+      "source_path": "ddqn-multi-game-best-hparams.yaml",
+      "source_commit": "6186f36313be956fe2ea35f85a0a70ea31c5b387",
+      "source_sha256": "9c86f1d8722634833d7913c37a353d549af2601b7a64d32cd2a6b5741fe841f5",
+      "sha256": "1d2d9fd7eb834cf146275dded5f9296f355d44ad6704674903079b1de58b115a",
+      "adaptations": [
+        "Run agents.ddqn.train as a Python module; search grids select the pinned original game directory."
+      ]
+    }
+  ]
+}

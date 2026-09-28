@@ -1,4 +1,0 @@
--r requirements-analysis.txt
-pytest>=8,<10
-ruff==0.15.14
-# Feature extraction tests also require torch from requirements-full.txt.

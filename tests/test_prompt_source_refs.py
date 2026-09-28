@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from src.llm_eval.human_replay.prompt_utils import load_prompts
+from agents.lrm.prompting.conversation import load_prompts
 
 
 SOURCE = {
@@ -89,8 +89,8 @@ def test_source_identity_in_saved_cpu_features_and_prompt_log(tmp_path):
     torch = pytest.importorskip("torch")
     transformers = pytest.importorskip("transformers")
     tokenizers = pytest.importorskip("tokenizers")
-    from src.llm_eval.human_replay import extract_features as extraction
-    from src.llm_eval.shared.config import ExtractionConfig
+    from agents.lrm.features import extract as extraction
+    from agents.lrm.config import ExtractionConfig
 
     vocab = {token: index for index, token in enumerate(["<unk>", "<pad>", "left"])}
     backend = tokenizers.Tokenizer(

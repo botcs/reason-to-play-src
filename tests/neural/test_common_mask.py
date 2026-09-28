@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from reason_to_play.analysis.neural import roi
+from analysis.neural import roi
 
 
 @pytest.fixture
@@ -64,7 +64,7 @@ def run_roi(tmp_path, fixture_data, name, *, subjects=None, pinned=True):
     command = [
         sys.executable,
         "-m",
-        "reason_to_play.analysis.neural.roi",
+        "analysis.neural.roi",
         "--results-dir",
         str(results),
         "--atlas",

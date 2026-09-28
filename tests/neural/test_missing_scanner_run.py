@@ -7,8 +7,8 @@ import json
 import numpy as np
 import pytest
 
-from reason_to_play.data.behavior import load_runs
-from reason_to_play.fmri import align_baselines, align_llm
+from human.behavior import load_runs
+from analysis.neural import prepare_inputs as align_baselines, align_llm
 
 
 def write_json(path, data):

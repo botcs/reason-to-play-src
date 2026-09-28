@@ -41,7 +41,7 @@ pytest.importorskip(
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.human_replay.extract_features import (  # noqa: E402
+from agents.lrm.features.extract import (  # noqa: E402
     Window,
     _assign_targets_to_windows,
     _build_conversation,
@@ -232,7 +232,7 @@ class TestMessageBoundaries:
         vocabulary), but the char->token mapping logic is exercised
         end-to-end.
         """
-        from src.llm_eval.shared.transformers_wrapper import (
+        from agents.lrm.backends.adapters.transformers import (
             DEEPSEEK_V3_CHAT_TEMPLATE,
         )
 
@@ -539,7 +539,7 @@ class TestSmokeReplayBoundaries:
 
     @pytest.fixture(scope="class")
     def session(self):
-        from src.llm_eval.shared.replay_codec import load_replay
+        from data.replay_codec import load_replay
 
         return load_replay(_SMOKE_REPLAY)
 

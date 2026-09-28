@@ -682,8 +682,7 @@ def validate_game(game_dir: Path, verbose: bool = False) -> bool:
         True if valid, False otherwise
     """
     # Import here to avoid dependency if --validate not used
-    sys.path.append('/home/ubuntu/infer-vgdl')
-    import src.vgdl as vgdl
+    import environments.vgdl as vgdl
 
     game_name = game_dir.name.replace('_vgfmri3_v0', '').replace('_vgfmri4_v0', '').replace('_v0', '')
 
@@ -733,29 +732,20 @@ def main():
         description="Convert VGDL games from tomov23 format to infer-vgdl format",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Dry run to see what would be converted
-  ./convert_tomov23_games.py --dry-run
+Example (inspect before writing):
+  python docs/sources/convert_tomov23_games.py \\
+    --source /path/to/RC_RL/all_games \\
+    --target /path/to/translated-games --dry-run
 
-  # Convert all games
-  ./convert_tomov23_games.py
-
-  # Convert only vgfmri4 versions
-  ./convert_tomov23_games.py --version vgfmri4
-
-  # Convert specific games
-  ./convert_tomov23_games.py --games avoidgeorge plaqueAttack
-
-  # Convert with validation
-  ./convert_tomov23_games.py --validate
+Remove --dry-run to write the translated definitions; add --validate to parse them.
         """
     )
 
     parser.add_argument('--source', type=str,
-                       default='/home/ubuntu/infer-vgdl/tomov23-neuron-reference/all_games',
+                       required=True,
                        help='Source directory with tomov23 games')
     parser.add_argument('--target', type=str,
-                       default='/home/ubuntu/infer-vgdl/games',
+                       required=True,
                        help='Target directory for converted games')
     parser.add_argument('--dry-run', action='store_true',
                        help='Show what would be converted without actually converting')

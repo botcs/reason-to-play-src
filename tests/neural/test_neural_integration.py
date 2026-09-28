@@ -30,18 +30,16 @@ def load_script(name, relative):
     return module
 
 
-preprocess = load_script("neural_preprocess", "src/reason_to_play/fmri/preprocess.py")
-base = load_script("neural_align_base", "src/reason_to_play/fmri/align_baselines.py")
-align = load_script("neural_align", "src/reason_to_play/fmri/align_llm.py")
-encoder = load_script(
-    "neural_encoder", "src/reason_to_play/analysis/neural/encoding.py"
-)
-extractor = load_script("neural_ddqn", "src/reason_to_play/features/ddqn.py")
+preprocess = load_script("neural_preprocess", "human/neural/process_bold.py")
+base = load_script("neural_align_base", "analysis/neural/prepare_inputs.py")
+align = load_script("neural_align", "analysis/neural/align_llm.py")
+encoder = load_script("neural_encoder", "analysis/neural/encoding.py")
+extractor = load_script("neural_ddqn", "agents/ddqn/extract_features.py")
 
 
 def write_human_replay(path, plays, scanner):
     """Serialize explicit, small measured fixtures in the released JSON schema."""
-    from reason_to_play.data.behavior import human_outcome
+    from human.behavior import human_outcome
 
     states, records = [], []
     for ordinal, play in enumerate(plays):
@@ -254,7 +252,7 @@ def synthetic_alignment(tmp_path_factory):
 
 
 def test_json_records_drive_ddqn_and_theory_alignment(synthetic_alignment):
-    from reason_to_play.data.behavior import iter_plays
+    from human.behavior import iter_plays
 
     root, subject = synthetic_alignment
     recordings = root / "behavioral"
@@ -404,7 +402,7 @@ def test_failed_layer_cli_returns_nonzero(synthetic_alignment):
     result = subprocess.run(
         [
             sys.executable,
-            str(ROOT / "src/reason_to_play/analysis/neural/encoding.py"),
+            str(ROOT / "analysis/neural/encoding.py"),
             "--subject",
             subject,
             "--data-dir",
@@ -448,7 +446,7 @@ def test_checkpoint_map_works_without_private_service(tmp_path):
 
 def test_baseline_roi_aggregation_requires_explicit_layer_identity(synthetic_alignment):
     root, subject = synthetic_alignment
-    roi = load_script("neural_roi", "src/reason_to_play/analysis/neural/roi.py")
+    roi = load_script("neural_roi", "analysis/neural/roi.py")
     encoder.run_encoding_model(
         subject,
         root / "aligned",
@@ -460,7 +458,7 @@ def test_baseline_roi_aggregation_requires_explicit_layer_identity(synthetic_ali
     )
     assert roi.find_npz_files(root / "baseline-results") == []
     mapping = roi.load_baseline_map(
-        ROOT / "experiments/neurips2026/baseline-layer-map.example.json"
+        ROOT / "experiments/neurips2026/analysis/baseline-layer-map.example.json"
     )
     items = roi.find_npz_files(root / "baseline-results", baseline_map=mapping)
     assert len(items) == 1
@@ -482,9 +480,7 @@ def test_baseline_roi_aggregation_requires_explicit_layer_identity(synthetic_ali
 
 
 def test_roi_requires_explicit_fit_condition_and_reads_shuffle_metadata(tmp_path):
-    roi = load_script(
-        "neural_roi_conditions", "src/reason_to_play/analysis/neural/roi.py"
-    )
+    roi = load_script("neural_roi_conditions", "analysis/neural/roi.py")
     subject = tmp_path / "sub-13"
     subject.mkdir()
     stem = "encoding_results_llm_qwen35_9b__all__main_layer_1"

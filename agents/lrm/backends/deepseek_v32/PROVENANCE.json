@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "upstream_reference": {
+    "repository": "https://huggingface.co/deepseek-ai/DeepSeek-V3.2",
+    "revision": "a7e62ac04ecb2c0a54d736dc46601c5606cf10a6",
+    "revision_scope": "Recorded upstream comparison snapshot; not a producing-checkpoint or paper-run attribution"
+  },
+  "license": "MIT; see LICENSE. Model weights have separate terms.",
+  "reference_record": {
+    "repository": "https://github.com/botcs/reason-to-play-src",
+    "commit": "4c3cac23473c8304ae162cdc4edb049539e38828",
+    "path": "docs/source-provenance.md"
+  },
+  "comparison_scope": "Current file hashes compared with the retained source files from the recorded upstream snapshot. Files without a retained upstream comparison are identified separately. Full-model conversion and distributed inference equivalence are not established.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+      "upstream_path": "LICENSE",
+      "upstream_sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/blob/a7e62ac04ecb2c0a54d736dc46601c5606cf10a6/LICENSE",
+      "comparison": "byte-identical"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "069f6f6a85cd42426789eb482f92f39db41af7135de54771be6a814dcd5bb575",
+      "origin": "project",
+      "role": "Python package marker",
+      "upstream_path": null
+    },
+    {
+      "path": "config_671B_v3.2.json",
+      "sha256": "f9fe074cdef8fdcc0feabbe635ff7c072a65d273a42a6bc207fe425439dff835",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "convert.py",
+      "sha256": "9ea91ee4390645ab5d820c004bc1c7fe8d1e5c1ef35450faea7b7e0846b6697a",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "generate.py",
+      "sha256": "d176c8e44f635199ac853fe8d40425fde3ecc5c4b2f43d251d2fec5ab0e9ecd0",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "kernel.py",
+      "sha256": "430a7cca14358bb273bc3a05ca8445e5bf1fc95b1b6faff304b92b4a1cfc83b5",
+      "upstream_path": "inference/kernel.py",
+      "upstream_sha256": "92abc46cb6457b8cbe105be66f26f9a119aeb86c872e4521d853d5177d181868",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/blob/a7e62ac04ecb2c0a54d736dc46601c5606cf10a6/inference/kernel.py",
+      "comparison": "modified",
+      "changes": [
+        "Updated TileLang fast-math configuration key.",
+        "Squeezed final scale dimensions passed into the index kernel."
+      ]
+    },
+    {
+      "path": "load_utils.py",
+      "sha256": "b4bbc042218ba470a3958b4b3be57d6a4b7d7ee096cfba518d0c7875b940ad43",
+      "origin": "project",
+      "role": "Bounded sharded-checkpoint loader",
+      "upstream_path": null
+    },
+    {
+      "path": "model.py",
+      "sha256": "612059696746a6305e587b07b1cc85663ce18ee7e5a0be1ecc9f75d4e6b63051",
+      "upstream_path": "inference/model.py",
+      "upstream_sha256": "bfe5b89186b579910b6d59fa7e0cf1f7a75ceb4ec5d0f5b54f0ccbe77cdb6a63",
+      "upstream_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3.2/blob/a7e62ac04ecb2c0a54d736dc46601c5606cf10a6/inference/model.py",
+      "comparison": "modified",
+      "changes": [
+        "Package-relative kernel import.",
+        "Changed maximum batch/sequence defaults.",
+        "FP32 attention-score computation, conversion of softmax output to query dtype, and NaN handling in the expert output."
+      ]
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "06dfb5d41de9fdcfa5f723203fe84eacb93bda1792eb5d1d1a063e25b96aa6ad",
+      "origin": "upstream-relationship-not-established-by-this-record",
+      "comparison": "not-compared",
+      "upstream_path": null
+    },
+    {
+      "path": "vgdl_DS32.json",
+      "sha256": "aa277837518bf125869be396afb93fc947450f11ab1812fae524fe6953c3c90f",
+      "origin": "project",
+      "role": "VGDL extraction configuration",
+      "upstream_path": null
+    }
+  ]
+}

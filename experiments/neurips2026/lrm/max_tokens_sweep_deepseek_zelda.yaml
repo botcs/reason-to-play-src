@@ -1,0 +1,47 @@
+program: agents.lrm.play
+method: grid
+name: max-tokens-sweep-deepseek-zelda
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  harness.context_usage_fraction:
+    values:
+    - 0.1
+    - 0.5
+    - 0.9
+  llm.max_tokens:
+    values:
+    - 16384
+    - 32768
+  llm.model:
+    value: deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: zelda_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.play
+- ${args_no_hyphens}

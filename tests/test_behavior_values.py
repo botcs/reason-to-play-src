@@ -7,13 +7,9 @@ import json
 import pytest
 
 
-from reason_to_play.data.behavior import (
-    BinaryValue,
-    decode_value,
-    encode_value,
-    iter_regressors,
-    load_runs,
-)
+from data.values import BinaryValue, decode_value, encode_value
+from agents.empa.theory_features import iter_regressors
+from human.behavior import load_runs
 from test_replay_behavior import recording, write_record
 
 
@@ -35,7 +31,7 @@ def test_empa_dataset_root_and_explicit_file_read_identical_typed_records(tmp_pa
             "regressors": {"theory_str": ["rule"], "ts": [2.5]},
         }
     ]
-    path = tmp_path / "features/theory/empa/source-regressors.json.gz"
+    path = tmp_path / "analysis/neural/inputs/theory-regressors.json.gz"
     path.parent.mkdir(parents=True)
     path.write_bytes(
         gzip.compress(

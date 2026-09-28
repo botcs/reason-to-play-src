@@ -1,0 +1,43 @@
+program: agents.lrm.play
+method: grid
+name: fourth-slice-minimal-suggestion
+parameters:
+  harness.rationale_mode:
+    value: prompted-rationale
+  harness.suggestion_level:
+    value: minimal
+  llm.model:
+    values:
+    - qwen/qwen3.5-9b
+    - qwen/qwen3.5-397b-a17b
+    - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  seed:
+    value: 0
+  game.game:
+    values:
+    - bait_vgfmri4
+    - chase_vgfmri3
+    - zelda_vgfmri4
+    - lemmings_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.play
+- ${args_no_hyphens}

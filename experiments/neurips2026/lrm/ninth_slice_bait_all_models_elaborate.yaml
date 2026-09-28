@@ -1,0 +1,46 @@
+program: agents.lrm.play
+method: grid
+name: ninth-slice-bait-all-models-copied-reasoning-elaborate
+parameters:
+  harness.rationale_mode:
+    value: copied-reasoning
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    values:
+    - qwen/qwen3.5-9b
+    - qwen/qwen3.5-27b
+    - qwen/qwen3.5-35b-a3b
+    - qwen/qwen3.5-122b-a10b
+    - qwen/qwen3.5-397b-a17b
+    - deepseek/deepseek-v3.2
+  llm.backend:
+    value: openrouter
+  llm.max_tokens:
+    value: 16384
+  llm.api_budget:
+    value: 45.0
+  seed:
+    value: 0
+  game.game:
+    value: bait_vgfmri4
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 4500
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.advancement.max_consecutive_losses:
+    value: 4
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.play
+- ${args_no_hyphens}

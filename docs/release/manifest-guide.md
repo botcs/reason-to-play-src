@@ -12,7 +12,7 @@ policy explicitly. The scripts use listing, HEAD and GET operations and do not
 modify source objects. Keep generated files in local working storage, not Git.
 
 ```bash
-pip install -r requirements-release.txt
+pip install -e '.[release]'
 python scripts/release/index_derivatives.py scan \
     --bucket YOUR_BUCKET --region YOUR_REGION --output out/inventory
 python scripts/release/prepare_manifest.py build \

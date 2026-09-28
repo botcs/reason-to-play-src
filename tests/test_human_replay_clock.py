@@ -1,6 +1,6 @@
 """Human engine ticks must survive conversion into the replay display format."""
 
-from src.llm_eval.human_replay.zstate_adapter import convert_zstate_to_viewer
+from agents.lrm.prompting.observations import convert_zstate_to_viewer
 
 
 def test_human_frame_clock_uses_original_engine_ticks():

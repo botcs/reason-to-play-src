@@ -12,13 +12,13 @@ outstanding artifact associations.
 | --- | --- | --- |
 | Raw fMRI | OpenNeuro ds004323 1.0.0 | BIDS snapshot `17d00770c7b7885ed51dd42d9dee44909bd26c6c` |
 | fMRIPrep | Original RC_RL launcher plus retained 24.1.0 TOMLs | Latest recorded config per subject; MNI152NLin2009cAsym 2 mm and anatomical space, BBR, DOF 9, dummy scans 0, master seed 23; this selection is not a producing-run attribution |
-| Postprocessing | `reason_to_play.fmri.preprocess` | 8 mm smoothing, 1/128 Hz high-pass filter, linear detrending, available motion parameters/derivatives plus CSF and white matter, global AR(1) correction dropping volume 0, voxel z-score |
-| Base alignment | `reason_to_play.fmri.align_baselines` | Intersect run masks; behavioral timestamps relative to scanner start, rounded to nearest TR; subtract one TR for AR(1), then concatenate by game/level/play |
-| DDQN | `reason_to_play.features.ddqn` | 8-frame stack, original `GridDQN` architecture; SHA-256 checkpoint and exact source revision recorded for newly generated features |
+| Postprocessing | `human.neural.process_bold` | 8 mm smoothing, 1/128 Hz high-pass filter, linear detrending, available motion parameters/derivatives plus CSF and white matter, global AR(1) correction dropping volume 0, voxel z-score |
+| Base alignment | `analysis.neural.prepare_inputs` | Intersect run masks; behavioral timestamps relative to scanner start, rounded to nearest TR; subtract one TR for AR(1), then concatenate by game/level/play |
+| DDQN | `agents.ddqn.extract_features` | 8-frame stack, original `GridDQN` architecture; SHA-256 checkpoint and exact source revision recorded for newly generated features |
 | EMPA/HRR | Base aligner | Reads theory-regressor JSON and embeds symbolic theory sequences with the historical HRR settings; no new EMPA fitting is performed here |
-| EfficientZero | `reason_to_play.fmri.align_efficientzero` | Original play/frame identities; four representation and seven initial value/policy hooks, averaged in the existing BOLD sample bins; optional timestep-averaged dynamics/reward hooks |
-| LLM alignment | `reason_to_play.fmri.align_llm` | Original play/frame identities and wall-clock timestamps, average activations per TR, forward fill only inside a play; archived frame-indexed inputs retain their timing convention |
-| Encoder | `reason_to_play.analysis.neural.encoding` | Past lags 2–5 TR, padding with the first row within each play, training-fold scaling/PCA before lags; outer and inner level-partition CV |
+| EfficientZero | `analysis.neural.align_efficientzero` | Original play/frame identities; four representation and seven initial value/policy hooks, averaged in the existing BOLD sample bins; optional timestep-averaged dynamics/reward hooks |
+| LLM alignment | `analysis.neural.align_llm` | Original play/frame identities and wall-clock timestamps, average activations per TR, forward fill only inside a play; archived frame-indexed inputs retain their timing convention |
+| Encoder | `analysis.neural.encoding` | Past lags 2–5 TR, padding with the first row within each play, training-fold scaling/PCA before lags; outer and inner level-partition CV |
 | Bands | Explicit CLI setting | Default **main only**; `--include-nuisance-bands` adds button, time, and game/level identity bands |
 | Ridge | Submitted settings | Alpha grid `logspace(-5, 10, 20)`, random search, local alpha, alpha jitter, 100 iterations by default |
 | Cohort comparison | Explicit `--max-level 8` | Restrict levels to 0–8 for comparisons; vgfmri3 participants also have levels 9–11 |

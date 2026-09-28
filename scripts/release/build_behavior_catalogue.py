@@ -22,10 +22,11 @@ import tempfile
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from reason_to_play.data.behavior import GAMES, behavior_root, game_identity  # noqa: E402
-from reason_to_play.data.replay_behavior import (  # noqa: E402
+from data.game_ids import GAMES, game_identity  # noqa: E402
+from human.behavior import behavior_root  # noqa: E402
+from human.behavior import (  # noqa: E402
     CONDITIONS,
     read_record,
     record_plays,

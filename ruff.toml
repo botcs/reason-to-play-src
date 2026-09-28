@@ -1,15 +1,21 @@
-# Ruff configuration for infer-vgdl
-# VGDL engine (src/vgdl/, src/utils.py) is forked upstream code -- excluded.
-extend-exclude = ["src/vgdl/", "src/utils.py", "baselines/vendor/", "baselines/extraction/", "agents/efficientzero/environment/", "agents/efficientzero/inference/", "agents/efficientzero/training/", "agents/efficientzero/extract_features.py", "agents/efficientzero/extract_traces.py"]
+# Third-party engines and inference kernels retain their source formatting.
+extend-exclude = [
+  "environments/vgdl/",
+  "agents/ddqn/environment/",
+  "agents/efficientzero/environment/",
+  "agents/efficientzero/inference/",
+  "agents/efficientzero/training/",
+  "agents/efficientzero/extract_features.py",
+  "agents/efficientzero/extract_traces.py",
+  "agents/lrm/backends/deepseek_v32/",
+  "agents/lrm/backends/deepseek_v4/",
+]
 
 [lint.per-file-ignores]
-# These files use sys.path.insert() before imports (intentional E402)
-"src/llm_eval/generative_gameplay/run.py" = ["E402"]
-"src/llm_eval/human_replay/extract_features.py" = ["E402"]
-"src/llm_eval/human_replay/generate_observations.py" = ["E402"]
-"src/llm_eval/human_replay/run_replay.py" = ["E402"]
-"src/llm_eval/shared/deepseek_torchrun_wrapper.py" = ["E402"]
+"agents/lrm/play.py" = ["E402"]
+"agents/lrm/prepare_prompts.py" = ["E402"]
+"agents/lrm/features/extract.py" = ["E402"]
+"agents/lrm/backends/adapters/deepseek_v32.py" = ["E402"]
 "tests/test_interaction_ground_truth.py" = ["E402"]
-
-# Historical figure scripts configure a headless backend before pyplot.
-"src/reason_to_play/analysis/behavioral/plots.py" = ["E402"]
+# Configure a headless plotting backend before importing pyplot.
+"analysis/behavioral/plots.py" = ["E402"]

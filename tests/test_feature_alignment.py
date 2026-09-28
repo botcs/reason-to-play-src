@@ -11,7 +11,7 @@ torch = pytest.importorskip("torch", reason="Feature alignment needs optional Py
 
 
 def load_alignment_module():
-    path = Path(__file__).resolve().parents[1] / "src/reason_to_play/fmri/align_llm.py"
+    path = Path(__file__).resolve().parents[1] / "analysis/neural/align_llm.py"
     spec = importlib.util.spec_from_file_location("public_feature_alignment", path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module

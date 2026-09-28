@@ -9,9 +9,10 @@ import sys
 
 import pytest
 
-from reason_to_play.data.behavior import encode_value, iter_plays, load_runs
-from reason_to_play.data.replay_codec import save_replay
-from src.llm_eval.human_replay.data_loader import HumanPlayLoader
+from data.values import encode_value
+from human.behavior import iter_plays, load_runs
+from data.replay_codec import save_replay
+from human.behavior import HumanPlayLoader
 
 
 def recording(game="bait", ordinal=4, condition="elaborate"):
@@ -162,14 +163,14 @@ def test_installed_package_reading_does_not_import_bson_or_gameplay(tmp_path):
 import importlib.abc, sys
 class DenyOptional(importlib.abc.MetaPathFinder):
     def find_spec(self, name, *args):
-        if name.split('.')[0] in {'bson', 'pymongo', 'src', 'pygame', 'gym'}:
+        if name.split('.')[0] in {'bson', 'pymongo', 'agents', 'environments', 'pygame', 'gym'}:
             raise AssertionError('Unexpected runtime dependency: ' + name)
 sys.meta_path.insert(0, DenyOptional())
-from reason_to_play.data.behavior import iter_plays, load_runs
+from human.behavior import iter_plays, load_runs
 assert len(list(iter_plays(sys.argv[1]))) == 1
 assert load_runs(sys.argv[1])[13, 1]['scan_start_ts'] == 999.0
 """
-    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / "src"))
+    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))
     subprocess.run(
         [sys.executable, "-c", code, str(path)], cwd=tmp_path, env=env, check=True
     )
@@ -194,3 +195,35 @@ def test_replay_loader_keeps_all_idle_plays_and_rejects_non_json_inputs(tmp_path
     (non_json / "run-01.bson").write_bytes(b"not a JSON recording")
     with pytest.raises(FileNotFoundError, match="No human JSON recordings"):
         HumanPlayLoader(str(non_json.parent.parent))
+
+
+def test_play_listing_does_not_expand_frames_and_loading_caches_one_game(
+    tmp_path, monkeypatch
+):
+    from human import behavior
+
+    first = write_record(tmp_path, recording("bait", 4))
+    second = write_record(tmp_path, recording("helper", 1))
+    expected = {str(play["_id"]): play for play in iter_plays(tmp_path)}
+    reads = []
+    original_read = behavior.read_record
+
+    def tracked_read(path, *, expand=True):
+        reads.append((Path(path), expand))
+        return original_read(path, expand=expand)
+
+    monkeypatch.setattr(behavior, "read_record", tracked_read)
+    loader = HumanPlayLoader(str(tmp_path))
+    assert loader.list_runs("sub-13") == [1]
+    assert [p["play_idx"] for p in loader.list_plays("sub-13", 1)] == [1, 4]
+    assert loader.get_num_plays("sub-13", 1) == 2
+    assert len(reads) == 2 and all(not expanded for _, expanded in reads)
+    one, states = loader.load_play("sub-13", 1, 4)
+    assert one == expected[one["_id"]] and states == one["states"]
+    again, _ = loader.load_play("sub-13", 1, 4)
+    assert again is one
+    assert [path for path, expanded in reads if expanded] == [first]
+    two, states = loader.load_play("sub-13", 1, 1)
+    assert two == expected[two["_id"]] and states == two["states"]
+    assert [path for path, expanded in reads if expanded] == [first, second]
+    assert list(loader._cached_documents) == [two["_id"]]

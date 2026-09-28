@@ -1,0 +1,44 @@
+program: agents.lrm.play
+method: grid
+name: second-slice-remaining-games
+parameters:
+  harness.rationale_mode:
+    values:
+    - action-only
+    - prompted-rationale
+  harness.suggestion_level:
+    value: elaborate
+  llm.model:
+    value: qwen/qwen3.5-9b
+  llm.backend:
+    value: openrouter
+  seed:
+    value: 0
+  game.game:
+    values:
+    - avoidGeorge_vgfmri4
+    - bait_vgfmri3
+    - chase_vgfmri4
+    - helper_vgfmri3
+    - helper_vgfmri4
+    - lemmings_vgfmri3
+    - lemmings_vgfmri4
+    - zelda_vgfmri3
+  game.max_levels:
+    value: 9
+  game.advancement.strategy:
+    value: blocked_curricula
+  game.advancement.total_frame_budget:
+    value: 2700
+  game.advancement.consecutive_wins_required:
+    value: 2
+  game.idle_frames:
+    value: 3
+  logging.wandb_project:
+    value: <WANDB-PROJECT>
+command:
+- ${env}
+- python
+- -m
+- agents.lrm.play
+- ${args_no_hyphens}

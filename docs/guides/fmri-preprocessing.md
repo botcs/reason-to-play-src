@@ -11,7 +11,7 @@ TemplateFlow cache. Use an explicit output root for each new reconstruction.
 ## Acquire the pinned source
 
 ```bash
-bash tools/download_openneuro.sh /data/raw/ds004323-1.0.0 sub-13
+bash reconstruction/tomov23/download_openneuro.sh /data/raw/ds004323-1.0.0 sub-13
 ```
 
 The script pins Git snapshot `17d00770c7b7885ed51dd42d9dee44909bd26c6c` and
@@ -25,7 +25,7 @@ documents the original archive for independent data archaeology.
 ## Run fMRIPrep
 
 ```bash
-python -m reason_to_play.fmri.fmriprep --subject sub-13 \
+python -m reconstruction.tomov23.fmriprep --subject sub-13 \
   --bids-dir /data/raw/ds004323-1.0.0 \
   --output-dir /data/reconstruction/fmri/fmriprep \
   --work-dir /data/work/fmriprep/sub-13 \
@@ -45,7 +45,7 @@ no FreeSurfer reconstruction, all confound components, slice reference 0.5,
 fixed skull-stripping seed and master seed 23. An earlier sub-02 configuration
 used DOF 6; the runner selects the latest recorded configuration for each subject.
 
-The [original launcher and 38 configuration records](../../src/reason_to_play/resources/fmriprep)
+The [original launcher and 38 configuration records](../../reconstruction/tomov23/configs)
 cover all 32 participants. The original launcher used Docker while the TOMLs
 report Singularity. The original container digest and full cache are unknown;
 this reconstruction does not promise byte-identical historical derivatives.
@@ -68,10 +68,10 @@ The DDQN directory must contain `sub-XX/GAME/level-YY.npz`; the extractor writes
 that structure beneath its `model-MODEL_ID/` directory.
 
 ```bash
-python -m reason_to_play.fmri.preprocess --subject sub-13 \
+python -m human.neural.process_bold --subject sub-13 \
   --fmriprep-dir /data/reconstruction/fmri/fmriprep \
   --output-dir /data/reconstruction/fmri/preprocessed
-python -m reason_to_play.fmri.align_baselines --subject sub-13 \
+python -m analysis.neural.prepare_inputs --subject sub-13 \
   --preprocessed-dir /data/reconstruction/fmri/preprocessed \
   --model-features-dir "${DDQN_FEATURES:?Set DDQN_FEATURES to the selected per-frame model directory}" \
   --behavior-dir "${DATASET:?Set DATASET to the downloaded dataset root}/behavior/human" \
@@ -94,7 +94,7 @@ configured feature sidecars; that base file can be passed to the encoder as
 To regenerate DDQN features with an explicit local checkpoint map:
 
 ```bash
-python -m reason_to_play.features.ddqn --subject sub-13 --run 1 \
+python -m agents.ddqn.extract_features --subject sub-13 --run 1 \
   --behavior-dir "$DATASET/behavior/human" \
   --output-dir /data/reconstruction/features/ddqn \
   --checkpoint-map /data/checkpoints/ddqn.json --model-id ddqn-local-rerun

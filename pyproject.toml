@@ -8,6 +8,13 @@ version = "0.1.0"
 description = "Behavioral and neural comparisons of human and model game learning"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = [
+  "LICENSE",
+  "THIRD_PARTY.md",
+  "licenses/*.txt",
+  "agents/lrm/backends/deepseek_*/LICENSE",
+  "agents/efficientzero/inference/LICENSE",
+]
 
 [project.optional-dependencies]
 analysis = [
@@ -22,7 +29,42 @@ analysis = [
   "tqdm>=4.66,<5",
 ]
 download = ["huggingface_hub>=1,<2"]
+lrm = [
+  "numpy>=1.26,<3",
+  "gym==0.26.2",
+  "pygame>=2.6,<3",
+  "setuptools<82",
+  "hydra-core>=1.3,<1.4",
+  "openai>=2.32,<3",
+  "httpx>=0.28,<1",
+  "tqdm>=4.66,<5",
+  "wandb>=0.26,<1",
+]
+local-models = [
+  "torch>=2.2",
+  "transformers>=5.6,<6",
+  "safetensors>=0.7,<1",
+  "accelerate>=1.13,<2",
+  "huggingface_hub>=1,<2",
+  "tokenizers>=0.22,<1",
+  "sentencepiece>=0.2,<1",
+]
+release = ["boto3>=1.42,<2", "pyarrow>=20,<24", "PyYAML>=6,<7"]
+dev = ["pytest>=8,<10", "ruff==0.15.14"]
 features = ["torch>=2.2"]
+ddqn = [
+  "torch>=2.2",
+  "numpy>=1.26,<3",
+  "pygame>=2.6,<3",
+  "setuptools<82",
+  "scipy>=1.14,<2",
+  "imageio>=2.31,<3",
+  "cloudpickle>=2,<4",
+  "termcolor>=2.5,<3",
+  "ipython>=8,<9",
+  "scikit-image>=0.22,<0.26",
+  "wandb>=0.26,<1",
+]
 # Checkpoint inference and extraction; training uses its separate upstream environment.
 efficientzero = [
   "torch>=2.2",
@@ -37,23 +79,26 @@ efficientzero = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src", "."]
-include = [
-  "reason_to_play*",
-  "agents",
-  "agents.efficientzero",
-  "agents.efficientzero.inference*",
-  "agents.efficientzero.environment*",
-  "src",
-  "src.vgdl*",
-]
+where = ["."]
+include = ["agents*", "human*", "analysis*", "data*", "environments*", "reconstruction*"]
 exclude = ["agents.efficientzero.training*"]
+namespaces = false
 
 [tool.setuptools.package-data]
-"reason_to_play.resources" = ["fmriprep/**/*"]
+"agents.lrm" = ["prompts/**/*.txt", "configs/**/*.yaml", "configs/*.yaml"]
+"agents.lrm.backends" = ["requirements-*.txt"]
+"agents.lrm.backends.deepseek_v32" = ["*.json", "LICENSE", "requirements.txt"]
+"agents.lrm.backends.deepseek_v4" = ["*.json", "LICENSE", "requirements.txt"]
+"agents.ddqn" = ["*.json"]
+"agents.ddqn.environment.training" = ["PROVENANCE.json", "all_games*/*.txt", "*.yaml"]
+"agents.ddqn.environment.extraction" = ["PROVENANCE.json", "all_games*/*.txt", "*.yaml"]
+"agents.empa" = ["*.json"]
 "agents.efficientzero" = ["*.json"]
 "agents.efficientzero.inference" = ["LICENSE", "PROVENANCE.json"]
 "agents.efficientzero.environment" = ["PROVENANCE.json", "*.yaml", "all_games*/*.txt"]
+"environments" = ["definitions/**/*.txt", "definitions/**/*.json"]
+"environments.vgdl" = ["sprites/**/*.png", "sprites/**/*.txt"]
+"reconstruction.tomov23" = ["configs/**/*", "download_openneuro.sh"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "."]
+pythonpath = ["."]

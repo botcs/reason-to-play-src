@@ -2,45 +2,45 @@
   "schema_version": 1,
   "scope": "Origins of analysis implementations; source pins alone do not identify the producing run for paper outputs",
   "files": {
-    "src/reason_to_play/fmri/preprocess.py": {
+    "human/neural/process_bold.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
       "path": "encoding_model_code/preprocess.py"
     },
-    "src/reason_to_play/fmri/align_llm.py": {
+    "analysis/neural/align_llm.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
       "path": "encoding_model_code/align.py"
     },
-    "src/reason_to_play/analysis/neural/encoding.py": {
+    "analysis/neural/encoding.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
       "path": "encoding_model_code/encoding_model.py"
     },
-    "src/reason_to_play/analysis/neural/roi.py": {
+    "analysis/neural/roi.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "62c202130d057e585b6bf7978f621fcd0255919c",
       "path": "encoding_model_code/load_and_parse.py"
     },
-    "src/reason_to_play/fmri/align_baselines.py": {
+    "analysis/neural/prepare_inputs.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
       "path": "encoding_model_slurm/stages/align.py"
     },
-    "src/reason_to_play/features/ddqn.py": {
+    "agents/ddqn/extract_features.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
       "path": "stages/extract_model_features_to_npz.py"
     },
-    "src/reason_to_play/fmri/extract_bold.py": {
+    "human/neural/bold.py": {
       "repository": "https://github.com/botcs/tomov23-analysis",
       "commit": "d49655c8cb179e6d7ecd601ccb766eb34331404c",
       "path": "utils/extract_bold_to_npz.py"
     },
-    "src/reason_to_play/fmri/fmriprep.py": {
+    "reconstruction/tomov23/fmriprep.py": {
       "origin": "Preprocessing settings from the original RC_RL launcher and retained execution configurations",
-      "original_launcher": "../../src/reason_to_play/resources/fmriprep/original-launcher/source.json",
-      "config_manifest": "../../src/reason_to_play/resources/fmriprep/manifest.json"
+      "original_launcher": "../../reconstruction/tomov23/configs/original-launcher/source.json",
+      "config_manifest": "../../reconstruction/tomov23/configs/manifest.json"
     }
   },
   "analysis_methods": "../analysis-methods.md"

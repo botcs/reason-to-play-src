@@ -1,0 +1,26 @@
+"""RGB palette used in the recorded games and model observations."""
+
+COLOR_DICT = {
+    "DARKBLUE": (1, 87, 155),
+    "LIGHTRED": (255, 82, 82),
+    "PURPLE": (92, 107, 192),
+    "RED": (211, 47, 47),
+    "PINK": (255, 138, 128),
+    "GOLD": (255, 196, 0),
+    "LIGHTORANGE": (255, 112, 67),
+    "WHITE": (250, 250, 250),
+    "DARKGRAY": (68, 90, 100),
+    "GREEN": (129, 199, 132),
+    "BLACK": (55, 71, 79),
+    "BROWN": (109, 76, 65),
+    "LIGHTGRAY": (207, 216, 220),
+    "LIGHTGREEN": (185, 246, 202),
+    "YELLOW": (255, 245, 157),
+    "GRAY": (69, 90, 100),
+    "LIGHTBLUE": (144, 202, 249),
+    "DARKGREEN": (0, 200, 0),
+    "ORANGE": (230, 81, 0),
+    "BLUE": (25, 118, 210),
+    "LIGHTPURPLE": (200, 150, 220),
+    "LIGHTPINK": (255, 230, 230),
+}

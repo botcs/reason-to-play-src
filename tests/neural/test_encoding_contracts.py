@@ -12,7 +12,7 @@ import nibabel as nib
 import numpy as np
 import pytest
 
-from reason_to_play.analysis.neural.alignment import bind_to_base
+from analysis.neural.alignment import bind_to_base
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -21,7 +21,7 @@ def module(name, filename):
     spec = importlib.util.spec_from_file_location(
         name,
         ROOT
-        / "src/reason_to_play/analysis/neural"
+        / "analysis/neural"
         / {"encoding_model.py": "encoding.py", "load_and_parse.py": "roi.py"}[filename],
     )
     loaded = importlib.util.module_from_spec(spec)
@@ -282,7 +282,7 @@ def test_per_model_nifti_needs_equal_layer_coverage(tmp_path):
 
 
 def test_library_import_does_not_change_thread_environment(tmp_path):
-    script = ROOT / "src/reason_to_play/analysis/neural/encoding.py"
+    script = ROOT / "analysis/neural/encoding.py"
     code = """import importlib.util, os, sys
 before = dict(os.environ)
 spec = importlib.util.spec_from_file_location('imported_encoder', sys.argv[1])
@@ -311,7 +311,7 @@ def test_explicit_input_cli_resume_checks_content_from_other_directory(
     output = tmp_path / "encoded"
     command = [
         sys.executable,
-        str(ROOT / "src/reason_to_play/analysis/neural/encoding.py"),
+        str(ROOT / "analysis/neural/encoding.py"),
         "--subject",
         "sub-13",
         "--base-data",

@@ -15,11 +15,11 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from src.llm_eval.shared.replay_codec import load_replay as _load_replay
+from data.replay_codec import load_replay as _load_replay
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.human_replay.prompt_utils import load_prompts
+from agents.lrm.prompting.conversation import load_prompts
 
 
 def _minimal_generative_step(step_num: int, action: str = "wait") -> dict:

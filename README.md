@@ -59,7 +59,7 @@ download catalogues. Preprocessing outputs for reconstruction are optional.
 Minimal install (OpenRouter-backed gameplay and action-only human replay; no local GPU inference):
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -e '.[lrm]'
 ```
 
 For local model inference and activation extraction, follow the
@@ -68,15 +68,15 @@ GPU/runtime requirements for the selected model.
 
 ## Quickstart
 
-Run these Python modules from the checkout root. Configuration overrides select
-the model, game, inputs and outputs. The
+After installation, call the Python modules directly. Configuration overrides
+select the model, game, inputs and outputs. The
 [workflow guide](docs/reproducibility.md#replay-and-model-gameplay) has the full
 examples and configuration details.
 
 Generative gameplay uses an OpenRouter model and requires `OPENROUTER_API_KEY`:
 
 ```bash
-python -m src.llm_eval.generative_gameplay.run \
+python -m agents.lrm.play \
     game.game=bait_vgfmri4 \
     llm.backend=openrouter llm.model=<MODEL> \
     harness.rationale_mode=copied-reasoning
@@ -85,7 +85,7 @@ python -m src.llm_eval.generative_gameplay.run \
 Human action-only replay (recorded keypresses, no model API call):
 
 ```bash
-python -m src.llm_eval.human_replay.run_replay \
+python -m agents.lrm.prepare_prompts \
     replay.subject=sub-01 \
     replay.data_dir=/absolute/path/to/behavior/human \
     harness.rationale_mode=action-only
@@ -109,6 +109,25 @@ in these guides; [AGENTS.md](AGENTS.md) maps tasks to their implementations and
 tests. Keep the paper's study settings explicit when adapting an experiment.
 EfficientZero analysis and feature extraction use included code; only training
 requires initializing `agents/efficientzero/training/`.
+
+## Code layout
+
+```text
+agents/              lrm/, ddqn/, efficientzero/, empa/
+human/               Participant/game recordings and BOLD processing
+analysis/            behavioral/ and neural/ comparisons
+data/                Replay encoding, identifiers and value formats
+environments/        VGDL interpreter and translated game definitions
+experiments/         NeurIPS 2026 configurations by agent and analysis
+reconstruction/      Optional processing from raw OpenNeuro data
+docs/                Workflow guides, formats and preceding sources
+tests/               Input, model and analysis checks
+scripts/release/     Dataset inventory and catalogue preparation
+```
+
+Downloaded datasets live outside these source directories. Each agent's gameplay,
+training or feature extraction code lives with that agent; comparisons between
+humans and agents live in `analysis/`.
 
 ## Data
 

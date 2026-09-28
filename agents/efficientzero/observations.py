@@ -40,7 +40,7 @@ def render_recorded_frames(
 
     import cv2
     import numpy as np
-    from src.vgdl import VGDLParser
+    from environments.vgdl import VGDLParser
 
     sprite_order = VGDLParser().parse_game(description).sprite_order
     width, height = dimensions

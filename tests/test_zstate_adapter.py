@@ -13,7 +13,7 @@ import pytest
 # Ensure repo root is on path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.llm_eval.human_replay.zstate_adapter import (
+from agents.lrm.prompting.observations import (
     ZstateAdapter,
     ACTION_UP,
     ACTION_DOWN,
@@ -733,7 +733,7 @@ class TestWithRealData:
 
     def _load_first_bait_play(self):
         """Load the first bait play from any subject (deterministic game)."""
-        from src.llm_eval.human_replay.data_loader import HumanPlayLoader
+        from human.behavior import HumanPlayLoader
 
         loader = HumanPlayLoader(HUMAN_DATA)
         # Search across subjects for any bait play

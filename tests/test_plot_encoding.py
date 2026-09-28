@@ -7,7 +7,7 @@ import sys
 import pandas as pd
 import pytest
 
-from reason_to_play.analysis.neural import plots as plotting
+from analysis.neural import plots as plotting
 
 
 def fresh_rows():
@@ -34,7 +34,7 @@ def test_headless_single_subject_unknown_models_and_missing_rois(tmp_path):
     result = subprocess.run(
         [
             sys.executable,
-            "src/reason_to_play/analysis/neural/plots.py",
+            "analysis/neural/plots.py",
             "--csv",
             str(path),
             "--outdir",
@@ -62,7 +62,7 @@ def test_headless_single_subject_unknown_models_and_missing_rois(tmp_path):
         [
             sys.executable,
             "-c",
-            "from reason_to_play.analysis.neural.plots import model_color; "
+            "from analysis.neural.plots import model_color; "
             "print(model_color('qwen35_9b_sugmin'))",
         ],
         text=True,
